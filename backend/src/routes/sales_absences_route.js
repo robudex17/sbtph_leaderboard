@@ -6,6 +6,14 @@ const { validateAbsence } = require('../middleware/validator')
 //encode absent
 
 
-router.post('/record_new_absent/:agent_id', validateAbsence, salesAbsencesController.recordNewAbsent)
+router.get('/agent_absent/:agent_id', salesAbsencesController.fetchAgentAbsent)
+
+router.delete('/agent_absent/:agent_id', salesAbsencesController.deleteAgentAbsent)
+
+router.put('/agent_absent/:agent_id', validateAbsence, salesAbsencesController.updateAgentAbsent)
+
+router.post('/agent_absent/:agent_id', validateAbsence, salesAbsencesController.recordNewAbsent)
+
+
 
 module.exports = router

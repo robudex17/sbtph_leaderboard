@@ -114,14 +114,16 @@ validator.validateTarget = [
         
        
         //current month and year timestamp
-        const currentMonthYearTimestamp = new Date(`${year}-${month}`)
+        const currentMonthYearTimestamp = new Date(`${year}-${month}`).getTime()
 
 
         const givenMonthYear = value.slice(0,7 ) // Extracts "YYYY-MM"
         
-        const givenMonthYearTimestamp = new Date(givenMonthYear) 
-
-        if (currentMonthYearTimestamp < givenMonthYearTimestamp){
+        const givenMonthYearTimestamp = new Date(givenMonthYear).getTime() 
+        
+        console.log(`givenMonthYearTimestamp: ${givenMonthYearTimestamp}`)
+        console.log(`currentMonthYearTimestamp: ${currentMonthYearTimestamp}`)
+        if (currentMonthYearTimestamp > givenMonthYearTimestamp){
             throw new Error('Cannot Set Target on the Previous Year-Month')
         }
         return true
@@ -131,6 +133,30 @@ validator.validateTarget = [
     
     check('shipok').trim().notEmpty().withMessage('shipok is Required')
     .isInt({min:0}).withMessage('Only positive Whole Number are allowed')
+]
+
+
+
+validator.validateNewAndUpdateAgent = [
+
+    check('agent_id').trim().notEmpty().withMessage('Agent Id is Required')
+    .isInt().withMessage('Numbers are only allowed in Agent ID')
+    .isLength({min:4}).withMessage('Agent ID must atleast 4 digits'),
+
+    check('manager_id').trim().notEmpty().withMessage('Manager Id is Required')
+    .isInt().withMessage('Numbers are only allowed in Manager ID')
+    .isLength({min:4}).withMessage('Manger ID must atleast 4 digits'),
+
+    check('agent_type').trim().notEmpty().withMessage('Agent Type is Required')
+    .isIn([0,1,2,"0","1","2"]).withMessage('Agent Type must be 0, 1, 2'),
+
+    check('agent_firstname').trim().notEmpty().withMessage('Agent Firstname is Required'),
+
+    check('agent_lastname').trim().notEmpty().withMessage('Agent Lastname is Required'),
+
+    check('agent_dbname').trim().notEmpty().withMessage('Agent DB Name is Required')
+
+
 ]
 
 module.exports = validator

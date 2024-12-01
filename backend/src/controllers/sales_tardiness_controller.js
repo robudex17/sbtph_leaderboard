@@ -27,3 +27,71 @@ exports.recordNewTardiness = async (req,res, next) => {
 
 
 }
+
+exports.fetchAgentTardiness = async (req, res, next) => {
+
+    const agentId = req.params.agent_id
+
+    const connection =  await pool.getConnection()
+
+    const [result] = await connection.execute(
+        'SELECT * FROM  `tardiness` WHERE agent_id=?',[agentId]  
+    )
+    connection.release()
+    res.json(result)
+}
+
+exports.updateAgentTardiness = async (req,res, next) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const agentId = req.params.agent_id
+    const tardinessId = req.query.tardiness_id
+
+    const  agentTardinessDate = req.body.tardiness_date 
+    const agentTardinessDescription = req.body.tardiness_description
+
+
+    try {
+        const query = "UPDATE tardiness SET  description=?, date=? WHERE id=? AND agent_id=?"
+        
+        const [result]  = await pool.execute(query, [agentTardinessDescription, agentTardinessDate, tardinessId,agentId])
+        
+        if (result.affectedRows === 0){
+            return res.status(400).json({message: 'Tardiness ID Not Found'})
+        }
+
+
+        res.status(201).json({
+            message: `Sales Agent Tardiness is updated`
+        })
+        
+    }catch(error){
+        console.error('Error Updating Agent Tardiness records', error)
+        res.status(500).json({error: 'Database Error, Cannot Update Agent Tardiness '})
+    }  
+}
+
+exports.deleteAgentTardiness = async (req, res, next) => {
+    const  agentId = req.params.agent_id 
+    const  tardinessId = req.query.tardiness_id
+
+
+    try {
+        const query = "DELETE FROM tardiness WHERE id=? AND agent_id=?"
+        const [result] = await pool.execute(query, [tardinessId, agentId])
+
+        if (result.affectedRows === 0){
+            return res.status(400).json({message: 'Agent Tardiness ID Not found'})
+        }
+
+        res.status(200).send({ message: 'Agent Tardiness deleted successfully' });
+    }
+    catch(error) {
+        console.error('Error deleting agent tardiness:', error)
+        res.status(500).json({error: 'Database Error, Cannot Delete Agent Tardiness'})
+    }
+}
