@@ -1,5 +1,5 @@
 const express = require('express')
-
+const cors = require('cors')
 require('dotenv').config()
 
 const app = express()
@@ -11,6 +11,7 @@ const salesNewDepositRoutes = require('./routes/sales_new_deposit_route')
 const salesFeedbackRoutes = require('./routes/sales_feedback_route')
 const salesTardinessRoutes = require('./routes/sales_tardiness_route')
 const salesTargetShipokRoutes = require('./routes/sales_target_shipok_route')
+const salesLeaderboardRoutes = require('./routes/sales_leaderboard_route')
 const path = require('path')
 const pool = require('./config/db')
 
@@ -28,9 +29,9 @@ const  startServer = async () => {
 
         app.use(express.json())
         app.use('/images', express.static(path.join(__dirname, 'images')))
-        // app.use(
-        //     multer({ storage: storage, fileFilter: fileFilter }).single('image')
-        //   )
+       
+        //enable cors in all origin..
+        app.use(cors())
         app.use(salesAgentsRoutes)
         app.use(salesMemoRoutes)
         app.use(salesAbsencesRoutes)
@@ -38,6 +39,7 @@ const  startServer = async () => {
         app.use(salesFeedbackRoutes)
         app.use(salesTardinessRoutes)
         app.use(salesTargetShipokRoutes)
+        app.use(salesLeaderboardRoutes)
 
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`)

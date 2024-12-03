@@ -159,4 +159,66 @@ validator.validateNewAndUpdateAgent = [
 
 ]
 
+validator.validateSalesLeaderBoard = [
+    check('month').optional().isString().withMessage('Invalid Months, Or month must be a string...').custom((value, {req})=>{
+        
+        const validMonths = [
+         'January', 'February', 'March', 'April', 'May', 'June', 
+        'July', 'August', 'September', 'October', 'November', 'December'
+        ]
+
+        //If the month is missing or empty , set it  to the current month
+        if(!value){
+            const currentMonth = new Date().toLocaleString('default', {month: 'long'})
+            value = currentMonth //set the value of the current month
+        }
+        
+        //check if valid month
+
+        if (!validMonths.includes(value)){
+            throw new Error('Invalid month')
+
+        }
+
+        //Validate the month against the current month
+
+        const  currentDate = new Date()
+        const currentYear = currentDate.getFullYear()
+
+        const  currentMonthIndex = currentDate.getMonth() // return 0 = January, 1 = February ... soon 
+        const inputMonthIndex = validMonths.indexOf(value) // get the index of the given month
+
+        //get the input year from the query string (default to currentyear if it is empty)
+        const inputYear = parseInt(req.query.year || currentYear, 10)
+       
+        if(inputYear > currentYear || (inputYear === currentYear  &&  inputMonthIndex > currentMonthIndex)){
+            throw new Error("No Sales Leaderboard for the given date and year..")
+        }
+          
+        return true
+
+    }),
+
+    check('year').optional().isInt({min:1900, max: new Date().getFullYear()})
+    .custom((value, {req})=>{
+        //If the value is missing or empty , set it to the current year
+        if(!value){
+            value = new Date().getFullYear()
+        }
+
+        const currentYear = new Date().getFullYear()
+        const inputYear = parseInt(value, 10)
+
+        // The entered year is greater than the current year , throw an error
+
+        if (inputYear > currentYear){
+            throw new Error('Year cannot be in the future')
+        }
+
+        return true
+    })
+]
+
+
+
 module.exports = validator

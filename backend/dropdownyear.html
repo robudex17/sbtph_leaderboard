@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Year Dropdown</title>
+</head>
+<body>
+  <label for="year">Select a Year:</label>
+  <select id="year-dropdown"></select>
+
+  <script>
+    // Get the current year
+    const currentYear = new Date().getFullYear();
+
+    // Get the dropdown element
+    const dropdown = document.getElementById('year-dropdown');
+
+    // Generate the last 10 years
+    for (let i = 0; i < 10; i++) {
+      const year = currentYear - i;
+      const option = document.createElement('option');
+      option.value = year;
+      option.textContent = year;
+      dropdown.appendChild(option);
+    }
+  </script>
+</body>
+</html>
