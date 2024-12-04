@@ -220,12 +220,10 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     
 
     connection.release()
-   const sales_sort =  sales_agents.sort((a, b) => {
-      b.final_ratings - a.final_ratings
-    })
-    res.status(200).json(sales_sort.sort((a, b) =>{
-      b.final_ratings - a.final_ratings
-    }))
+   
+    sales_agents.sort((a, b) => b.final_ratings - a.final_ratings)
+
+    res.status(200).json(sales_agents)
  
     
    /*fetch target and shipok of each agent for the given month, and get the perentage
