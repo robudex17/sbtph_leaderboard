@@ -36,6 +36,19 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     //fetch all agent available and save it to sales_agent array
     const connection =  await pool.getConnection()
 
+    //CHECK FIRST IF THERE ARE AVAILABLE MONTH AND YEAR ON target_shipok if not return empty array Imediately
+
+    const [row] = await connection.execute(
+       'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=?',[givenMonth,givenYear]
+    )
+
+   const { count } = row[0]
+
+   if (count == 0){
+    connection.release()
+    return  res.status(200).json([])
+   }
+
     const [sales_agents] = await connection.execute(
         'SELECT * FROM  `sales_agents`'  
     )
@@ -214,10 +227,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     agent['ratings_name'] = ratings[0].ratings_name
 
   }
-
-
-
-    
 
     connection.release()
    

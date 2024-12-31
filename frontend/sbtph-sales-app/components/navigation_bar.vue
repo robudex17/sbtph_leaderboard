@@ -1,5 +1,5 @@
 <template>
-  <header class="w-full bg-white shadow-md flex items-center justify-between px-6 py-4">
+  <header class="w-full bg-white shadow-md flex items-center justify-between px-6 py-4 fixed ">
     <!-- Brand -->
     <div class="text-lg font-bold">Sales App</div>
 

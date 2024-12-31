@@ -8,25 +8,31 @@
           <font-awesome-icon :icon="['fas', 'bars']" />
         </button>
       </div>
-      <nav v-if="!isCollapsed">
+      <nav>
         <ul>
           <li
             v-for="item in menuItems"
             :key="item.name"
             class="p-4 hover:bg-gray-700 cursor-pointer"
-            :class="{ 'bg-gray-700': activeMenu === item.name }"
+            :class="{ 'bg-blue-600': activeMenu === item.name }"
           >
-            <div @click="item.subMenu ? toggleSubmenu(item.name) : navigate(item.route)">
-              <font-awesome-icon :icon="item.icon" /> {{ item.name }}
-              <font-awesome-icon v-if="item.subMenu" :icon="['fas', submenuStates[item.name] ? 'chevron-up' : 'chevron-down']" class="ml-auto" />
+            <div @click="item.subMenu ? toggleSubmenu(item.name) : activateMenu(item.name, item.route)">
+              <font-awesome-icon :icon="item.icon" class="pr-1" /> 
+              <span v-if="!isCollapsed">{{ item.name }}</span>
+              <font-awesome-icon 
+                v-if="item.subMenu" 
+                :icon="['fas', submenuStates[item.name] ? 'chevron-up' : 'chevron-down']" 
+                class="ml-auto" 
+              />
             </div>
             <!-- Dropdown for submenus -->
-            <ul v-if="item.subMenu && submenuStates[item.name]" class="ml-4 mt-2 space-y-2">
+            <ul v-if="item.subMenu && submenuStates[item.name]" class="ml-4 mt-2 space-y-2 ">
               <li
                 v-for="subItem in item.subMenu"
                 :key="subItem.name"
                 class="p-2 pl-6 hover:bg-gray-600 cursor-pointer"
-                @click="navigate(subItem.route)"
+                :class="{ 'bg-blue-600': activeMenu === subItem.name }"
+                @click="activateMenu(subItem.name, subItem.route)"
               >
                 <font-awesome-icon :icon="subItem.icon" /> {{ subItem.name }}
               </li>
@@ -37,11 +43,12 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 ml-64 p-6 bg-gray-100">
+    <main :class="mainClass" class="p-6 bg-gray-100">
       <slot />
     </main>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed } from 'vue';
@@ -49,7 +56,7 @@ import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
-const activeMenu = ref('Dashboard');
+const activeMenu = ref('Dashboard'); // Holds the name of the currently active menu
 const isCollapsed = ref(false);
 const submenuStates = ref({});
 
@@ -61,7 +68,7 @@ const menuItems = [
   { name: 'Team Performance', route: '/team-performance', icon: ['fas', 'users'] },
   { 
     name: 'Admin Panel',
-    route: null, // No direct route
+    route: null,
     icon: ['fas', 'cog'],
     subMenu: [
       { name: 'Manage Users', route: '/admin/manage-users', icon: ['fas', 'user'] },
@@ -75,10 +82,10 @@ const menuItems = [
   }
 ];
 
-const navigate = (route) => {
+const activateMenu = (menuName, route) => {
+  activeMenu.value = menuName;
   if (route) {
-    activeMenu.value = route;
-    router.push(route);
+    router.push(route); // Navigate to the specified route
   }
 };
 
@@ -90,10 +97,16 @@ const sidebarClass = computed(() => {
   return isCollapsed.value ? 'w-16' : 'w-64';
 });
 
+const mainClass = computed(() => {
+  return isCollapsed.value ? 'ml-16' : 'ml-64';
+});
+
 const toggleSubmenu = (menuName) => {
   submenuStates.value[menuName] = !submenuStates.value[menuName];
 };
 </script>
+
+
 
 <style scoped>
 aside {
@@ -104,3 +117,4 @@ main {
   transition: margin-left 0.3s ease-in-out;
 }
 </style>
+
