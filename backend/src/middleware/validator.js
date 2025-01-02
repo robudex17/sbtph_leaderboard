@@ -159,7 +159,7 @@ validator.validateNewAndUpdateAgent = [
 
 ]
 
-validator.validateSalesLeaderBoard = [
+validator.validateMonthYear = [
     check('month').optional().isString().withMessage('Invalid Months, Or month must be a string...').custom((value, {req})=>{
         
         const validMonths = [

@@ -267,6 +267,9 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         res.status(500).json({error: 'Error, Cannot Fetch Agent sales_leaderboard'})
 
    }
+  //  finally {
+  //    connection.release()
+  //  }
 
 }
 

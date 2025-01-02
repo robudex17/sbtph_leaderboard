@@ -12,6 +12,8 @@ const salesFeedbackRoutes = require('./routes/sales_feedback_route')
 const salesTardinessRoutes = require('./routes/sales_tardiness_route')
 const salesTargetShipokRoutes = require('./routes/sales_target_shipok_route')
 const salesLeaderboardRoutes = require('./routes/sales_leaderboard_route')
+const salesDashboardRoutes = require('./routes/sales_dashboard_routes')
+
 const path = require('path')
 const pool = require('./config/db')
 
@@ -40,6 +42,7 @@ const  startServer = async () => {
         app.use(salesTardinessRoutes)
         app.use(salesTargetShipokRoutes)
         app.use(salesLeaderboardRoutes)
+        app.use(salesDashboardRoutes)
 
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`)
