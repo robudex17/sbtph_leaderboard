@@ -91,7 +91,7 @@ validator.validateTardiness = [
         
 
         if (givenDate > today){
-            throw new Error('Cannot do feedback on the future date')
+            throw new Error('Cannot give tardiness on the future date')
         }
         return true
     }),
@@ -199,6 +199,29 @@ validator.validateMonthYear = [
 
     }),
 
+    check('year').optional().isInt({min:1900, max: new Date().getFullYear()})
+    .custom((value, {req})=>{
+        //If the value is missing or empty , set it to the current year
+        if(!value){
+            value = new Date().getFullYear()
+        }
+
+        const currentYear = new Date().getFullYear()
+        const inputYear = parseInt(value, 10)
+
+        // The entered year is greater than the current year , throw an error
+
+        if (inputYear > currentYear){
+            throw new Error('Year cannot be in the future')
+        }
+
+        return true
+    })
+
+
+]
+
+validator.validateYear = [
     check('year').optional().isInt({min:1900, max: new Date().getFullYear()})
     .custom((value, {req})=>{
         //If the value is missing or empty , set it to the current year

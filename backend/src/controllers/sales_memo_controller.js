@@ -31,12 +31,39 @@ exports.createSalesAgentMemo = async (req, res, next) => {
 
 exports.fetchAgentMemo = async (req, res, next) => {
 
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+   
+    let givenMonth
+    let givenYear 
+    const currentDate = new Date()
+ 
+    if (!req.query.month ||  req.query.month ==="") {
+        
+            // Get the month name
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
+    }else {
+        givenMonth = req.query.month
+    }
+    
+    if(!req.query.year || req.query.year ===""){
+        givenYear = currentDate.getFullYear()
+    }else {
+        givenYear = req.query.year
+    }
+
     const agentId = req.params.agent_id
 
     const connection =  await pool.getConnection()
 
     const [result] = await connection.execute(
-        'SELECT * FROM  `memo` WHERE agent_id=?',[agentId]  
+        'SELECT * FROM  `memo` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
     )
     connection.release()
     res.json(result)

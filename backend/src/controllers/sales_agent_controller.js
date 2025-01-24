@@ -2,13 +2,37 @@ const pool = require('../config/db')
 const { validationResult} = require('express-validator')
 
 exports.fetchSalesAgents = async (req,res, next ) => {
-    const connection =  await pool.getConnection()
+    try{
+        const connection =  await pool.getConnection()
 
-    const [rows, fields] = await connection.execute(
-        'SELECT * FROM  `sales_agents`'  
-    )
-    connection.release()
-    res.json(rows)
+        const [rows, fields] = await connection.execute(
+            'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
+        )
+        connection.release()
+        res.json(rows)
+    }catch(error){
+        console.error('Error In Fetching Active Agents', error)
+        res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
+    }  
+}
+
+exports.fetchSalesAgent = async( req,res, next) => {
+
+    try {
+        const connection = await pool.getConnection()
+        const agentId = req.params.agent_id
+        const [rows, fields] = await connection.execute(
+            'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
+        )
+    
+        connection.release()
+        res.json(rows)
+        
+    }catch(error){
+        console.error('Error In Fetching Active Agents', error)
+        res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
+    }  
+
 }
 
 exports.addNewSalesAgent = async( req, res, next) => {

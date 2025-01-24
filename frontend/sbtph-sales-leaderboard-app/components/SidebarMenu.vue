@@ -43,7 +43,7 @@
      </aside>
  
      <!-- Main Content -->
-     <main :class="mainClass" class="p-6 bg-gray-100">
+     <main :class="mainClass" class="p-6 bg-gray-100 flex flex-col">
        <slot />
      </main>
    </div>
@@ -57,14 +57,23 @@ import { useRouter, useRoute } from 'vue-router';
 const router = useRouter();
 const route = useRoute(); // Access the current route
 
-const activeMenu = ref('Dashboard'); // Holds the name of the currently active menu
+const activeMenu = ref('Leaderboard'); // Holds the name of the currently active menu
 const isCollapsed = ref(false);
 const submenuStates = ref({});
 
 const menuItems = [
-  { name: 'Dashboard', route: '/', icon: ['fas', 'tachometer-alt'] },
-  { name: 'Leaderboard', route: '/sales_leaderboard', icon: ['fas', 'list'] },
-  { name: 'Analytics', route: '/analytics', icon: ['fas', 'chart-bar'] },
+  { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
+  { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+  { 
+    name: 'Analytics', 
+    route: null, icon: ['fas', 'chart-bar'],
+    subMenu:[
+      { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
+      { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
+      { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
+    ] 
+  
+  },
   { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
   { name: 'Team Performance', route: '/team_performance', icon: ['fas', 'users'] },
   { name: 'Agent Performance', route: '/sales_agent_performance', icon: ['fas', 'users'] },
@@ -74,7 +83,7 @@ const menuItems = [
     icon: ['fas', 'cog'],
     subMenu: [
       { name: 'Manage Users', route: '/admin/manage_users', icon: ['fas', 'user'] },
-      { name: 'Manage Sales Agents', route: '/admin/manage_sales_agents', icon: ['fas', 'user-tie'] },
+      { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
       { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
       { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
       { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
@@ -125,6 +134,9 @@ const setActiveMenuFromRoute = () => {
   }
 };
 
+
+
+
 onMounted(() => {
   setActiveMenuFromRoute();
 });
@@ -136,6 +148,7 @@ onMounted(() => {
  aside {
    transition: width 0.3s ease-in-out;
    overflow-y: auto; /* To allow scrolling within the sidebar if needed */
+   z-index: 10;
  }
  main {
    transition: margin-left 0.3s ease-in-out;

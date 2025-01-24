@@ -6,11 +6,11 @@
 
       <!-- Dropdown for Month and Year -->
       <div class="flex items-center gap-2">
-        <select
+        <select v-if="isNotAnalytics"
           v-model="selectedMonth"
           class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option disabled value="">Select Month</option>
+          <option disabled value="" >Select Month</option>
           <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
         </select>
         <select
@@ -77,7 +77,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch,computed } from "vue";
 
 const searchQuery = ref("");
 const notifications = [
@@ -92,10 +92,28 @@ const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+
+
 
 const router = useRouter()
 const route = useRoute()
+const urlPath = ref(route.fullPath)
+
+const analyticsPath = ref([
+  '/analytics/agents', '/analytics/market', '/analytics/overall'
+])
+
+const isNotAnalytics = computed(() =>{
+  if(!analyticsPath.value.includes(route.path)){
+    return true
+  }else{
+    return false
+  }
+})
+
+console.log('the urlPath', urlPath.value)
+
 
 const search = () => {
   console.log("Searching for:", searchQuery.value);
@@ -113,29 +131,94 @@ const toggleViewMode = () => {
   viewMode.value = viewMode.value === "card" ? "table" : "card";
 };
 
+const validateInputMonthAndYearDates = (month, year) => {
+    const timestamp = Date.now()
+    
+    const date = new Date(timestamp)
+      //  Extract year, month, and day
+    const currentYear = date.getFullYear();
+    const currentMonth = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed, so add 1
+    const currentDay = date.getDate().toString().padStart(2, '0'); // Ensure two digits    
+    
+    //    current month and year timestamp
+   const currentMonthYearTimestamp = new Date(`${currentYear}-${currentMonth}`).getTime()
+  
+   const givenMonthYearTimestamp = new Date(`${year}-${month}`).getTime() 
+
+   if (givenMonthYearTimestamp > currentMonthYearTimestamp){
+    return false
+   }
+   return true
+}
+
+const  validateInputYearDates = (year) => {
+  const timestamp = Date.now()
+    
+    const date = new Date(timestamp)
+      //  Extract year, month, and day
+    const currentYear = date.getFullYear();
+    const currentMonth = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed, so add 1
+    const currentDay = date.getDate().toString().padStart(2, '0'); // Ensure two digits    
+    
+    //    current month and year timestamp
+   const currentMonthYearTimestamp = new Date(`${currentYear}-${currentMonth}`).getTime()
+  
+   const givenMonthYearTimestamp = new Date(`${year}-${currentMonth}`).getTime() 
+
+   if (givenMonthYearTimestamp > currentMonthYearTimestamp){
+    return false
+   }
+   return true
+}
+
+
 const submitDateSelection = () => {
-  if (selectedMonth.value && selectedYear.value) {
-    const currentRoute = router.currentRoute.value;
-    router.push({
-      path: currentRoute.path,
-      query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value },
-    });
-    console.log(`Redirecting to: ${currentRoute.path} with Month: ${selectedMonth.value}, Year: ${selectedYear.value}`);
-  } else {
-    alert("Please select both a month and a year.");
+  if (route.path == '/analytics/agents' || route.path == '/analytics/market' || route.path == '/analytics/overall' ){
+    
+    if (!validateInputYearDates(selectedYear.value)){
+    alert('Cannot Select Year greater than current Year')
+    return
+    }
+    if (selectedYear.value) {
+      const currentRoute = router.currentRoute.value;
+      router.push({
+        path: currentRoute.path,
+        query: { ...currentRoute.query, year: selectedYear.value },
+      });
+      console.log(`Redirecting to: ${currentRoute.path} with  Year: ${selectedYear.value}`);
+    } else {
+      alert("Please select a year.");
+    }
+  }else{
+    if (!validateInputMonthAndYearDates(selectedMonth.value, selectedYear.value)){
+    alert('Cannot Select Month and Year greater than current Month and Year')
+    return
+    }
+    if (selectedMonth.value && selectedYear.value) {
+      const currentRoute = router.currentRoute.value;
+      router.push({
+        path: currentRoute.path,
+        query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value },
+      });
+      console.log(`Redirecting to: ${currentRoute.path} with Month: ${selectedMonth.value}, Year: ${selectedYear.value}`);
+    } else {
+      alert("Please select both a month and a year.");
+    }
   }
+
 };
 
 //If Click I to other menu  selectedMonth and selectedYear will be empty
 watch(route, (newRoute)=> {
   console.log(newRoute.query)
+  urlPath.value = newRoute.fullPath
+  console.log('The  Updated route is ',newRoute.fullPath)
   if (Object.keys(newRoute.query).length == 0) {
       selectedMonth.value = ""
        selectedYear.value =  ""
   }
  
 })
-
 
 
 
@@ -157,5 +240,8 @@ nav ul li {
 }
 nav ul li i {
   font-size: 1.2em;
+}
+header {
+  z-index: 10;
 }
 </style>

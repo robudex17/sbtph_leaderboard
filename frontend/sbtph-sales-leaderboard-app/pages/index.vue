@@ -1,74 +1,347 @@
 <template>
-    <div class="mt-20 px-4">
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse border border-gray-300">
-          <thead>
-            <tr class="bg-green-600 text-white">
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th colspan="2" class="border border-gray-300 px-4 py-2">Performance (80%)</th>
-              <th colspan="3" class="border border-gray-300 px-4 py-2">Attendance (10%)</th>
-              <th colspan="3" class="border border-gray-300 px-4 py-2">Memo and Feedback (10%)</th>
-              <th colspan="2" class="border border-gray-300 px-4 py-2">Additional Points</th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-            </tr>
-            <tr class="bg-green-500 text-white">
-              <th class="border border-gray-300 px-4 py-2">Year</th>
-              <th class="border border-gray-300 px-4 py-2">Month</th>
-              <th class="border border-gray-300 px-4 py-2">Employee Name</th>
-              <th class="border border-gray-300 px-4 py-2">Score</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Absences</th>
-              <th class="border border-gray-300 px-4 py-2">Tardiness</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Memo-score</th>
-              <th class="border border-gray-300 px-4 py-2">Feedback-score</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">New Deposit</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Grand Total</th>
-              <th class="border border-gray-300 px-4 py-2">Rating</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="odd:bg-green-50 even:bg-white">
-              <td class="border border-gray-300 px-4 py-2 capitalize">2021</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">February</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">Rustan</td>
-              <td class="border border-gray-300 px-4 py-2">2.00</td>
-              <td class="border border-gray-300 px-4 py-2">1.60</td>
-            </tr>
-            <tr class="odd:bg-green-50 even:bg-white">
-              <td class="border border-gray-300 px-4 py-2 capitalize">2021</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">February</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">Paula</td>
-              <td class="border border-gray-300 px-4 py-2">2.00</td>
-              <td class="border border-gray-300 px-4 py-2">1.60</td>
-            </tr>
-            <tr class="odd:bg-green-50 even:bg-white">
-              <td class="border border-gray-300 px-4 py-2 capitalize">2021</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">February</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">Floyd</td>
-              <td class="border border-gray-300 px-4 py-2">2.00</td>
-              <td class="border border-gray-300 px-4 py-2">1.60</td>
-            </tr>
-            <!-- Additional rows can be added here -->
-          </tbody>
-        </table>
+  <div>
+  <div class="p-4 mt-20">
+    <!-- Loading Spinner -->
+    <div v-if="leaderBoardStore.state.loading">
+      <spinner></spinner>
+    </div>
+
+    <!-- Leaderboard View -->
+    <div v-else>
+          <!-- Toggle Button for Card/Table View -->
+      <div class="mb-4 flex justify-end">
+        <button 
+          @click="toggleView" 
+          class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
+        >
+          Toggle to {{ isCardView ? 'Table' : 'Card' }} View
+        </button>
+      </div>
+      
+      <div v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
+      <div v-if="leaderBoardStore.state.leaderboard.length === 0" class="text-red-700 font-bold  text-5xl">
+        No Available Data.
+      </div>
+      <div v-else>
+        <!-- CARD VIEW -->
+        <div v-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div
+          v-for="(agent, index) in leaderBoardStore.state.leaderboard"
+          :key="index"
+          class="bg-gray-800 text-white border rounded-lg shadow-lg overflow-hidden"
+        >
+          <div class="flex flex-col items-center p-4">
+            <img
+              v-if="agent.image_link"
+              :src="agent.image_link"
+              alt="Agent Image"
+              class="w-20 h-20 rounded-full object-cover mb-4"
+            />
+            <div v-else class="w-20 h-20 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
+              <span class="text-xl">{{ agent.db_name.charAt(0) }}</span>
+            </div>
+            <div class="text-center">
+              <h3 class="text-lg font-semibold">{{ agent.db_name }}</h3>
+              <p class="text-sm  font-bold" :class="setRatingNameColor(agent)" >{{ agent.ratings_name }}</p>
+
+              <div class="flex items-center mt-2">
+                <template v-for="i in 5" :key="i">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    :class="getStarClass(agent.final_ratings, i)"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                </template>
+              </div>
+
+              <p class="text-xl font-bold mt-2">{{ agent.final_ratings }}</p>
+              <p class="text-xl font-bold mt-2">{{ agent.month }}</p>
+              <p class="text-xl font-bold mt-2">{{ agent.year }}</p>
+            </div>
+            <button
+              @click="showAgentDetails(agent)"
+              class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+            >
+              Agent Performance Details
+            </button>
+          </div>
+        </div>
+        </div>
+              <!-- Table View -->
+      <div v-else class="overflow-x-auto shadow-xl rounded-lg">
+        <leader-board-table-view :agents="leaderBoardStore.state.leaderboard"></leader-board-table-view>
+     
+    </div>
       </div>
     </div>
-  </template>
-  
-  <style scoped>
-  /* Ensure text resizes to fit within the cells */
-  table {
-    table-layout: auto;
+  </div>
+
+  <!-- Modal for Agent Details -->
+  <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-gray-800 text-white p-6 rounded-lg w-full md:w-2/3 lg:w-1/2 xl:w-1/3 h-auto overflow-auto">
+      <div class="flex flex-col items-center">
+        <img
+          v-if="selectedAgent && selectedAgent.image_link"
+          :src="selectedAgent.image_link"
+          alt="Agent Image"
+          class="w-40 h-40 rounded-full object-cover mb-4"
+        />
+        <div v-else class="w-40 h-40 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
+          <span class="text-4xl">{{ selectedAgent ? selectedAgent.db_name.charAt(0) : '' }}</span>
+        </div>
+        <div class="text-center">
+          <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
+          <h3 class="text-xl font-semibold">AgentID: {{ selectedAgent ? selectedAgent.id : 'Agent has no ID' }}</h3>
+          <p class="text-lg text-gray-600 font-bold" :class="ratingClassModal">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
+
+          <div class="flex items-center mt-2">
+            <template v-for="i in 5" :key="i">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                :class="getStarClass(selectedAgent ? selectedAgent.final_ratings : 0, i)"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+            </template>
+          </div>
+
+          <p class="text-3xl font-bold mt-2">{{ selectedAgent ? selectedAgent.final_ratings : '' }}</p>
+         
+        </div>
+        <p class="text-lg font-bold mt-2">Month Of: {{ selectedAgent ? selectedAgent.month : '' }}</p>
+        <p class="text-lg font-bold mt-2">Year: {{ selectedAgent ? selectedAgent.year : '' }}</p>
+        <!-- Table for Additional Information -->
+        <div class="mt-6 w-full overflow-x-auto">
+          <table class="min-w-full table-auto">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Metric</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Target</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.target }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.shipok }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok Percent</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 ">{{ selectedAgent.shipok_percent }}%</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.shipok_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.absence_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.tardiness_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.memo_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.feedback_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Deposit Score</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.deposit_score }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Performance Rating</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.performance_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence Rating</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.absence_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 ">Tardiness Rating</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.tardiness_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo Rating</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.memo_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback Rating</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.feedback_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Additional Points</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.additional_points }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button
+          @click="closeModal"
+          class="mt-6 text-blue-300 hover:text-blue-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+</template>
+
+<script setup>
+import { useLeaderBoardStore } from '../stores/sales_leaderboard';
+import { onMounted, reactive,ref, watch } from 'vue';
+
+const leaderBoardStore = useLeaderBoardStore();
+const selectedAgent = reactive({});
+const showModal = ref(false);
+const isCardView = ref(true)
+
+const route = useRoute()
+const router = useRouter()
+
+const query = route.query
+
+console.log(query)
+
+const ratingClassModal = computed(() => {
+  if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
+    return 'text-purple-600'
   }
-  th, td {
-    font-size: 0.875rem; /* Tailwind's text-sm */
-    white-space: normal; /* Allow text wrapping */
-  }
-  </style>
   
+  if (selectedAgent.ratings_name == 'VERY SATISFACTORY') {
+    return 'text-blue-600'
+  }
+
+  if (selectedAgent.ratings_name == 'SATISFACTORY') {
+    return 'text-green-600'
+  }
+  if (selectedAgent.ratings_name == 'NEEDS IMPROVEMENT') {
+    return 'text-yellow-600'
+  }
+
+  if (selectedAgent.ratings_name == 'POOR') {
+    return 'text-red-600'
+  }
+
+})
+
+const setRatingNameColor = (agent) => {
+  if (agent.ratings_name == 'EXCEPTIONAL') {
+    return 'text-purple-600'
+  }
+  
+  if (agent.ratings_name == 'VERY SATISFACTORY') {
+    return 'text-blue-600'
+  }
+
+  if (agent.ratings_name == 'SATISFACTORY') {
+    return 'text-green-600'
+  }
+  if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
+    return 'text-yellow-600'
+  }
+
+  if (agent.ratings_name == 'POOR') {
+    return 'text-red-600'
+  }
+}
+
+// Method to fetch leaderboard data
+const leaderBoardData = (query) => {
+  leaderBoardStore.fetchLeaderboard(query);
+};
+
+// Show the details of the selected agent
+const showAgentDetails = (agent) => {
+  // selectedAgent.value = agent;
+  Object.assign(selectedAgent, agent);
+  showModal.value = true; // Show the modal
+};
+
+// Close the modal
+const closeModal = () => {
+  showModal.value = false; // Hide the modal
+};
+
+//Toggle the view mode between card and table
+
+const  toggleView = () => {
+  isCardView.value = !isCardView.value
+}
+
+//watch for the route change
+
+watch(route, (newRoute) => {
+  console.log('The route is change. we should react to the change..')
+  router.push(newRoute.fullPath)
+  leaderBoardData(newRoute.query)
+  
+})
+
+
+
+// Fetch leaderboard data on mount
+onMounted(() => {
+  leaderBoardData(query);
+});
+
+
+
+// Star rating calculation
+const getStarClass = (rating, index) => {
+  const fullStar = 'text-yellow-500';
+  const halfStar = 'text-yellow-300';
+  const emptyStar = 'text-gray-300';
+
+  const decimalPart = rating - Math.floor(rating);
+  if (index <= Math.floor(rating)) {
+    return fullStar;
+  } else if (index - 1 < decimalPart) {
+    return halfStar;
+  } else {
+    return emptyStar;
+  }
+};
+</script>
+
+<style scoped>
+/* Modal container adjustments */
+@media (min-width: 768px) {
+  .modal {
+    width: 75%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal {
+    width: 50%;
+  }
+}
+
+/* Modal content */
+.bg-gray-800 {
+  max-height: 80vh; /* Set the maximum height to 80% of the viewport height */
+  overflow-y: auto;  /* Allow vertical scrolling if content exceeds max height */
+}
+
+
+</style>

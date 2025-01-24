@@ -6,6 +6,7 @@ const { validateNewAndUpdateAgent } = require('../middleware/validator')
 const uploadImage = require('../middleware/fileupload')
 
 
+router.get('/sales_agents/:agent_id', salesAgensController.fetchSalesAgent)
 router.get('/sales_agents', salesAgensController.fetchSalesAgents)
 
 
@@ -14,5 +15,7 @@ router.post('/sales_agents', uploadImage.single('image'), validateNewAndUpdateAg
 router.delete('/sales_agents/:agent_id', salesAgensController.deleteSalesAgent)
 
 router.put('/sales_agents/:agent_id', uploadImage.single('image'), validateNewAndUpdateAgent, salesAgensController.updateSalesAgent)
+
+
 
 module.exports = router

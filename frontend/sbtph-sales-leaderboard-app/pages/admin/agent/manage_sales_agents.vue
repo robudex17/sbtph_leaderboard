@@ -99,6 +99,12 @@
                   >
                     Edit
                   </button>
+                  <NuxtLink
+                      :to="`/admin/agent/${agent.id}/details`"
+                      class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600"
+                    >
+                      Details
+                 </NuxtLink>
                   <button
                     class="px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600"
                     @click="deleteAgent(agent.id)"
@@ -132,8 +138,12 @@
   
   <script setup >
   import { ref, computed } from 'vue';
-  import { useManageSalesAgentStore} from '../../stores/manage_sales_agents'
+  import { useManageSalesAgentStore} from '../../../stores/manage_sales_agents'
   import { onMounted } from 'vue'
+
+  definePageMeta({
+       layout: 'custom', // Refers to the file 'layouts/custom.vue'
+   });
   
   const manageSalesAgentStore  = useManageSalesAgentStore()
   
