@@ -5,7 +5,7 @@ const salesNewDepositController = require('../controllers/sales_new_deposit_cont
 const { validateNewDeposit, validateMonthYear } = require('../middleware/validator')
 
 
-router.post('/agent_deposit/:agent_id', validateNewDeposit, salesNewDepositController.newDeposit )
+router.post('/agent_deposit/:agent_id', validateNewDeposit,validateMonthYear, salesNewDepositController.addNewDeposit )
 
 router.get('/agent_deposit/:agent_id', validateMonthYear,salesNewDepositController.fetchAgentNewDeposit )
 

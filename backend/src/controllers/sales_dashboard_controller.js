@@ -32,15 +32,15 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         givenYear = req.query.year
     }
     // const connection =  await pool.getConnection()
-    let connection 
+    // let connection 
     
     try {
-      connection = await pool.getConnection()
+      // connection = await pool.getConnection()
      
       const dashboard = {}
       
       //fetch current month target and ship ok 
-      const [currentMonthyTargetShipokResult] = await connection.execute(
+      const [currentMonthyTargetShipokResult] = await pool.execute(
         "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE month=? AND year=? GROUP BY month,year",
         [givenMonth, givenYear]
       )
@@ -55,7 +55,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       //fetch current year target shipok
 
-      const [currentYearTargetShipokResult] = await connection.execute(
+      const [currentYearTargetShipokResult] = await pool.execute(
         "SELECT year, SUM(target) AS year_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE year=? GROUP BY year",
         [ givenYear]
       )
@@ -69,7 +69,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       //current month new_deposit 
 
-      const [currentMOnthNewDepositResut] = await connection.execute("SELECT month, year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE month=? AND year=? GROUP BY month,year",[givenMonth,givenYear])
+      const [currentMOnthNewDepositResut] = await pool.execute("SELECT month, year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE month=? AND year=? GROUP BY month,year",[givenMonth,givenYear])
       let [currentMOnthNewDeposit] = currentMOnthNewDepositResut
 
       if (currentMOnthNewDeposit == null || currentMOnthNewDeposit == ""){
@@ -78,7 +78,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.current_month_newdeposit = currentMOnthNewDeposit
 
       // current year new_deposit
-      const [currentYearNewDepositResult] =await connection.execute("SELECT  year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE  year=? GROUP BY year",[givenYear])
+      const [currentYearNewDepositResult] =await pool.execute("SELECT  year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE  year=? GROUP BY year",[givenYear])
      
       let [currentYearNewDeposit]  = currentYearNewDepositResult
 
@@ -89,13 +89,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       //active agents 
 
-      const [ activeAgentsResult ]  = await connection.execute("SELECT COUNT(*) AS active_agents FROM `sales_agents` WHERE status='active'")
+      const [ activeAgentsResult ]  = await pool.execute("SELECT COUNT(*) AS active_agents FROM `sales_agents` WHERE status='active'")
 
       const [activeAgents ] = activeAgentsResult
       dashboard.active_agents = activeAgents
 
       //get ratings summarries
-      const agentMetics =  await getAgentMetrics(connection, givenMonth, givenYear)
+      const agentMetics =  await getAgentMetrics( givenMonth, givenYear)
 
       const ratingsCount = {
         EXCEPTIONAL: 0,
@@ -124,7 +124,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }
 
       //get per market
-      const [marketTargetShipok] = await connection.execute(
+      const [marketTargetShipok] = await pool.execute(
         `
         SELECT 
             market.id AS market_id,
@@ -162,15 +162,15 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       //attendance behavior metrics
 
       
-      const [tardinessResult] = await connection.execute(
+      const [tardinessResult] = await pool.execute(
         "SELECT COUNT(*) AS tardiness  FROM `tardiness` WHERE `month`=? AND `year`=? GROUP BY month,year", [givenMonth,givenYear]
       )
       
-      const [memoResult]  = await connection.execute(
+      const [memoResult]  = await pool.execute(
         "SELECT COUNT(*) AS memos  FROM `memo` WHERE `month`=? AND `year`=? GROUP BY month,year", [givenMonth,givenYear]
       )
 
-      const [absenceResult]  = await connection.execute(
+      const [absenceResult]  = await pool.execute(
         "SELECT COUNT(*) AS absences  FROM `absences` WHERE `month`=? AND `year`=? GROUP BY month,year", [givenMonth,givenYear]
       ) 
 
@@ -198,7 +198,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       
 
       dashboard.attendance = { ...tardines, ...absences, ...memos}
-      connection.release()
+      // connection.release()
       
       res.status(200).json(dashboard)
       
@@ -209,13 +209,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         res.status(500).json({error: 'Error, Cannot Fetch sales dashboard..'})
 
    }
-   finally {
-    if(connection){
-      console.log('connection is closed...')
-      connection.release()
-    }
+  //  finally {
+  //   if(connection){
+  //     console.log('connection is closed...')
+  //     connection.release()
+  //   }
 
-   }
+  //  }
 }
 
 

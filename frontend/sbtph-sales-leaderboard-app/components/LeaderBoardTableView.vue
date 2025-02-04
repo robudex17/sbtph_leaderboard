@@ -1,8 +1,16 @@
 <template>
     <div>
-      <div class="overflow-x-auto">
+
+   <!-- <div class="py-2">
+    <button @click="printTable" class="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600">
+      <font-awesome-icon :icon="['fas', 'print']" />
+      Print Page
+    </button>
+  </div> -->
+      <div class="overflow-x-auto" id="print-table">
         <table class="min-w-full border-collapse border border-gray-300">
           <thead>
+
             <tr class="bg-green-600 text-white">
               <th class="border border-gray-300 px-4 py-2"></th>
               <th class="border border-gray-300 px-4 py-2"></th>
@@ -60,6 +68,16 @@
   </template>
 
   <script setup>
+  import printJS from "print-js";
+
+  const printTable = () => {
+    const printContent = document.getElementById("print-table").innerHTML;
+    const originalContent = document.body.innerHTML;
+
+    document.body.innerHTML = printContent;
+    window.print();
+    document.body.innerHTML = originalContent;
+  };
     const props = defineProps({
         agents : {
             type: Array
@@ -102,5 +120,20 @@
     font-size: 0.875rem; /* Tailwind's text-sm */
     white-space: normal; /* Allow text wrapping */
   }
+
+  @media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-table, #print-table * {
+    visibility: visible;
+  }
+  #print-table {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+}
   </style>
   

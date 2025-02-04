@@ -74,7 +74,7 @@ const menuItems = [
     ] 
   
   },
-  { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
+  // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
   { name: 'Team Performance', route: '/team_performance', icon: ['fas', 'users'] },
   { name: 'Agent Performance', route: '/sales_agent_performance', icon: ['fas', 'users'] },
   { 
@@ -84,11 +84,11 @@ const menuItems = [
     subMenu: [
       { name: 'Manage Users', route: '/admin/manage_users', icon: ['fas', 'user'] },
       { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
-      { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
-      { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
-      { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
-      { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
-      { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
+      // { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
+      // { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
+      // { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
+      // { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
+      // { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
     ]
   }
 ];

@@ -1,14 +1,34 @@
 const pool = require('../config/db')
 const { validationResult} = require('express-validator')
+const fs = require('fs')
+const path = require('path')
 
 exports.fetchSalesAgents = async (req,res, next ) => {
     try{
-        const connection =  await pool.getConnection()
+        // const connection =  await pool.getConnection()
 
-        const [rows, fields] = await connection.execute(
-            'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
+        const [rows, fields] = await pool.execute(
+            // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
+            `
+            SELECT 
+                sa.id AS id,
+                sa.manager_id,
+                sa.agent_type,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.image_link,
+                sa.market_id,
+                market.market_name,
+                managers.db_name AS manager_name
+            FROM sales_agents sa
+            JOIN market ON sa.market_id = market.id
+            JOIN managers ON sa.manager_id = managers.id
+            WHERE sa.status = ?
+
+            `,['active']
         )
-        connection.release()
+        // connection.release()
         res.json(rows)
     }catch(error){
         console.error('Error In Fetching Active Agents', error)
@@ -19,24 +39,44 @@ exports.fetchSalesAgents = async (req,res, next ) => {
 exports.fetchSalesAgent = async( req,res, next) => {
 
     try {
-        const connection = await pool.getConnection()
+        // const connection = await pool.getConnection()
         const agentId = req.params.agent_id
-        const [rows, fields] = await connection.execute(
-            'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
+        const [rows, fields] = await pool.execute(
+            // 'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
+
+            `
+            SELECT 
+                sa.id AS id,
+                sa.manager_id,
+                sa.agent_type,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.image_link,
+                sa.market_id,
+                sa.status,
+                market.market_name,
+                managers.db_name AS manager_name
+            FROM sales_agents sa
+            JOIN market ON sa.market_id = market.id
+            JOIN managers ON sa.manager_id = managers.id
+            WHERE sa.status = ?  AND sa.id=?
+
+            `,['active', agentId]
         )
     
-        connection.release()
+        // connection.release()
         res.json(rows)
         
     }catch(error){
-        console.error('Error In Fetching Active Agents', error)
+        console.error(`Error In Fetching Agent with agent_id of ${agentId}`, error)
         res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
     }  
 
 }
 
 exports.addNewSalesAgent = async( req, res, next) => {
-    const connection  = await pool.getConnection()
+    // const connection  = await pool.getConnection()
     
     
     const errors = validationResult(req)
@@ -47,14 +87,15 @@ exports.addNewSalesAgent = async( req, res, next) => {
         console.log('All input is valid..')
     }
 
-    const agentId  = req.body.agent_id
+    const agentId  = req.body.id
     const mangerId = req.body.manager_id 
     const agentType = req.body.agent_type 
-    const agentFirstname = req.body.agent_firstname 
-    const agentLastname = req.body.agent_lastname 
-    const agentDbname = req.body.agent_dbname 
+    const agentFirstname = req.body.firstname 
+    const agentLastname = req.body.lastname 
+    const agentDbname = req.body.db_name 
+    const agentMarketId = req.body.market_id
+     
     
-
 
     let imageLink = ""
     if (!req.file) {
@@ -65,8 +106,8 @@ exports.addNewSalesAgent = async( req, res, next) => {
     }
 
     try {
-        const query = "INSERT INTO sales_agents ( id, manager_id,agent_type,firstname,lastname,db_name,image_link) VALUES (?,?,?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [agentId, mangerId,agentType,agentFirstname,agentLastname,agentDbname,imageLink])
+        const query = "INSERT INTO sales_agents ( id, manager_id,agent_type,firstname,lastname,db_name,image_link,market_id) VALUES (?,?,?,?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, mangerId,agentType,agentFirstname,agentLastname,agentDbname,imageLink,agentMarketId])
 
         res.status(201).json({
             message: `New Sales Agent for is created..`
@@ -79,7 +120,7 @@ exports.addNewSalesAgent = async( req, res, next) => {
 }
 
 exports.updateSalesAgent = async( req, res, next) => {
-    const connection  = await pool.getConnection()
+    // const connection  = await pool.getConnection()
     
     
     console.log(req.body)
@@ -94,20 +135,21 @@ exports.updateSalesAgent = async( req, res, next) => {
     const agentId  = req.params.agent_id
     const mangerId = req.body.manager_id 
     const agentType = req.body.agent_type 
-    const agentFirstname = req.body.agent_firstname 
-    const agentLastname = req.body.agent_lastname 
-    const agentDbname = req.body.agent_dbname 
-    let imageLink = req.body.agent_image_link
+    const agentFirstname = req.body.firstname 
+    const agentLastname = req.body.lastname 
+    const agentDbname = req.body.db_name 
+    const marketId = req.body.market_id
+    let imageLink = req.body.image_link
 
-  
+   
     if (req.file) {
         imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
     }
 
     try {
-        const query = "UPDATE sales_agents SET manager_id=?, agent_type=?, firstname=?, lastname=?, db_name=?, image_link=? WHERE id=?"
+        const query = "UPDATE sales_agents SET manager_id=?, agent_type=?, firstname=?, lastname=?, db_name=?, image_link=?, market_id=? WHERE id=?"
         
-        const [result]  = await pool.execute(query, [mangerId,agentType,agentFirstname,agentLastname,agentDbname,imageLink,agentId])
+        const [result]  = await pool.execute(query, [mangerId,agentType,agentFirstname,agentLastname,agentDbname,imageLink,marketId,agentId])
 
         res.status(201).json({
             message: `Sales Agent Info is updated`
@@ -123,7 +165,26 @@ exports.deleteSalesAgent = async (req, res, next) => {
 
     const { agent_id } = req.params 
 
+
+
     try {
+        const [fetchAgentImageLink] = await pool.execute("SELECT image_link FROM sales_agents WHERE id=?",[agent_id])
+        const [ agentImageLink] = fetchAgentImageLink
+        
+        const image_link = agentImageLink.image_link
+        if(image_link != null || image_link != ""){
+            const filePath = new URL(image_link).pathname.substring(1)
+            
+            //Construct absolute path
+            const absolutePath = path.join(__dirname, '../', filePath)
+
+            //Delet the agent Image file
+
+            fs.unlink(absolutePath, (error) => {
+                console.log(`File ${filePath} deleted successfully`)
+            })
+        }
+        
         const query = "DELETE FROM sales_agents WHERE id=?"
         const [result] = await pool.execute(query, [agent_id])
 
@@ -131,7 +192,7 @@ exports.deleteSalesAgent = async (req, res, next) => {
             return res.status(400).json({message: 'Agent not ound'})
         }
 
-        res.status(200).send({ message: 'Agent deleted successfully' });
+        res.status(204).send({ message: 'Agent deleted successfully' })
     }
     catch(error) {
         console.error('Error deleting agent:', error)

@@ -2,26 +2,26 @@ const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
 
-exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
+exports.getAgentMetrics = async ( givenMonth,givenYear) => {
     //CHECK FIRST IF THERE ARE AVAILABLE MONTH AND YEAR ON target_shipok if not return empty array Imediately
 
-    const [row] = await connection.execute(
+    const [row] = await pool.execute(
       'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=?',[givenMonth,givenYear]
    )
 
   const { count } = row[0]
 
   if (count == 0){
-   connection.release()
+  //  connection.release()
    return  []
   }
 
-   const [sales_agents] = await connection.execute(
+   const [sales_agents] = await pool.execute(
        'SELECT * FROM  `sales_agents`'  
    )
   
    //fetch  evaluation_criteria value and save it to evalulation_criteria 
-   const [evaluation_criteria_array] = await connection.execute(
+   const [evaluation_criteria_array] = await pool.execute(
       'SELECT * FROM `evaluation_criteria`'
    )
    
@@ -34,7 +34,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
       /*fetch target and shipok of each agent for the given month and year and get the percentage
            with  performance_percent = shipok/target * 100
       */
-      const [agentTargetShipOk] = await connection.execute(
+      const [agentTargetShipOk] = await pool.execute(
        'SELECt target, ship_ok FROM `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agent.id, givenMonth, givenYear]
       )
       
@@ -44,7 +44,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
        const percentShipOk = Math.round(Number(shipok)/Number(target) * 100)
        
        //get the agent score performance
-       const [scoreShipOk] = await connection.execute(
+       const [scoreShipOk] = await pool.execute(
          'SELECT score FROM `performance_score`WHERE ? BETWEEN `min_value` AND `max_value`', [percentShipOk]
        ) 
 
@@ -60,7 +60,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
      }
 
      //get agent total absences for the given month and year
-     const [absences] = await connection.execute(
+     const [absences] = await pool.execute(
        'SELECT Count(*) as absences FROM absences WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
      )  
      let agentAbsenceScore;
@@ -68,7 +68,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
         agentAbsenceScore = 5
      }else {
        
-       const [absenceScore] = await connection.execute(
+       const [absenceScore] = await pool.execute(
          'SELECT score FROM absences_score WHERE absence_count=?', [absences[0].absences]
        )
        if (absenceScore.length == 0){
@@ -85,7 +85,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
     
      //get total agent tardiness for the given month and year and corresding score
      
-     const [tardiness] = await connection.execute(
+     const [tardiness] = await pool.execute(
        'SELECT Count(*) as tardiness FROM tardiness WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
      )
 
@@ -95,7 +95,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
         agentTardinessScore = 5
      }else {
        
-       const [tardinessScore] = await connection.execute(
+       const [tardinessScore] = await pool.execute(
          'SELECT score FROM tardiness_score WHERE tardiness_count=?', [tardiness[0].tardiness]
        )
        if (tardinessScore.length == 0){
@@ -112,7 +112,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
     
    //get agent total memo for the given month and year and corressponding memo score
 
-   const [memo] = await connection.execute(
+   const [memo] = await pool.execute(
      'SELECT Count(*) as memo FROM memo WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
    )
 
@@ -122,7 +122,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
       agentMemoScore = 5
    }else {
      
-     const [memoScore] = await connection.execute(
+     const [memoScore] = await pool.execute(
        'SELECT score FROM memorandum_score WHERE memo_count=?', [memo[0].memo]
      )
      if (memoScore.length == 0){
@@ -138,7 +138,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
 
 
    // get agent feedback for the given month and year
-   const [feedback] = await connection.execute(
+   const [feedback] = await pool.execute(
      'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
    )
    let agentFeedbackScore 
@@ -152,7 +152,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
 
    //get agent new deposit for the given and treat this as additional point
    
-   const [newDeposit] = await connection.execute(
+   const [newDeposit] = await pool.execute(
      'SELECT Count(*) AS deposit FROM new_deposit WHERE agent_id=? AND month=? AND year=?',[agent.id, givenMonth,givenYear]
    )
    let agentNewDepositScore
@@ -180,7 +180,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
 
    // Get the result name base on the final_ratings
 
-   const [ratings] = await connection.execute(
+   const [ratings] = await pool.execute(
      'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[agent['final_ratings']]
    )
 
@@ -188,7 +188,7 @@ exports.getAgentMetrics = async (connection, givenMonth,givenYear) => {
 
  }
 
-   connection.release()
+  //  connection.release()
   
    sales_agents.sort((a, b) => b.final_ratings - a.final_ratings)
 
@@ -255,17 +255,17 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
     try {
     //fetch all agent available and save it to sales_agent array
-    const connection =  await pool.getConnection()
+    // const connection =  await pool.getConnection()
 
-    const agentMetircs = await this.getAgentMetrics(connection, givenMonth, givenYear)
+    const agentMetircs = await this.getAgentMetrics( givenMonth, givenYear)
 
-    connection.release()
+    // connection.release()
     
     res.status(200).json(agentMetircs)
     
     }
     catch(error){
-        console.error('Error Updating Agent Tardiness records', error)
+        console.error('Error, Cannot Fetch Agent sales_leaderboard', error)
         res.status(500).json({error: 'Error, Cannot Fetch Agent sales_leaderboard'})
 
    }

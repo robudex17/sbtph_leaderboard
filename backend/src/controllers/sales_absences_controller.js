@@ -8,14 +8,18 @@ exports.recordNewAbsent = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+    
+   
     const agentId = req.params.agent_id
-    const  agentAbsentDate = req.body.absent_date 
-    const agentAbsentDescription = req.body.absent_description
+    const  agentAbsentDate = req.body.date 
+    const absentMonth = req.body.month
+    const absentYear = req.body.year
+    const agentAbsentDescription = req.body.description
 
     
     try {
-        const query = "INSERT INTO absences ( agent_id, description,date) VALUES (?, ?,?)"
-        const [result]  = await pool.execute(query, [agentId, agentAbsentDescription, agentAbsentDate])
+        const query = "INSERT INTO absences ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, absentMonth, absentYear, agentAbsentDate,agentAbsentDescription])
 
         res.status(201).json({
             message: `New absence for agent_id: ${agentId} are created or recorded`
@@ -23,7 +27,7 @@ exports.recordNewAbsent = async (req, res, next) => {
         
     }catch(error){
         console.error('Error inserting absense records', error)
-        res.status(500).json({error: 'Database Error, Cannot memo'})
+        res.status(500).json({error: 'Database Error, Cannot Absent'})
     }  
 
 
@@ -58,12 +62,12 @@ exports.fetchAgentAbsent = async (req, res, next) => {
     }
     const agentId = req.params.agent_id
 
-    const connection =  await pool.getConnection()
+    // const connection =  await pool.getConnection()
 
-    const [result] = await connection.execute(
+    const [result] = await pool.execute(
         'SELECT * FROM  `absences` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
     )
-    connection.release()
+    // connection.release()
     res.json(result)
 }
 
@@ -75,16 +79,20 @@ exports.updateAgentAbsent = async (req,res, next) => {
     }
 
     const agentId = req.params.agent_id
-    const absenceId = req.query.absence_id
+    // const absenceId = req.query.id
 
-    const  agentAbsentDate = req.body.absent_date 
-    const agentAbsentDescription = req.body.absent_description
+    const  agentAbsentDate = req.body.date 
+    const agentAbsentDescription = req.body.description
+    const absenceId = req.body.id 
+    const absentMonth = req.body.month 
+    const absentYear = req.body.year 
+
 
 
     try {
-        const query = "UPDATE absences SET  description=?, date=? WHERE id=? AND agent_id=?"
+        const query = "UPDATE absences SET description=?, date=?, month=?, year=?  WHERE id=? AND agent_id=?"
         
-        const [result]  = await pool.execute(query, [agentAbsentDescription, agentAbsentDate, absenceId,agentId])
+        const [result]  = await pool.execute(query, [agentAbsentDescription, agentAbsentDate, absentMonth, absentYear, absenceId,agentId])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Absence ID Not Found'})
@@ -103,10 +111,9 @@ exports.updateAgentAbsent = async (req,res, next) => {
 
 exports.deleteAgentAbsent = async (req, res, next) => {
     const { agent_id } = req.params 
-    const  absenceId = req.query.absence_id
+  
 
-    console.log(agent_id)
-    console.log(absenceId)
+    const absenceId = req.body.id
 
     try {
         const query = "DELETE FROM absences WHERE id=? AND agent_id=?"

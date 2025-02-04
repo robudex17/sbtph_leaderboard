@@ -2,7 +2,7 @@
   <header class="w-full bg-white shadow-md flex items-center justify-between px-6 py-4 fixed">
     <!-- Brand -->
     <div class="flex items-center gap-10">
-      <div class="text-lg font-bold">Sales App</div>
+      <div class="text-lg font-bold">SBTPH SALES APP</div>
 
       <!-- Dropdown for Month and Year -->
       <div class="flex items-center gap-2">
@@ -14,13 +14,13 @@
           <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
         </select>
         <select
-          v-model="selectedYear"
+          v-model="selectedYear" v-if="route.path !='/admin/agent/manage_sales_agents'"
           class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option disabled value="">Select Year</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
         </select>
-        <button
+        <button v-if="route.path !='/admin/agent/manage_sales_agents'"
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
           @click="submitDateSelection"
         >
@@ -101,8 +101,9 @@ const route = useRoute()
 const urlPath = ref(route.fullPath)
 
 const analyticsPath = ref([
-  '/analytics/agents', '/analytics/market', '/analytics/overall'
+  '/analytics/agents', '/analytics/market', '/analytics/overall', '/admin/agent/manage_sales_agents'
 ])
+
 
 const isNotAnalytics = computed(() =>{
   if(!analyticsPath.value.includes(route.path)){
@@ -112,7 +113,7 @@ const isNotAnalytics = computed(() =>{
   }
 })
 
-console.log('the urlPath', urlPath.value)
+
 
 
 const search = () => {
@@ -185,7 +186,7 @@ const submitDateSelection = () => {
         path: currentRoute.path,
         query: { ...currentRoute.query, year: selectedYear.value },
       });
-      console.log(`Redirecting to: ${currentRoute.path} with  Year: ${selectedYear.value}`);
+      
     } else {
       alert("Please select a year.");
     }
@@ -212,7 +213,7 @@ const submitDateSelection = () => {
 watch(route, (newRoute)=> {
   console.log(newRoute.query)
   urlPath.value = newRoute.fullPath
-  console.log('The  Updated route is ',newRoute.fullPath)
+
   if (Object.keys(newRoute.query).length == 0) {
       selectedMonth.value = ""
        selectedYear.value =  ""

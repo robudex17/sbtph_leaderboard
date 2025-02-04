@@ -4,17 +4,17 @@ const validator = { }
 
 validator.validateMemo = [
     param('agent_id').trim().notEmpty().withMessage('Agent ID is required'),
-    check('memo_date').trim().notEmpty().withMessage('Date for Memo is required'),
-    check('memo_description').notEmpty().withMessage('A Description for Memo is required'),
-    check('memo_date').trim().matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
+    check('date').trim().notEmpty().withMessage('Date for Memo is required'),
+    check('description').notEmpty().withMessage('A Description for Memo is required'),
+    check('date').trim().matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
 ]
 
 
 
 validator.validateAbsence = [
-    check('absent_date').trim().notEmpty().withMessage('Date For Absence is required'),
-    check('absent_date').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format'),
-    check('absent_description').trim().notEmpty().withMessage('A Description for Absence is required')
+    check('date').trim().notEmpty().withMessage('Date For Absence is required'),
+    check('date').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format'),
+    check('description').trim().notEmpty().withMessage('A Description for Absence is required')
 ]
 
 
@@ -27,12 +27,13 @@ validator.validateNewDeposit = [
         }
         return true;
       }), // Second check: ensure it's a positive number)
-    check('deposit_date').trim().notEmpty().withMessage('Deposit Date is required')
+    check('date').trim().notEmpty().withMessage('Deposit Date is required')
     .matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
+  
 ]
 
 validator.validateFeedback = [
-    check('feedback_date').trim().notEmpty().withMessage('Feedback is Date is required')
+    check('date').trim().notEmpty().withMessage('Feedback is Date is required')
     .isDate().withMessage('Invalid Date format').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
     .custom(value => {
 
@@ -69,7 +70,7 @@ validator.validateFeedback = [
 ]
 
 validator.validateTardiness = [
-    check('tardiness_date').trim().notEmpty().withMessage('Tardiness Date is required')
+    check('date').trim().notEmpty().withMessage('Tardiness Date is required')
     .isDate().withMessage('Invalid Date format').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
     .custom(value => {
 
@@ -95,11 +96,11 @@ validator.validateTardiness = [
         }
         return true
     }),
-    check('tardiness_description').trim().notEmpty().withMessage('Tardiness Description is required')
+    check('description').trim().notEmpty().withMessage('Tardiness Description is required')
 ]
 
 validator.validateTarget = [
-    check('target_date').trim().notEmpty().withMessage('Target Date is required')
+    check('date').trim().notEmpty().withMessage('Target Date is required')
     .isDate().withMessage('Invalid Date format').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
     .custom(value => {
 
@@ -131,15 +132,16 @@ validator.validateTarget = [
     check('target').trim().notEmpty().withMessage('target is required.')
     .isInt({min:1}).withMessage('Only positive Whole numbers are allowed'),
     
-    check('shipok').trim().notEmpty().withMessage('shipok is Required')
-    .isInt({min:0}).withMessage('Only positive Whole Number are allowed')
+    check('ship_ok').trim().notEmpty().withMessage('shipok is Required')
+    .isInt({min:0}).withMessage('Only positive Whole Number are allowed'),
+    check('market_id').trim().notEmpty().withMessage('shipok is Required')
 ]
 
 
 
 validator.validateNewAndUpdateAgent = [
 
-    check('agent_id').trim().notEmpty().withMessage('Agent Id is Required')
+    check('id').trim().notEmpty().withMessage('Agent Id is Required')
     .isInt().withMessage('Numbers are only allowed in Agent ID')
     .isLength({min:4}).withMessage('Agent ID must atleast 4 digits'),
 
@@ -150,11 +152,11 @@ validator.validateNewAndUpdateAgent = [
     check('agent_type').trim().notEmpty().withMessage('Agent Type is Required')
     .isIn([0,1,2,"0","1","2"]).withMessage('Agent Type must be 0, 1, 2'),
 
-    check('agent_firstname').trim().notEmpty().withMessage('Agent Firstname is Required'),
+    check('firstname').trim().notEmpty().withMessage('Agent Firstname is Required'),
 
-    check('agent_lastname').trim().notEmpty().withMessage('Agent Lastname is Required'),
+    check('lastname').trim().notEmpty().withMessage('Agent Lastname is Required'),
 
-    check('agent_dbname').trim().notEmpty().withMessage('Agent DB Name is Required')
+    check('db_name').trim().notEmpty().withMessage('Agent DB Name is Required')
 
 
 ]
@@ -192,7 +194,7 @@ validator.validateMonthYear = [
         const inputYear = parseInt(req.query.year || currentYear, 10)
        
         if(inputYear > currentYear || (inputYear === currentYear  &&  inputMonthIndex > currentMonthIndex)){
-            throw new Error("No Sales Leaderboard for the given date and year..")
+            throw new Error("No Data for the given date and year..")
         }
           
         return true

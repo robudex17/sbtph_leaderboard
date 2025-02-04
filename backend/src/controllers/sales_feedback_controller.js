@@ -7,25 +7,20 @@ exports.addNewFeedback = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-
+   
+    console.log(req.body)
     const feedback = req.body.feedback 
-    const feedbackDate = req.body.feedback_date
+    const feedbackDate = req.body.date
+    const feedbackMonth = req.body.month 
+    const feedbackYear = req.body.year 
+
     const agentId = req.params.agent_id
 
-    const date = new Date(feedbackDate)
-    const year = date.getFullYear()
-    
-        // Get the month name
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
-    const monthName = monthNames[date.getMonth()]; // getMonth() returns 0-based index
-
+  
         
     try {
         const query = "INSERT INTO feedback ( agent_id, month,year,date,feedback) VALUES (?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [agentId, monthName, year, feedbackDate,feedback])
+        const [result]  = await pool.execute(query, [agentId, feedbackMonth, feedbackYear, feedbackDate,feedback])
 
         res.status(201).json({
             message: `New Feedback Score for agent_id: ${agentId} are created or recorded`
@@ -46,26 +41,21 @@ exports.addNewFeedback = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+   
+
+  
 
     const feedback = req.body.feedback 
-    const feedbackDate = req.body.feedback_date
+    const feedbackDate = req.body.date
     const agentId = req.params.agent_id
-
-    const date = new Date(feedbackDate)
-    const year = date.getFullYear()
-    
-        // Get the month name
-    const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-    ];
-    const monthName = monthNames[date.getMonth()]; // getMonth() returns 0-based index
-
+    const feedbackMonth = req.body.month 
+    const feedbackYear = req.body.year 
+ 
         
     try {
-        const query = "UPDATE feedback SET month=?, year=?, date=?, feedback=? WHERE agent_id=? AND date=?"
+        const query = "UPDATE feedback SET  feedback=? WHERE agent_id=? AND date=?"
         
-        const [result]  = await pool.execute(query, [monthName, year, feedbackDate, feedback, agentId, feedbackDate])
+        const [result]  = await pool.execute(query, [feedback, agentId, feedbackDate])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Agent Feedback Not Found..'})
@@ -113,12 +103,12 @@ exports.addNewFeedback = async (req, res, next) => {
     
     const agentId = req.params.agent_id
 
-    const connection =  await pool.getConnection()
+    // const connection =  await pool.getConnection()
 
-    const [result] = await connection.execute(
+    const [result] = await pool.execute(
         'SELECT * FROM  `feedback` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
     )
-    connection.release()
+    // connection.release()
     res.json(result)
 
  }
@@ -126,7 +116,7 @@ exports.addNewFeedback = async (req, res, next) => {
  exports.deleteAgentFeedback = async (req, res, next) => {
     
     const agentId = req.params.agent_id
-    const feedbackDate = req.query.feedback_date 
+    const feedbackDate = req.query.date 
 
     try {
         const query = "DELETE FROM feedback WHERE  agent_id=? AND date=?"

@@ -7,14 +7,18 @@ exports.recordNewTardiness = async (req,res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-
+  
+    
     const agentId = req.params.agent_id
-    const tardinessDate = req.body.tardiness_date 
-    const tardinessDescription = req.body.tardiness_description
-
+    const tardinessDate = req.body.date 
+    const tardinessDescription = req.body.description
+    const tardinessMonth = req.body.month
+    const tardinessYear = req.body.year
+ 
+    
     try {
-        const query = "INSERT INTO tardiness ( agent_id, description,date) VALUES (?, ?,?)"
-        const [result]  = await pool.execute(query, [agentId, tardinessDescription, tardinessDate])
+        const query = "INSERT INTO tardiness ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId,tardinessMonth,tardinessYear, tardinessDate,tardinessDescription ])
 
         res.status(201).json({
             message: `New Tardiness for agent_id: ${agentId} are created or recorded`
@@ -63,12 +67,12 @@ exports.fetchAgentTardiness = async (req, res, next) => {
 
     
 
-    const connection =  await pool.getConnection()
+    // const connection =  await pool.getConnection()
 
-    const [result] = await connection.execute(
+    const [result] = await pool.execute(
         'SELECT * FROM  `tardiness` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
     )
-    connection.release()
+    // connection.release()
     res.json(result)
 }
 
@@ -78,18 +82,22 @@ exports.updateAgentTardiness = async (req,res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
-
+   
+   
     const agentId = req.params.agent_id
-    const tardinessId = req.query.tardiness_id
+    
 
-    const  agentTardinessDate = req.body.tardiness_date 
-    const agentTardinessDescription = req.body.tardiness_description
+    const  agentTardinessDate = req.body.date 
+    const agentTardinessDescription = req.body.description
+    const tardinessMonth = req.body.month 
+    const tardinessYear = req.body.year 
+    const tardinessId = req.body.id
 
 
     try {
-        const query = "UPDATE tardiness SET  description=?, date=? WHERE id=? AND agent_id=?"
+        const query = "UPDATE tardiness SET  description=?, date=? , month=? , year=? WHERE id=? AND agent_id=?"
         
-        const [result]  = await pool.execute(query, [agentTardinessDescription, agentTardinessDate, tardinessId,agentId])
+        const [result]  = await pool.execute(query, [agentTardinessDescription, agentTardinessDate, tardinessMonth, tardinessYear, tardinessId,agentId])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Tardiness ID Not Found'})
@@ -108,7 +116,7 @@ exports.updateAgentTardiness = async (req,res, next) => {
 
 exports.deleteAgentTardiness = async (req, res, next) => {
     const  agentId = req.params.agent_id 
-    const  tardinessId = req.query.tardiness_id
+    const  tardinessId = req.body.id
 
 
     try {

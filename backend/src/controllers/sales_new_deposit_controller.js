@@ -1,23 +1,29 @@
 const pool  =  require('../config/db')
 const { validationResult } = require('express-validator')
 
-exports.newDeposit = async (req, res, next ) => {
+exports.addNewDeposit = async (req, res, next ) => {
    
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
- 
+   
+
+    console.log(req.body)
+
     const agentId = req.params.agent_id
-    const newDeposit = req.body.new_deposit
-    const depositDate = req.body.deposit_date
+    const newDeposit =  req.body.new_deposit
+    const depositDate = req.body.date
+    const depositMOnth = req.body.month
+    const depositYear = req.body.year
+    const depositDescription = req.body.description
 
        
     try {
-        const query = "INSERT INTO new_deposit ( agent_id, new_deposit,date) VALUES (?, ?,?)"
-        const [result]  = await pool.execute(query, [agentId, newDeposit, depositDate])
-
+        const query = "INSERT INTO new_deposit ( agent_id, month, year,new_deposit,description,date) VALUES (?,?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, depositMOnth,depositYear, newDeposit, depositDescription,depositDate])
+        console.log('the result is:', result)
         res.status(201).json({
             message: `New Deposit for agent_id: ${agentId} are created or recorded`
         })
@@ -79,17 +85,22 @@ exports.updateAgentNewDeposit = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
     
+    console.log(req.body)
+  
     const agentId  = req.params.agent_id
 
-    const depositId = req.query.deposit_id
+    const depositId = req.body.id
 
     const  newDeposit = req.body.new_deposit 
-    const depositDate = req.body.deposit_date
+    const depositDate = req.body.date
+    const  depositMonth = req.body.month 
+    const depositYear = req.body.year
+    const depositDescription = req.body.description
 
     try {
-        const query = "UPDATE new_deposit SET  new_deposit=?, date=? WHERE id=? AND agent_id=?"
+        const query = "UPDATE new_deposit SET  new_deposit=?, date=?, month=?, year=?, description=? WHERE id=? AND agent_id=?"
         
-        const [result]  = await pool.execute(query, [newDeposit, depositDate, depositId,agentId])
+        const [result]  = await pool.execute(query, [newDeposit, depositDate, depositMonth, depositYear, depositDescription, depositId,agentId])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'New Deposit ID Not Found'})
@@ -111,9 +122,8 @@ exports.updateAgentNewDeposit = async (req, res, next) => {
 exports.deleteAgentNewDeposit = async (req, res, next) => {
     
     const agentId = req.params.agent_id 
-    const  depositId = req.query.deposit_id
-
-   
+    const  depositId = req.body.id
+  
 
     try {
         const query = "DELETE FROM new_deposit WHERE id=? AND agent_id=?"

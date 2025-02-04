@@ -1,6 +1,6 @@
 // fetch_sales_agents_details.js
 
-export const fetchSalesAgents = async (url) => {
+const fetchSalesAgents = async () => {
     state.loading = true;
     state.error = null;
 

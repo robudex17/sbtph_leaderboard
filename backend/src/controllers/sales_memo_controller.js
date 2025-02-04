@@ -9,14 +9,19 @@ exports.createSalesAgentMemo = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log(req.body)
+
     const agentId = req.params.agent_id
-    const memoDate  = req.body.memo_date
-    const memoDescription = req.body.memo_description 
+    const memoDate  = req.body.date
+    const memoDescription = req.body.description 
+    const memoMonth = req.body.month
+    const memoYear = req.body.year
     
-    
+ 
+
     try {
-        const query = "INSERT INTO memo ( agent_id, description,date) VALUES (?, ?,?)"
-        const [result]  = await pool.execute(query, [agentId, memoDescription,memoDate])
+        const query = "INSERT INTO memo ( agent_id, month, year, description,date) VALUES (?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, memoMonth,memoYear, memoDescription,memoDate])
 
         res.status(201).json({
             message: `New memo for agent_id: ${agentId} are created`
@@ -77,16 +82,20 @@ exports.updateAgentMemo = async (req,res, next) => {
     }
 
     const agentId = req.params.agent_id
-    const memoId = req.query.memo_id
+    
+    console.log(req.body)
 
-    const  agentMemoDate = req.body.memo_date 
-    const agentMemoDescription = req.body.memo_description
+    const  agentMemoDate = req.body.date 
+    const agentMemoDescription = req.body.description
+    const memoId = req.body.id 
+    const memoMonth = req.body.month 
+    const memoYear = req.body.year
 
-
+  
     try {
-        const query = "UPDATE memo SET  description=?, date=? WHERE id=? AND agent_id=?"
+        const query = "UPDATE memo SET  description=?, month=?, year=? , date=? WHERE id=? AND agent_id=?"
         
-        const [result]  = await pool.execute(query, [agentMemoDescription, agentMemoDate, memoId,agentId])
+        const [result]  = await pool.execute(query, [agentMemoDescription, memoMonth, memoYear, agentMemoDate, memoId,agentId])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Memo ID Not Found'})
@@ -105,8 +114,7 @@ exports.updateAgentMemo = async (req,res, next) => {
 
 exports.deleteAgentMemo = async (req, res, next) => {
     const { agent_id } = req.params 
-    const  memoId = req.query.memo_id
-
+    const  memoId = req.body.id
  
 
     try {

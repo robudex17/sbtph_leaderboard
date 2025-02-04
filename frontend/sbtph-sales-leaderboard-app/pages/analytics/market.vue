@@ -225,6 +225,9 @@ const renderMarketCharts = () => {
   });
 };
 
+
+
+
 const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
