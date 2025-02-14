@@ -3,7 +3,17 @@ import { reactive } from 'vue'
 
 import API from '~/utils/api'
 
+
+
 export const useManageSalesAgentStore = defineStore('salesAgents', () => {
+    //call auth store fetch the token on the localstorage 
+    //save it to state.token
+    const authStore = useAuthStore()
+    authStore.fetchTokenFromLocalStore()
+
+    const  token = authStore.state.token 
+
+    
     const state = reactive({
         salesAgents: [],
         salesAgentBio: [],
@@ -23,12 +33,31 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         let url = API.salesAgents
         try {
             // Fetch sales agent info
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
-    
+            
             const data = await response.json();
+
+            console.log(data)
             state.salesAgents = data;
         } catch (error) {
             const customError = new Error(`Failed to fetch sales agents info: ${error.message}`);
@@ -43,7 +72,24 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         let url = API.salesAgents
         try {
             // Fetch sales agent info
-            const response = await fetch(`${url}/${agentId}`);
+            const response = await fetch(`${url}/${agentId}`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }     
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
@@ -106,7 +152,24 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         }
         
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }            
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
@@ -121,8 +184,6 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         }
     }
 
-
-  
     // POST/ADD Sales Agent
     const addSalesAgent = async (newAgent) => {
         state.loading = true;
@@ -146,8 +207,20 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
             const response = await fetch(API.salesAgents, {
                 method: 'POST',
                 body: formData, // No need for 'Content-Type' header; it's automatically set
-             
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
             });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }            
 
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
@@ -158,7 +231,7 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
             if(response.ok && response.statusText =='Created' && response.status == 201){
                 const data = await response.json()
                 alert(data.message)
-                fetchSalesAgents()
+               await fetchSalesAgents()
             }
 
 
@@ -193,8 +266,22 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
 
             const response = await fetch(`${API.salesAgents}/${agent_id}`, {
                 method: 'PUT', // Use PATCH if you're partially updating
-                body: formData
+                body: formData,
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
             });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
@@ -228,7 +315,22 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.salesAgents}/${agent_id}`, {
                 method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
             });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }  
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
@@ -252,11 +354,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentTargetShipok}/${agent_id}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(target)
+                body: JSON.stringify(target),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -273,7 +387,6 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
             state.loading = false
         }
     }
-
   
     const updateAgentTarget = async (agent_id, query, target) => {
         state.loading = true
@@ -282,11 +395,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentTargetShipok}/${agent_id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(target)
+                body: JSON.stringify(target),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -311,11 +436,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentTargetShipok}/${agent_id}?date=${target_date}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 // body: JSON.stringify(target)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }    
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -341,11 +478,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentDeposit}/${agent_id}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(target)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -371,11 +520,24 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentDeposit}/${agent_id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(updateNewposit)
+
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }     
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -401,11 +563,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentDeposit}/${agent_id}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(newDeposit)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -432,16 +606,31 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentAttendance[attendanceType]}/${agent_id}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(attendance)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }        
+
             if (!response.ok) {
                 
                 const errors = await response.json()
+                alert(errors.message)
                 throw new Error(errors || "An unknown error occurred");
             }
+
+
         
           let agentAttendanceDetails 
           if (attendanceType == 'memo'){
@@ -470,11 +659,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentAttendance[attendanceType]}/${agent_id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(attendance)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -509,11 +710,22 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentAttendance[attendanceType]}/${agent_id}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(attendance)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -549,11 +761,23 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentFeedback}/${agent_id}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(feedback)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }      
+
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -578,11 +802,22 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentFeedback}/${agent_id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify(feedback)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -607,11 +842,22 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         try {
             const response = await fetch(`${API.agentFeedback}/${agent_id}?date=${feedback_date}`, {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
                 // body: JSON.stringify(target)
             }) 
          
-           
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
             if (!response.ok) {
                 
                 const errors = await response.json()
@@ -628,7 +874,6 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
             state.loading = false
         }
     }
-
 
     return {
         state, 

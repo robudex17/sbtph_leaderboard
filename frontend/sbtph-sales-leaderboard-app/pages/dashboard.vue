@@ -108,6 +108,9 @@
   
 
 <script setup>
+definePageMeta({
+   middleware: 'auth'
+})
 import { onMounted,computed } from 'vue';
 
 import Chart from 'chart.js/auto';

@@ -13,14 +13,14 @@
           <option disabled value="" >Select Month</option>
           <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
         </select>
-        <select
-          v-model="selectedYear" v-if="route.path !='/admin/agent/manage_sales_agents'"
+        <select v-if="isNotmanagePath" 
+          v-model="selectedYear"
           class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option disabled value="">Select Year</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
         </select>
-        <button v-if="route.path !='/admin/agent/manage_sales_agents'"
+        <button  v-if="isNotmanagePath" 
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
           @click="submitDateSelection"
         >
@@ -29,18 +29,19 @@
       </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="relative w-1/3">
-      <input
-        type="text"
-        placeholder="Search..."
-        class="w-full p-2 border rounded"
-        v-model="searchQuery"
+<!-- User Profile -->
+    <div class="relative flex items-center gap-2 cursor-pointer group">
+      <p>
+      <span class="font-semibold text-gray-700">Current User: </span>
+      <span class="font-bold text-purple-800 uppercase"> {{ currentUser.username }}</span>
+    
+    </p> 
+    <img 
+          :src="currentUser.image_link" 
+          alt="User Profile" 
+          class="w-10 h-10 rounded-full border-2 border-gray-300"
       />
-      <button class="absolute right-2 top-2 text-gray-500 hover:text-gray-700" @click="search">
-        <i class="fas fa-search"></i>
-      </button>
-    </div>
+  </div>
 
     <!-- Actions -->
     <div class="flex items-center gap-6">
@@ -79,6 +80,12 @@
 <script setup>
 import { ref, watch,computed } from "vue";
 
+//get the current user
+const authStore = useAuthStore()
+authStore.fetchTokenFromLocalStore()
+
+const currentUser = authStore.state.user 
+
 const searchQuery = ref("");
 const notifications = [
   { id: 1, message: "John Doe reached his sales target!" },
@@ -101,8 +108,22 @@ const route = useRoute()
 const urlPath = ref(route.fullPath)
 
 const analyticsPath = ref([
-  '/analytics/agents', '/analytics/market', '/analytics/overall', '/admin/agent/manage_sales_agents'
+  '/analytics/agents', '/analytics/market', '/analytics/overall', '/admin/agent/manage_sales_agents', '/admin/manage_standard_users', '/agent_performance/year', '/team_performance/year'
 ])
+
+const managePath = ref([
+   '/admin/agent/manage_sales_agents', '/admin/manage_standard_users'
+])
+
+
+const isNotmanagePath  = computed(() =>{
+  if(!managePath.value.includes(route.path)){
+    return true
+  }else{
+    return false
+  }
+})
+
 
 
 const isNotAnalytics = computed(() =>{
@@ -174,7 +195,7 @@ const  validateInputYearDates = (year) => {
 
 
 const submitDateSelection = () => {
-  if (route.path == '/analytics/agents' || route.path == '/analytics/market' || route.path == '/analytics/overall' ){
+  if (route.path == '/analytics/agents' || route.path == '/analytics/market' || route.path == '/analytics/overall' || route.path == '/agent_performance/year' || route.path == '/team_performance/year' ){
     
     if (!validateInputYearDates(selectedYear.value)){
     alert('Cannot Select Year greater than current Year')

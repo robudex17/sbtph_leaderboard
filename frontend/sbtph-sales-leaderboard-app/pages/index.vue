@@ -18,8 +18,8 @@
         </button>
       </div>
       
-      <div v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
-      <div v-if="leaderBoardStore.state.leaderboard.length === 0" class="text-red-700 font-bold  text-5xl">
+      <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
+      <div v-else-if="leaderBoardStore.state.leaderboard.length === 0" class="text-red-700 font-bold  text-5xl">
         No Available Data.
       </div>
       <div v-else>
@@ -210,6 +210,20 @@
 import { useLeaderBoardStore } from '../stores/sales_leaderboard';
 import { onMounted, reactive,ref, watch } from 'vue';
 
+definePageMeta({
+  middleware: ['auth', 'adminmanager'] 
+})
+
+//get the current user
+const authStore = useAuthStore()
+authStore.fetchTokenFromLocalStore()
+
+const currentUser = authStore.state.user 
+
+console.log('The current user is: ', currentUser)
+
+
+
 const leaderBoardStore = useLeaderBoardStore();
 const selectedAgent = reactive({});
 const showModal = ref(false);
@@ -302,6 +316,7 @@ watch(route, (newRoute) => {
 // Fetch leaderboard data on mount
 onMounted(() => {
   leaderBoardData(query);
+  
 });
 
 

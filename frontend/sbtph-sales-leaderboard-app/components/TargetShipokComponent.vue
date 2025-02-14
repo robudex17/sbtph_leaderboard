@@ -16,7 +16,7 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market Name</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button :disabled="targetShipokDetails.length===1"
+                <button :disabled="targetShipokDetails.length===1 || currentUser.role == 'user'" class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openModal('add')" 
                   :class="hasTarget">
                   <font-awesome-icon icon="plus" />
@@ -46,14 +46,14 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_id }}</td> 
               <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_name}}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
-                <button 
+                <button :disabled="currentUser.role == 'user'"
                   @click="openModal('edit', index)" 
-                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600">
+                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Edit
                 </button>
-                <button 
+                <button  :disabled="currentUser.role == 'user'"
                   @click="deleteTarget(targetShipokDetail.agent_id, targetShipokDetail.date)" 
-                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600">
+                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Delete
                 </button>
               </td>
@@ -95,7 +95,7 @@
             </div>
             <div class="flex justify-end gap-2">
               <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
-              <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600"  >
+              <button  :disabled="currentUser.role == 'user'"   type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"  >
                 Submit
               </button>
             </div>
@@ -108,6 +108,13 @@
   <script setup>
   import { ref, defineProps, defineEmits,computed, onMounted, watch } from 'vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+    //get the current user
+    const authStore = useAuthStore()
+    authStore.fetchTokenFromLocalStore()
+
+    const currentUser = authStore.state.user 
+  
 
   const route = useRoute()
   const router = useRouter()

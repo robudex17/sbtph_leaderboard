@@ -13,9 +13,9 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button 
+                <button :disabled="currentUser.role == 'user'"
                   @click="openModal('add')" 
-                  class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600">
+                  class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   <font-awesome-icon icon="plus" />
                   Add
                 </button>
@@ -34,14 +34,14 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.date }}</td>
               <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
-                <button 
+                <button  :disabled="currentUser.role == 'user'"
                   @click="openModal('edit', index)" 
-                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600">
+                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Edit
                 </button>
-                <button 
+                <button  :disabled="currentUser.role == 'user'"
                   @click="deleteNewDeposit(newDeposit.id , newDeposit.agent_id)" 
-                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600">
+                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Delete
                 </button>
               </td>
@@ -78,7 +78,7 @@
             </div>
             <div class="flex justify-end gap-2">
               <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
-              <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Submit</button>
+              <button :disabled="currentUser.role == 'user'" type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">Submit</button>
             </div>
           </form>
         </div>
@@ -91,7 +91,10 @@
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
   
-
+ //get the current user
+ const authStore = useAuthStore()
+ authStore.fetchTokenFromLocalStore()
+ const currentUser = authStore.state.user 
   
   const props = defineProps({
     newDepositDetails: {

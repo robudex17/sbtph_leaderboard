@@ -86,6 +86,11 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 // import { useAnalyticsStore } from "@/stores/analyticsStore"; // Assuming the store is imported correctly
+
+definePageMeta({
+    middleware: ['auth' ,'adminmanager'] 
+})
+
 import {
   Chart,
   LineController,
@@ -148,13 +153,97 @@ const months = [
   "December",
 ];
 
+// const renderMarketCharts = () => {
+//   pagedMarket.value.forEach((market, index) => {
+//     const lineChartRef = document.getElementById(`marketChart_${index}_line`);
+//     const barChartRef = document.getElementById(`marketChart_${index}_bar`);
+
+//     if (lineChartRef) {
+//       new Chart(lineChartRef.getContext("2d"), {
+//         type: "line",
+//         data: {
+//           labels: months,
+//           datasets: [
+//             {
+//               label: "ShipOK",
+//               data: market.ship_ok,
+//               borderColor: "blue",
+//               borderWidth: 2,
+//               fill: false,
+//             },
+//             {
+//               label: "Target",
+//               data: market.target,
+//               borderColor: "green",
+//               borderWidth: 2,
+//               fill: false,
+//             },
+//           ],
+//         },
+//         options: {
+//           responsive: true,
+//           plugins: {
+//             legend: {
+//               position: "top",
+//             },
+//             title: {
+//               display: true,
+//               text: `${market.market_name}'s Historical Trends`,
+//             },
+//           },
+//         },
+//       });
+//     }
+
+//     if (barChartRef) {
+//       new Chart(barChartRef.getContext("2d"), {
+//         type: "bar",
+//         data: {
+//           labels: months,
+//           datasets: [
+//             {
+//               label: "ShipOK",
+//               data: market.ship_ok,
+//               backgroundColor: "blue",
+//             },
+//             {
+//               label: "Target",
+//               data: market.target,
+//               backgroundColor: "green",
+//             },
+//           ],
+//         },
+//         options: {
+//           responsive: true,
+//           plugins: {
+//             legend: {
+//               position: "top",
+//             },
+//             title: {
+//               display: true,
+//               text: `${market.market_name}'s Monthly ShipOK vs Target (Bar Chart)`,
+//             },
+//           },
+//         },
+//       });
+//     }
+//   });
+// };
+
+
+const charts = [];
+
 const renderMarketCharts = () => {
+  // Destroy existing charts before creating new ones
+  charts.forEach(chart => chart.destroy());
+  charts.length = 0; // Clear the array
+
   pagedMarket.value.forEach((market, index) => {
     const lineChartRef = document.getElementById(`marketChart_${index}_line`);
     const barChartRef = document.getElementById(`marketChart_${index}_bar`);
 
     if (lineChartRef) {
-      new Chart(lineChartRef.getContext("2d"), {
+      const lineChart = new Chart(lineChartRef.getContext("2d"), {
         type: "line",
         data: {
           labels: months,
@@ -178,20 +267,16 @@ const renderMarketCharts = () => {
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: "top",
-            },
-            title: {
-              display: true,
-              text: `${market.market_name}'s Historical Trends`,
-            },
+            legend: { position: "top" },
+            title: { display: true, text: `${market.market_name}'s Historical Trends` },
           },
         },
       });
+      charts.push(lineChart);
     }
 
     if (barChartRef) {
-      new Chart(barChartRef.getContext("2d"), {
+      const barChart = new Chart(barChartRef.getContext("2d"), {
         type: "bar",
         data: {
           labels: months,
@@ -211,21 +296,15 @@ const renderMarketCharts = () => {
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              position: "top",
-            },
-            title: {
-              display: true,
-              text: `${market.market_name}'s Monthly ShipOK vs Target (Bar Chart)`,
-            },
+            legend: { position: "top" },
+            title: { display: true, text: `${market.market_name}'s Monthly ShipOK vs Target (Bar Chart)` },
           },
         },
       });
+      charts.push(barChart);
     }
   });
 };
-
-
 
 
 const nextPage = () => {

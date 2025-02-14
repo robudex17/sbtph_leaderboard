@@ -10,15 +10,15 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Feedback</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center  disabled:bg-gray-400 disabled:cursor-not-allowed">
                 Actions
               
-                 <button :disabled="feedbackDetails.length===1"
+                 <button :disabled="feedbackDetails.length===1 || currentUser.role == 'user'" class=" disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openModal('add')" 
                   :class="hasFeedback">
                   <font-awesome-icon icon="plus" />
 
-                  Add
+                  Add 
                 </button>
                 
              
@@ -37,14 +37,14 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ feedback.date }}</td>
               <td class="py-2 px-4 text-sm text-green-800">{{ feedback.feedback }}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
-                <button 
+                <button :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"
                   @click="openModal('edit', index)" 
-                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600">
+                  class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Edit
                 </button>
-                <button 
+                <button  :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"
                   @click="deleteFeedback(feedback.agent_id, feedback.date)" 
-                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600">
+                  class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Delete
                 </button>
               </td>
@@ -90,6 +90,12 @@
   <script setup>
   import { ref, defineProps, defineEmits,computed } from 'vue';
   import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+
+    //get the current user
+    const authStore = useAuthStore()
+  authStore.fetchTokenFromLocalStore()
+
+  const currentUser = authStore.state.user 
   
   const props = defineProps({
     feedbackDetails: {
@@ -180,6 +186,11 @@ const form = ref({
 
     if (errorFeedback.value){
       return 
+    }
+
+    if(currentUser.role != 'admin'){
+        alert('"Access Denied: Insufficient Permission')
+        closeModal();
     }
     if (modalType.value === 'add') {
 

@@ -43,6 +43,11 @@
   </template>
   
   <script setup>
+
+  definePageMeta({
+    middleware: 'auth'
+  })
+
   import { onMounted, watch, computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
 
@@ -59,8 +64,24 @@
   const router = useRouter();
   const route = useRoute();
   const query = route.query;
-  const agentId = route.params.agent_id;
+  // const agentId = route.params.agent_id;
+
+
   
+  //get the current user
+  const authStore = useAuthStore()
+  authStore.fetchTokenFromLocalStore()
+
+  const currentUser = authStore.state.user 
+
+
+  let agentId;
+
+  agentId = route.params.agent_id
+
+  if(!agentId){
+    agentId = currentUser.login_id
+  }
   const useManageSalesStore = useManageSalesAgentStore();
 
   const addNewTarget = async(agentId, query, target) => {
@@ -129,9 +150,12 @@
 const addAttendanceType = async (agentId, query,  attendanceType,attendance) => {
     try {
       await useManageSalesStore.addAgentAttendanceType(agentId, query, attendanceType, attendance)
+      
     }catch(error){
       console.log(error.errors)
     }
+
+    
   }
 
 

@@ -137,6 +137,11 @@ import { useAnalyticsStore } from "~/stores/sales_analytics";
     
     setup() {
 
+    definePageMeta({
+        middleware: ['auth' ,'adminmanager'] 
+     })
+
+
       const router = useRouter()
       const route =  useRoute()
       const query = route.query

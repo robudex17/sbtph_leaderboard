@@ -4,14 +4,16 @@ const router = express.Router()
 const salesFeedbackController = require('../controllers/sales_feedback_controller')
 const { validateFeedback,validateMonthYear } = require('../middleware/validator')
 
+const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
-router.post('/agent_feedback/:agent_id', validateFeedback, salesFeedbackController.addNewFeedback)
 
-router.get('/agent_feedback/:agent_id', validateMonthYear,salesFeedbackController.fetchAgentFeedback)
+router.post('/agent_feedback/:agent_id', authenticateToken,authorizeRoles('admin'), validateFeedback, salesFeedbackController.addNewFeedback)
 
-router.put('/agent_feedback/:agent_id', validateFeedback, salesFeedbackController.updateAgentFeedback)
+router.get('/agent_feedback/:agent_id', authenticateToken, validateMonthYear,salesFeedbackController.fetchAgentFeedback)
 
-router.delete('/agent_feedback/:agent_id', salesFeedbackController.deleteAgentFeedback)
+router.put('/agent_feedback/:agent_id', authenticateToken,authorizeRoles('admin'), validateFeedback, salesFeedbackController.updateAgentFeedback)
+
+router.delete('/agent_feedback/:agent_id', authenticateToken, authorizeRoles('admin'), salesFeedbackController.deleteAgentFeedback)
 
 
 module.exports = router

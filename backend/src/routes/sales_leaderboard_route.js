@@ -6,7 +6,9 @@ const { validateMonthYear } = require('../middleware/validator')
 
 const salesLeaderboardController = require('../controllers/sales_leaderboard_controllers')
 
-router.get('/sales_leaderboard', validateMonthYear, salesLeaderboardController.fetchAgentLeaderBoard)
+const { authenticateToken, authorizeRoles} = require('../middleware/auth')
+
+router.get('/sales_leaderboard', authenticateToken,validateMonthYear, salesLeaderboardController.fetchAgentLeaderBoard)
 
 
 

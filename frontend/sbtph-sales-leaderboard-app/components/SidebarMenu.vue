@@ -32,14 +32,21 @@
                  :key="subItem.name"
                  class="p-2 pl-6 hover:bg-gray-600 cursor-pointer"
                  :class="{ 'bg-blue-600': activeMenu === subItem.name }"
-                 @click="activateMenu(subItem.name, subItem.route)"
+                 @click="activateMenu(subItem.name, subItem.route)"               
                >
-                 <font-awesome-icon :icon="subItem.icon" /> {{ subItem.name }}
+                <div >
+                  <font-awesome-icon :icon="subItem.icon" /> {{ subItem.name }}
+                </div>
                </li>
              </ul>
            </li>
          </ul>
        </nav>
+      <!-- Logout button at the bottom -->
+      <button class="logout-btn p-4 hover:bg-gray-700 cursor-pointer mt-auto " @click="logout">
+        <font-awesome-icon :icon="['fas', 'sign-out-alt']" class="pr-2" />
+        <span v-if="!isCollapsed">Logout</span>
+      </button>
      </aside>
  
      <!-- Main Content -->
@@ -54,45 +61,168 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
+//get the current user
+const authStore = useAuthStore()
+authStore.fetchTokenFromLocalStore()
+const currentUser = authStore.state.user 
+
 const router = useRouter();
 const route = useRoute(); // Access the current route
 
 const activeMenu = ref('Leaderboard'); // Holds the name of the currently active menu
 const isCollapsed = ref(false);
 const submenuStates = ref({});
+let menuItems 
 
-const menuItems = [
-  { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
-  { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
-  { 
-    name: 'Analytics', 
-    route: null, icon: ['fas', 'chart-bar'],
-    subMenu:[
-      { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
-      { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
-      { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
-    ] 
-  
-  },
-  // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
-  { name: 'Team Performance', route: '/team_performance', icon: ['fas', 'users'] },
-  { name: 'Agent Performance', route: '/sales_agent_performance', icon: ['fas', 'users'] },
-  { 
-    name: 'Admin Panel',
-    route: null,
-    icon: ['fas', 'cog'],
-    subMenu: [
-      { name: 'Manage Users', route: '/admin/manage_users', icon: ['fas', 'user'] },
-      { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
-      // { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
-      // { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
-      // { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
-      // { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
-      // { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
-    ]
+
+if (currentUser.role === 'admin'){
+    menuItems = [
+      { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
+      { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+      { 
+        name: 'Analytics', 
+        route: null, icon: ['fas', 'chart-bar'],
+        subMenu:[
+          { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
+          { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
+          { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
+        ] 
+      
+      },
+      // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
+      { 
+        name: 'Agent Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+          { name: 'Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+        ]
+      },
+      { 
+        name: 'Team Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+          { name: 'Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+        ]
+      },
+      { 
+        name: 'Admin Panel',
+        route: null,
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
+          { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
+          // { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
+          // { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
+          // { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
+          // { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
+          // { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
+        ]
+      }
+    ];
+}else if (currentUser.role === 'manager'){
+  menuItems = [
+      { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
+      { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+      { 
+        name: 'Analytics', 
+        route: null, icon: ['fas', 'chart-bar'],
+        subMenu:[
+          { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
+          { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
+          { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
+        ] 
+      
+      },
+      // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
+      { 
+        name: 'Agent Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+          { name: 'Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+        ]
+      },
+      { 
+        name: 'Team Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+          { name: 'Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+        ]
+      },
+      { 
+        name: 'Admin Panel',
+        route: null,
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
+           { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
+          // { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
+          // { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
+          // { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
+          // { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
+          // { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
+        ]
+      }
+    ];
+}else if( currentUser.role == 'user'){
+ activeMenu.value = "Agent Performance"
+  menuItems = [
+     
+      
+      { 
+        name: 'Agent Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+          { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+        ]
+      },
+      { 
+        name: 'Team Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+          { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+        ]
+      },
+]
+      
+    
+}
+
+
+
+
+
+
+const isNotAnalytics = computed(() =>{
+  if(!analyticsPath.value.includes(route.path)){
+    return true
+  }else{
+    return false
   }
-];
+})
 
+const logout = () => {
+  const confirmation = window.confirm("Are you sure you want to logout?");
+  if (!confirmation) {
+            return; // Exit if the user cancels the deletion
+  }
+  localStorage.removeItem('jwt')
+  
+  router.push('/login')
+  location.reload()
+  
+}
 const activateMenu = (menuName, route) => {
   activeMenu.value = menuName;
   if (route) {
@@ -133,9 +263,6 @@ const setActiveMenuFromRoute = () => {
     }
   }
 };
-
-
-
 
 onMounted(() => {
   setActiveMenuFromRoute();

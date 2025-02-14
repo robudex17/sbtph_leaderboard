@@ -67,6 +67,11 @@
 </template>
 
 <script setup>
+
+definePageMeta({
+    middleware: ['auth' ,'adminmanager'] 
+})
+
 import { ref, onMounted,computed, watch } from 'vue';
 import {
   Chart,

@@ -3,8 +3,9 @@ const router = express.Router()
 
 const salesManagerController = require('../controllers/sales_managers_controller.js')
 
+const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
-router.get('/managers',salesManagerController.fetchManager)
+router.get('/managers', authenticateToken, salesManagerController.fetchManager)
 
 
 

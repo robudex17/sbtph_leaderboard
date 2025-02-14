@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const coookieParser = require('cookie-parser')
+
 require('dotenv').config()
 
 const app = express()
@@ -17,6 +19,12 @@ const salesAnalyticsRoutes = require('./routes/sales_analytics_route')
 const salesMarketRoutes = require('./routes/sales_market_route') 
 const salesManagerRoutes = require('./routes/sales_managers_route')
 
+const {authenticateToken, authorizeRoles  } = require('./middleware/auth')
+
+const salesLoginRoutes = require('./routes/sales_login_routes')
+const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
+const standardUsersRoutes = require('./routes/standardusers_routes')
+
 const path = require('path')
 const pool = require('./config/db')
 
@@ -32,9 +40,25 @@ const  startServer = async () => {
 
         app.use(express.json())
         app.use('/images', express.static(path.join(__dirname, 'images')))
-       
+
+        app.use(coookieParser())
+
+        // app.get('/protected', authenticateToken, (req,res, next)  => {
+        //     res.json({message: 'Welcome Authentication User'})
+        // })
+        
+        // app.get('/admin', authenticateToken, authorizeRoles('admin'), (req, res, next) => {
+        //     res.json({message: 'Welcome Administrator...'})
+        // })
+
         //enable cors in all origin..
-        app.use(cors())
+        app.use(cors({
+            origin: "http://localhost:3000", // Your frontend URL
+            credentials: true, // Allow cookies to be sent
+        }))
+        app.use(salesLoginRoutes)
+        app.use(standardUsersLoginRoutes)
+        app.use(standardUsersRoutes)
         app.use(salesAgentsRoutes)
         app.use(salesMemoRoutes)
         app.use(salesAbsencesRoutes)

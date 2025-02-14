@@ -1,7 +1,15 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
+import API from '~/utils/api'
 
 export const useDashBoardStore = defineStore('dashboard', () => {
+   //call auth store fetch the token on the localstorage 
+    //save it to state.token
+    const authStore = useAuthStore()
+    authStore.fetchTokenFromLocalStore()
+
+    const  token = authStore.state.token    
+
     // Reactive state definition
     const state = reactive({
         dashboard: {},
@@ -16,7 +24,7 @@ export const useDashBoardStore = defineStore('dashboard', () => {
 
         try {
             // Build the URL
-            let url = new URL('http://localhost:8080/sales_dashboard')
+            let url = new URL(`${API.fetchDashboard}`)
             if (queryString) {
                 Object.keys(queryString).forEach((key) =>
                     url.searchParams.append(key, queryString[key])
@@ -24,7 +32,24 @@ export const useDashBoardStore = defineStore('dashboard', () => {
             }
 
             // Fetch leaderboard data
-            const response = await fetch(url)
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            })
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} ${response.statusText}`)
             }
@@ -39,8 +64,6 @@ export const useDashBoardStore = defineStore('dashboard', () => {
             state.loading = false
         }
     }
-
-
 
     // Expose individual state properties and actions
     return {

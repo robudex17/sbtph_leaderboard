@@ -19,11 +19,16 @@ exports.fetchSalesAgents = async (req,res, next ) => {
                 sa.db_name,
                 sa.image_link,
                 sa.market_id,
+                sa.status as agent_status,
                 market.market_name,
-                managers.db_name AS manager_name
+                managers.db_name AS manager_name,
+                sales_agents_login.username,
+                sales_agents_login.status as login_status,
+                sales_agents_login.role
             FROM sales_agents sa
             JOIN market ON sa.market_id = market.id
             JOIN managers ON sa.manager_id = managers.id
+            LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
             WHERE sa.status = ?
 
             `,['active']

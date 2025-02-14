@@ -161,6 +161,21 @@ validator.validateNewAndUpdateAgent = [
 
 ]
 
+validator.validateNewAndUpdateStandardUser = [
+
+    check('id').trim().notEmpty().withMessage('Agent Id is Required')
+    .isInt().withMessage('Numbers are only allowed in Agent ID')
+    .isLength({min:4}).withMessage('Agent ID must atleast 4 digits'),
+
+    check('firstname').trim().notEmpty().withMessage('Agent Firstname is Required'),
+
+    check('lastname').trim().notEmpty().withMessage('Agent Lastname is Required'),
+
+    check('db_name').trim().notEmpty().withMessage('Agent DB Name is Required')
+
+
+]
+
 validator.validateMonthYear = [
     check('month').optional().isString().withMessage('Invalid Months, Or month must be a string...').custom((value, {req})=>{
         
@@ -220,6 +235,8 @@ validator.validateMonthYear = [
         return true
     })
 
+    
+
 
 ]
 
@@ -244,6 +261,59 @@ validator.validateYear = [
     })
 ]
 
+validator.registerUser = [
+    check('login_id')
+    .notEmpty().withMessage('Login ID is required')
+    .isNumeric().withMessage('Login ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Login ID must atleast 4 digits'),
+
+    check('role')
+    .notEmpty().withMessage('Role is required')
+    .isIn(['admin', 'manager','user']).withMessage('Role must be in admin, manager, or user only'),
+
+    check('username')
+    .notEmpty().withMessage('Username is required')
+    .isLength({min:3}).withMessage('Username must be at least 3 characters long'),
+
+    check('password')
+    .notEmpty().withMessage('Password is required')
+    .isLength({min: 6}).withMessage('Password must be at least 6 characters long'),
+
+    check('status')
+    .notEmpty().withMessage('Status is required')
+    .isIn(['active', 'inactive', 'suspended']).withMessage('Status must be active, inactive, or suspended only')
+]
+
+
+validator.updateLogin = [
+    check('login_id')
+    .notEmpty().withMessage('Login ID is required')
+    .isNumeric().withMessage('Login ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Login ID must atleast 4 digits'),
+
+    check('role')
+    .notEmpty().withMessage('Role is required')
+    .isIn(['admin', 'manager','user']).withMessage('Role must be in admin, manager, or user only'),
+
+    check('username')
+    .notEmpty().withMessage('Username is required')
+    .isLength({min:3}).withMessage('Username must be at least 3 characters long'),
+
+
+    check('status')
+    .notEmpty().withMessage('Status is required')
+    .isIn(['active', 'inactive', 'suspended']).withMessage('Status must be active, inactive, or suspended only')
+]
+
+
+
+validator.loginUser  = [
+    check('username')
+    .notEmpty().withMessage('Username is required'),
+
+    check('password')
+    .notEmpty().withMessage('Password is required')
+]
 
 
 module.exports = validator
