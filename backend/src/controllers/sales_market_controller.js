@@ -47,25 +47,28 @@ exports.fetchAgentMarketTargetShipok = async (req, res, next)  => {
     
 
      const query  =  `
-        SELECT 
-            market.id as market_id,
-            market.market_name, 
-            ts.year, 
-            ts.month, 
-            SUM(ts.target) AS total_target, 
-            SUM(ts.ship_ok) AS total_ship_ok,
-            SUM(ts.target) - SUM(ts.ship_ok) AS shortage,
-            ROUND((SUM(ts.ship_ok) / NULLIF(SUM(ts.target), 0)) * 100) AS achievement
-    FROM market
-    LEFT JOIN target_shipok ts ON market.id = ts.market_id
-    WHERE ts.year =? AND ts.month = ? AND market.market_name <> 'all_market'
-    GROUP BY market.market_name, ts.year, ts.month;
+     SELECT 
+    market.id AS market_id,
+    market.market_name, 
+    COALESCE(ts.year, ?) AS year, 
+    COALESCE(ts.month, ?) AS month, 
+    COALESCE(SUM(ts.target), 0) AS total_target, 
+    COALESCE(SUM(ts.ship_ok), 0) AS total_ship_ok,
+    COALESCE(SUM(ts.target), 0) - COALESCE(SUM(ts.ship_ok), 0) AS shortage,
+    COALESCE(ROUND((SUM(ts.ship_ok) / NULLIF(SUM(ts.target), 0)) * 100, 0), 0) AS achievement
+FROM market
+LEFT JOIN target_shipok ts ON market.id = ts.market_id 
+    AND ts.year = ?
+    AND ts.month = ?
+WHERE market.market_name <> 'all_market'
+GROUP BY market.id, market.market_name, ts.year, ts.month;
+
 
      `
 
      try {
         
-        const [result]  = await pool.execute(query, [givenYear, givenMonth])
+        const [result]  = await pool.execute(query, [givenYear, givenMonth, givenYear, givenMonth])
 
         res.json(result)
         
