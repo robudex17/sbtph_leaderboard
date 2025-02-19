@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Sales Agents Information</h1>
 
     <!-- Add Agent Button -->
-    <button  :disabled="currentUser.role == 'user'"
+    <button  :disabled="['user', 'manager'].includes(currentUser.role)"
       class="mb-6 px-6 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
       @click="openAddAgentModal"
     >
@@ -68,14 +68,28 @@
           </select>
 
             <label for="agent_type" class="font-semibold text-gray-600">Agent Type</label>
-            <input
+            <!-- <input
               id="agent_type"
               type="text"
               v-model="currentAgent.agent_type"
               placeholder="Agent Type"
               class="p-2 border rounded"
               required
-            />
+            /> -->
+            <select
+            id="agent_type"
+            v-model="currentAgent.agent_type"
+            placeholder="Agent Type"
+            class="p-2 border rounded"
+            required
+            
+          >
+          
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+          </select>
+
 
             <label for="db_name" class="font-semibold text-gray-600">Database Name</label>
             <input
@@ -330,7 +344,7 @@
                 </NuxtLink>
                 <button :disabled="currentUser.role !=='admin'"
                   class="px-4 py-2 bg-gray-500 text-white font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  @click="openEditAgentLoginModal({login_id: agent.id, role: agent.role, status: agent.login_status, username: agent.username})"
+                  @click="openEditAgentLoginModal({login_id: agent.id, role: agent.role, status: agent.login_status, username: agent.username, agent_type: agent.agent_type})"
                 >
                   Login
                 </button>
@@ -416,12 +430,13 @@ const  enablePasswordRecovery = ref(false)
 const editMode = ref(false); // Toggle between Add and Edit mode
 const editLoginMode = ref(false); // Toggle between Add and Edit mode for login
 const imagePreview = ref(null);
+
 const currentAgent = ref({
   id: '',
   firstname: '',
   lastname: '',
   manager_id: '',
-  agent_type: '',
+  agent_type: '0',
   db_name: '',
   market_id: '',
   manager_name: '',
@@ -436,6 +451,7 @@ const currentAgentLogin = ref({
   password_again: '',
   status: 'inactive',
   role: 'user',
+  agent_type: '',
  
 });
 
@@ -496,6 +512,7 @@ const openEditAgentLoginModal = (agentLogin) => {
         }
     isModalOpenForLogin.value = true;
     currentAgentLogin.value.login_id = agentLogin.login_id
+    currentAgentLogin.value.agent_type = agentLogin.agent_type
     editLoginMode.value = false;
     enablePasswordRecovery.value = true 
   
@@ -527,7 +544,7 @@ const resetCurrentAgent = () => {
     firstname: '',
     lastname: '',
     manager_id: '',
-    agent_type: '',
+    agent_type: '0',
     db_name: '',
     market_id: '',
     manager_name: '',
@@ -548,6 +565,9 @@ const resetCurrentAgentLogin = () => {
   };
  
 };
+
+
+
 
 const addAgent = async() => {
   try {
@@ -583,6 +603,12 @@ const deleteAgent = async(id) => {
     alert('Please correct the errors before submitting...')
     return
    }
+
+   if ((currentAgentLogin.value.agent_type == 0 || currentAgentLogin.value.agent_type == "0") && currentAgentLogin.value.role == 'manager'){
+     alert('Cannot Set manager if agent type is 0')
+     return
+   }
+
    try{
     await authStore.register(currentAgentLogin.value , 'salesagent')
     fetchSalesAgents();
@@ -599,6 +625,11 @@ const updateAgentLogin = async() => {
   if (!isFormLoginValid){
     alert('Please correct the errors before submitting...')
     return
+   }
+
+   if ((currentAgentLogin.value.agent_type == 0 || currentAgentLogin.value.agent_type == "0") && currentAgentLogin.value.role == 'manager'){
+     alert('Cannot Set manager if agent type is 0')
+     return
    }
    try{
     await authStore.updateLogin(currentAgentLogin.value , 'salesagent')

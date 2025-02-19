@@ -90,24 +90,24 @@ if (currentUser.role === 'admin'){
       
       },
       // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
-      { 
-        name: 'Agent Performance', 
-        route: null, 
-        icon: ['fas', 'cog'],
-        subMenu: [
-          { name: 'Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
-          { name: 'Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
-        ]
-      },
-      { 
-        name: 'Team Performance', 
-        route: null, 
-        icon: ['fas', 'cog'],
-        subMenu: [
-          { name: 'Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
-          { name: 'Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
-        ]
-      },
+      // { 
+      //   name: 'Agent Performance', 
+      //   route: null, 
+      //   icon: ['fas', 'cog'],
+      //   subMenu: [
+      //     { name: 'Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+      //     { name: 'Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+      //   ]
+      // },
+      // { 
+      //   name: 'Team Performance', 
+      //   route: null, 
+      //   icon: ['fas', 'cog'],
+      //   subMenu: [
+      //     { name: 'Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+      //     { name: 'Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+      //   ]
+      // },
       { 
         name: 'Admin Panel',
         route: null,
@@ -143,8 +143,8 @@ if (currentUser.role === 'admin'){
         route: null, 
         icon: ['fas', 'cog'],
         subMenu: [
-          { name: 'Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
-          { name: 'Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+          { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+          { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
         ]
       },
       { 
@@ -152,10 +152,11 @@ if (currentUser.role === 'admin'){
         route: null, 
         icon: ['fas', 'cog'],
         subMenu: [
-          { name: 'Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
-          { name: 'Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+          { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+          { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
         ]
       },
+
       { 
         name: 'Admin Panel',
         route: null,
@@ -175,7 +176,6 @@ if (currentUser.role === 'admin'){
  activeMenu.value = "Agent Performance"
   menuItems = [
      
-      
       { 
         name: 'Agent Performance', 
         route: null, 

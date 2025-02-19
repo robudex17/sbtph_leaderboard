@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Standard Users Information</h1>
 
     <!-- Add Agent Button -->
-    <button  :disabled="currentUser.role == 'user'"
+    <button  :disabled="['user', 'manager'].includes(currentUser.role)"
       class="mb-6 px-6 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
       @click="openAddAgentModal"
     >

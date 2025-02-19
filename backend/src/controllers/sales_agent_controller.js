@@ -4,41 +4,81 @@ const fs = require('fs')
 const path = require('path')
 
 exports.fetchSalesAgents = async (req,res, next ) => {
-    try{
-        // const connection =  await pool.getConnection()
 
-        const [rows, fields] = await pool.execute(
-            // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-            `
-            SELECT 
-                sa.id AS id,
-                sa.manager_id,
-                sa.agent_type,
-                sa.firstname,
-                sa.lastname,
-                sa.db_name,
-                sa.image_link,
-                sa.market_id,
-                sa.status as agent_status,
-                market.market_name,
-                managers.db_name AS manager_name,
-                sales_agents_login.username,
-                sales_agents_login.status as login_status,
-                sales_agents_login.role
-            FROM sales_agents sa
-            JOIN market ON sa.market_id = market.id
-            JOIN managers ON sa.manager_id = managers.id
-            LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-            WHERE sa.status = ?
-
-            `,['active']
-        )
-        // connection.release()
-        res.json(rows)
-    }catch(error){
-        console.error('Error In Fetching Active Agents', error)
-        res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
-    }  
+    if (req.user.role == 'manager'  && req.user.agent_type == 1){
+        try{
+            // const connection =  await pool.getConnection()
+    
+            const [rows, fields] = await pool.execute(
+                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
+                `
+                SELECT 
+                    sa.id AS id,
+                    sa.manager_id,
+                    sa.agent_type,
+                    sa.firstname,
+                    sa.lastname,
+                    sa.db_name,
+                    sa.image_link,
+                    sa.market_id,
+                    sa.status as agent_status,
+                    market.market_name,
+                    managers.db_name AS manager_name,
+                    sales_agents_login.username,
+                    sales_agents_login.status as login_status,
+                    sales_agents_login.role
+                FROM sales_agents sa
+                JOIN market ON sa.market_id = market.id
+                JOIN managers ON sa.manager_id = managers.id
+                LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                WHERE (sa.status = ? AND sa.manager_id =?)  OR sa.id=?
+    
+                `,['active', req.user.login_id,req.user.login_id]
+            )
+            // connection.release()
+            res.json(rows)
+        }catch(error){
+            console.error('Error In Fetching Active Agents', error)
+            res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
+        }  
+     // if the role is admin or  role is manager and agent_type is 2
+    }else {
+        try{
+            
+            const [rows, fields] = await pool.execute(
+                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
+                `
+                SELECT 
+                    sa.id AS id,
+                    sa.manager_id,
+                    sa.agent_type,
+                    sa.firstname,
+                    sa.lastname,
+                    sa.db_name,
+                    sa.image_link,
+                    sa.market_id,
+                    sa.status as agent_status,
+                    market.market_name,
+                    managers.db_name AS manager_name,
+                    sales_agents_login.username,
+                    sales_agents_login.status as login_status,
+                    sales_agents_login.role
+                FROM sales_agents sa
+                JOIN market ON sa.market_id = market.id
+                JOIN managers ON sa.manager_id = managers.id
+                LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                WHERE sa.status = ?
+    
+                `,['active']
+            )
+            // connection.release()
+            res.json(rows)
+        }catch(error){
+            console.error('Error In Fetching Active Agents', error)
+            res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
+        }  
+    }
+   
 }
 
 exports.fetchSalesAgent = async( req,res, next) => {
