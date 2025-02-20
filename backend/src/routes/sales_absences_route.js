@@ -9,9 +9,9 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 router.get('/agent_absent/:agent_id', authenticateToken,validateMonthYear,salesAbsencesController.fetchAgentAbsent)
 
-router.delete('/agent_absent/:agent_id', authenticateToken, authorizeRoles('admin' ),salesAbsencesController.deleteAgentAbsent)
+router.delete('/agent_absent/:agent_id', authenticateToken, authorizeRoles('admin'),salesAbsencesController.deleteAgentAbsent)
 
-router.put('/agent_absent/:agent_id', authenticateToken, authorizeRoles('admin' ), validateAbsence, salesAbsencesController.updateAgentAbsent)
+router.put('/agent_absent/:agent_id', authenticateToken, authorizeRoles('admin'), validateAbsence, salesAbsencesController.updateAgentAbsent)
 
 router.post('/agent_absent/:agent_id', authenticateToken, authorizeRoles('admin'), validateAbsence, salesAbsencesController.recordNewAbsent)
 

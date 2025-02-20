@@ -56,21 +56,38 @@ const  startServer = async () => {
             origin: "http://localhost:3000", // Your frontend URL
             credentials: true, // Allow cookies to be sent
         }))
-        app.use(salesLoginRoutes)
-        app.use(standardUsersLoginRoutes)
-        app.use(standardUsersRoutes)
-        app.use(salesAgentsRoutes)
-        app.use(salesMemoRoutes)
-        app.use(salesAbsencesRoutes)
-        app.use(salesNewDepositRoutes)
-        app.use(salesFeedbackRoutes)
-        app.use(salesTardinessRoutes)
-        app.use(salesTargetShipokRoutes)
-        app.use(salesLeaderboardRoutes)
-        app.use(salesDashboardRoutes)
-        app.use(salesAnalyticsRoutes)
-        app.use(salesMarketRoutes)
-        app.use(salesManagerRoutes)
+        // app.use(salesLoginRoutes)
+        // app.use(standardUsersLoginRoutes)
+        // app.use(standardUsersRoutes)
+        // app.use(salesAgentsRoutes)
+        // app.use(salesMemoRoutes)
+        // app.use(salesAbsencesRoutes)
+        // app.use(salesNewDepositRoutes)
+        // app.use(salesFeedbackRoutes)
+        // app.use(salesTardinessRoutes)
+        // app.use(salesTargetShipokRoutes)
+        // app.use(salesLeaderboardRoutes)
+        // app.use(salesDashboardRoutes)
+        // app.use(salesAnalyticsRoutes)
+        // app.use(salesMarketRoutes)
+        // app.use(salesManagerRoutes)
+
+        app.use("/api", salesLoginRoutes);
+        app.use("/api", standardUsersLoginRoutes);
+        app.use("/api", standardUsersRoutes);
+        app.use("/api", salesAgentsRoutes);
+        app.use("/api", salesMemoRoutes);
+        app.use("/api", salesAbsencesRoutes);
+        app.use("/api", salesNewDepositRoutes);
+        app.use("/api", salesFeedbackRoutes);
+        app.use("/api", salesTardinessRoutes);
+        app.use("/api", salesTargetShipokRoutes);
+        app.use("/api", salesLeaderboardRoutes);
+        app.use("/api", salesDashboardRoutes);
+        app.use("/api", salesAnalyticsRoutes);
+        app.use("/api", salesMarketRoutes);
+        app.use("/api", salesManagerRoutes);
+
 
         app.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`)

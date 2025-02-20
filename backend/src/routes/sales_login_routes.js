@@ -13,6 +13,7 @@ router.post('/sales_register', authenticateToken, authorizeRoles('admin'), regis
 router.put('/sales_update_login', authenticateToken, authorizeRoles('admin'), updateLogin, loginController.updateLogin )
 
 router.post('/sales_login', loginUser, loginController.loginUser)
+
 // router.post('/refresh_token', loginController.refreshToken )
 
 // router.post('/verify_token', loginController.verifyToken)
