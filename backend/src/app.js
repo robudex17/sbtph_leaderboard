@@ -52,10 +52,10 @@ const  startServer = async () => {
         // })
 
         //enable cors in all origin..
-        app.use(cors({
-            origin: "http://localhost:3000", // Your frontend URL
-            credentials: true, // Allow cookies to be sent
-        }))
+        // app.use(cors({
+        //     origin: "http://localhost:3000", // Your frontend URL
+        //     credentials: true, // Allow cookies to be sent
+        // }))
         // app.use(salesLoginRoutes)
         // app.use(standardUsersLoginRoutes)
         // app.use(standardUsersRoutes)
@@ -71,6 +71,9 @@ const  startServer = async () => {
         // app.use(salesAnalyticsRoutes)
         // app.use(salesMarketRoutes)
         // app.use(salesManagerRoutes)
+
+        // Allow all origins
+        app.use(cors());
 
         app.use("/api", salesLoginRoutes);
         app.use("/api", standardUsersLoginRoutes);
