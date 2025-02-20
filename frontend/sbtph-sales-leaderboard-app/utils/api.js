@@ -1,4 +1,4 @@
-// const HTTPADDR = `http://localhost:8080`
+// const HTTPADDR = `http://localhost:8080/api`
 
 const HTTPADDR = `http://192.168.70.252:8080/api`
 const API = {

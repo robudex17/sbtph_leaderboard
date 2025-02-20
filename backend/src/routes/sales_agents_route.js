@@ -7,7 +7,7 @@ const uploadImage = require('../middleware/fileupload')
 const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 
-router.get('/sales_agents/:agent_id', authorizeRoles('admin', 'manager'),authenticateToken,salesAgensController.fetchSalesAgent)
+router.get('/sales_agents/:agent_id',authenticateToken, authorizeRoles('admin', 'manager'),salesAgensController.fetchSalesAgent)
 router.get('/sales_agents', authenticateToken,authorizeRoles('admin', 'manager'),salesAgensController.fetchSalesAgents)
 
 

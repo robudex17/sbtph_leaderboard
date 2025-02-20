@@ -132,7 +132,7 @@ validator.validateTarget = [
     check('target').trim().notEmpty().withMessage('target is required.')
     .isInt({min:1}).withMessage('Only positive Whole numbers are allowed'),
     
-    check('ship_ok').trim().notEmpty().withMessage('shipok is Required')
+    check('ship_ok').trim().notEmpty().withMessage('market_id is Required')
     .isInt({min:0}).withMessage('Only positive Whole Number are allowed'),
     check('market_id').trim().notEmpty().withMessage('shipok is Required')
 ]
