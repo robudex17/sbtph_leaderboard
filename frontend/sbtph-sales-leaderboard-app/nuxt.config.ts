@@ -12,5 +12,10 @@ export default defineNuxtConfig({
     },
   },
   modules: ['@pinia/nuxt'],
+
+   // Add this part for setting the base URL
+   app: {
+    baseURL: '/sbtph_sales_leaderboard/', // Make sure this matches your Nginx location
+  },
   
 })
