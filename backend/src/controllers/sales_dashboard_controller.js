@@ -2,7 +2,7 @@ const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
 
- const { getAgentMetrics } = require('./sales_leaderboard_controllers')
+ const { getAgentsMetrics } = require('./sales_leaderboard_controllers')
 
 exports.fetchAgentDashboard = async (req,res,next) => {
     const errors = validationResult(req);
@@ -12,6 +12,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
    
     let givenMonth
     let givenYear 
+    let withTrucks
     const currentDate = new Date()
  
     if (!req.query.month ||  req.query.month ==="") {
@@ -31,6 +32,12 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     }else {
         givenYear = req.query.year
     }
+
+    if(!req.query.withTrucks || req.query.withTrucks === ""){
+      withTrucks = true      
+    }else{
+      withTrucks = req.query.withTrucks
+    }
     // const connection =  await pool.getConnection()
     // let connection 
     
@@ -40,8 +47,16 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       const dashboard = {}
       
       //fetch current month target and ship ok 
+
+      let queryTargetShipok;
+      if (withTrucks === "true" || withTrucks === true){
+        queryTargetShipok = "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE month=? AND year=? GROUP BY month,year"
+      }else {
+          queryTargetShipok = "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE month=? AND year=? AND market_id != 10 GROUP BY month,year"
+      }
+      
       const [currentMonthyTargetShipokResult] = await pool.execute(
-        "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE month=? AND year=? GROUP BY month,year",
+        queryTargetShipok,
         [givenMonth, givenYear]
       )
       
@@ -54,9 +69,15 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.monthly_target_shipok = currentMonthyTargetShipok
 
       //fetch current year target shipok
-
+      let queryTargetShipOkYear
+       
+      if (withTrucks === "true" || withTrucks === true){
+        queryTargetShipOkYear =  "SELECT year, SUM(target) AS year_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE year=? GROUP BY year"
+      }else {
+        queryTargetShipOkYear =  "SELECT year, SUM(target) AS year_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE year=? AND market_id !=10 GROUP BY year"
+      }
       const [currentYearTargetShipokResult] = await pool.execute(
-        "SELECT year, SUM(target) AS year_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE year=? GROUP BY year",
+       queryTargetShipOkYear,
         [ givenYear]
       )
       
@@ -68,8 +89,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.year_target_shipok = currentYearTargetShipok
 
       //current month new_deposit 
-
-      const [currentMOnthNewDepositResut] = await pool.execute("SELECT month, year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE month=? AND year=? GROUP BY month,year",[givenMonth,givenYear])
+      let queryNewDepositMonth 
+      if (withTrucks === "true" || withTrucks === true){
+        queryNewDepositMonth  = "SELECT month, year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE month=? AND year=? GROUP BY month,year"
+      }else {
+        queryNewDepositMonth = "SELECT month, year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE month=? AND year=? AND market_id != 10 GROUP BY month,year"
+      }
+      const [currentMOnthNewDepositResut] = await pool.execute(queryNewDepositMonth ,[givenMonth,givenYear])
       let [currentMOnthNewDeposit] = currentMOnthNewDepositResut
 
       if (currentMOnthNewDeposit == null || currentMOnthNewDeposit == ""){
@@ -78,7 +104,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.current_month_newdeposit = currentMOnthNewDeposit
 
       // current year new_deposit
-      const [currentYearNewDepositResult] =await pool.execute("SELECT  year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE  year=? GROUP BY year",[givenYear])
+      let queryNewDepositYear 
+      if (withTrucks === "true" || withTrucks === true){
+        queryNewDepositYear = "SELECT  year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE  year=? GROUP BY year"
+      }else {
+         queryNewDepositYear = "SELECT  year, COUNT(*) AS new_deposit FROM `new_deposit` WHERE  year=? AND market_id !=10 GROUP BY year"
+      }
+      const [currentYearNewDepositResult] =await pool.execute(queryNewDepositYear ,[givenYear])
      
       let [currentYearNewDeposit]  = currentYearNewDepositResult
 
@@ -88,14 +120,20 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.current_year_newdeposit = currentYearNewDeposit
 
       //active agents 
-
-      const [ activeAgentsResult ]  = await pool.execute("SELECT COUNT(*) AS active_agents FROM `sales_agents` WHERE status='active'")
+     
+      let queryActiveAgents
+      if (withTrucks === "true" || withTrucks === true){
+        queryActiveAgents = "SELECT COUNT(*) AS active_agents FROM `sales_agents` WHERE status='active'"
+      }else {
+          queryActiveAgents = "SELECT COUNT(*) AS active_agents FROM `sales_agents` WHERE status='active' AND market_id !=10"
+      }
+      const [ activeAgentsResult ]  = await pool.execute(queryActiveAgents)
 
       const [activeAgents ] = activeAgentsResult
       dashboard.active_agents = activeAgents
 
       //get ratings summarries
-      const agentMetics =  await getAgentMetrics( givenMonth, givenYear)
+      const agentsMetics =  await getAgentsMetrics( givenMonth, givenYear, withTrucks, "")  
 
       const ratingsCount = {
         EXCEPTIONAL: 0,
@@ -105,9 +143,9 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         POOR: 0
       }
 
-      const calculateRatings = (agentMetics,ratingsCount) => {
+      const calculateRatings = (agentsMetics,ratingsCount) => {
 
-        agentMetics.forEach(agentMetic => {
+        agentsMetics.forEach(agentMetic => {
           if (ratingsCount[agentMetic.ratings_name] != undefined) {
             ratingsCount[agentMetic.ratings_name]++
           }
@@ -116,49 +154,213 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         return ratingsCount
       }
 
-      if (agentMetics.length > 0){
-         console.log(agentMetics.length)
-        dashboard.agent_ratings = calculateRatings(agentMetics, ratingsCount)
+      if (agentsMetics.length > 0){
+         console.log(agentsMetics.length)
+        dashboard.agent_ratings = calculateRatings(agentsMetics, ratingsCount)
       }else{
         dashboard.agent_ratings = ratingsCount
       }
 
-      //get per market
-      const [marketTargetShipok] = await pool.execute(
-        `
+      //get per  target shipok  new deposit per market per month 
+      let queryPerMarket 
+      if (withTrucks === "true" || withTrucks === true){
+        queryPerMarket =    `
+              WITH deposit_count AS (
+            SELECT 
+                market_id, 
+                month, 
+                year, 
+                COUNT(*) AS total_deposit
+            FROM new_deposit
+            WHERE month = ? AND year = ?
+            GROUP BY market_id, month, year
+        )
         SELECT 
             market.id AS market_id,
             market.market_name,
-            SUM(target_shipok.target) AS total_target,
-            SUM(target_shipok.ship_ok) AS total_ship_ok
+            target_shipok.month AS month, 
+            target_shipok.year AS year ,    
+            COALESCE(SUM(target_shipok.target), 0) AS total_target,
+            COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+            COALESCE(deposit_count.total_deposit, 0) AS total_deposit
         FROM 
             market
         LEFT JOIN 
-            sales_agents 
-        ON 
-            market.id = sales_agents.market_id
+            sales_agents ON market.id = sales_agents.market_id
         LEFT JOIN 
             target_shipok 
-        ON 
-            sales_agents.id = target_shipok.agent_id
+            ON sales_agents.id = target_shipok.agent_id
             AND target_shipok.month = ?
             AND target_shipok.year = ?
+        LEFT JOIN 
+            deposit_count 
+            ON market.id = deposit_count.market_id
         WHERE 
-            market.id != 0
+            market.id != 0 
         GROUP BY 
-            market.id, market.market_name
-        `,
-        [givenMonth, givenYear]
+            market.id, market.market_name, deposit_count.total_deposit
+        ORDER BY 
+            market.id;
+
+
+        `
+      }else {
+        queryPerMarket =    `
+        WITH deposit_count AS (
+            SELECT 
+                market_id, 
+                month, 
+                year, 
+                COUNT(*) AS total_deposit
+            FROM new_deposit
+            WHERE month = ? AND year = ?
+            GROUP BY market_id, month, year
+        )
+        SELECT 
+            market.id AS market_id,
+            market.market_name,
+            target_shipok.month AS month,
+            target_shipok.year AS year,
+            COALESCE(SUM(target_shipok.target), 0) AS total_target,
+            COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+            COALESCE(deposit_count.total_deposit, 0) AS total_deposit
+        FROM 
+            market
+        LEFT JOIN 
+            sales_agents ON market.id = sales_agents.market_id
+        LEFT JOIN 
+            target_shipok 
+            ON sales_agents.id = target_shipok.agent_id
+            AND target_shipok.month = ?
+            AND target_shipok.year = ?
+        LEFT JOIN 
+            deposit_count 
+            ON market.id = deposit_count.market_id
+        WHERE 
+            market.id != 0 AND market.id != 10
+        GROUP BY 
+            market.id, market.market_name, deposit_count.total_deposit
+        ORDER BY 
+            market.id;
+        `
+      }
+      const [marketTargetShipok] = await pool.execute(
+        queryPerMarket,
+        [givenMonth, givenYear,givenMonth, givenYear]
       )
 
 
 
       // transform total_target and total_ship_ok value of null to 0
-      dashboard.market = marketTargetShipok.map(item => ({
+      dashboard.target_shipok_market = marketTargetShipok.map(item => ({
         ...item,
         total_target: item.total_target == null ? 0: item.total_target,
-        total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok
+        total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
+        month: item.month == null ? givenMonth : item.month,
+        year: item.year == null ? givenYear : item.year,
       }))
+
+
+       //get per  target shipok  new deposit per market per year
+       
+      let queryPerMarketYear 
+      if (withTrucks === "true" || withTrucks === true){
+        queryPerMarketYear  = `
+            WITH deposit_count AS (
+                SELECT 
+                    market_id, 
+                    year, 
+                    COUNT(*) AS total_deposit
+                FROM new_deposit
+                WHERE year = ?
+                GROUP BY market_id, year
+            )
+            SELECT 
+                market.id AS market_id,
+                market.market_name,
+                target_shipok.year AS year,            
+                COALESCE(SUM(target_shipok.target), 0) AS total_target,
+                COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+                COALESCE(deposit_count.total_deposit, 0) AS total_deposit
+            FROM 
+                market
+            LEFT JOIN 
+                sales_agents ON market.id = sales_agents.market_id
+            LEFT JOIN 
+                target_shipok 
+                ON sales_agents.id = target_shipok.agent_id
+                AND target_shipok.year = ?
+            LEFT JOIN 
+                deposit_count 
+                ON market.id = deposit_count.market_id
+            WHERE 
+                market.id != 0 
+            GROUP BY 
+                market.id, market.market_name, deposit_count.total_deposit
+            ORDER BY 
+                market.id;
+       
+        `
+      }else{
+        queryPerMarketYear =  `
+             WITH deposit_count AS (
+                SELECT 
+                    market_id, 
+                    year, 
+                    COUNT(*) AS total_deposit
+                FROM new_deposit
+                WHERE year = ?
+                GROUP BY market_id, year
+            )
+            SELECT 
+                market.id AS market_id,
+                market.market_name,
+                target_shipok.year AS year,            
+                COALESCE(SUM(target_shipok.target), 0) AS total_target,
+                COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+                COALESCE(deposit_count.total_deposit, 0) AS total_deposit
+            FROM 
+                market
+            LEFT JOIN 
+                sales_agents ON market.id = sales_agents.market_id
+            LEFT JOIN 
+                target_shipok 
+                ON sales_agents.id = target_shipok.agent_id
+                AND target_shipok.year = ?
+            LEFT JOIN 
+                deposit_count 
+                ON market.id = deposit_count.market_id
+            WHERE 
+                market.id != 0 And market.id != 10
+            GROUP BY 
+                market.id, market.market_name, deposit_count.total_deposit
+            ORDER BY 
+                market.id;       
+        
+        `
+
+      }
+
+      const [marketTargetShipokNewdepositYear] = await pool.execute(
+        queryPerMarketYear,
+        [ givenYear, givenYear]
+      )
+
+      // transform total_target and total_ship_ok value of null to 0
+      dashboard.target_shipok_market_year = marketTargetShipokNewdepositYear.map(item => ({
+        ...item,
+        total_target: item.total_target == null ? 0: item.total_target,
+        total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
+        year: item.year == null ? givenYear : item.year,
+      }))
+
+
+
+
+      console.log(dashboard.monthly_target_shipok)
+      console.log( dashboard.year_target_shipok)
+      console.log( dashboard.current_month_newdeposit)
+      console.log(  dashboard.current_year_newdeposit)
       //attendance behavior metrics
 
       

@@ -271,7 +271,7 @@
           </div>
         </form>
       </div>
-    </div>
+ </div>
 
 
     <!-- Agents Table -->
@@ -335,7 +335,7 @@
                 </button>
                 <NuxtLink 
                   :to="{
-                    path: `/admin/agent/${agent.id}/details`,
+                    path: `/admin/agent/${agent.id}/details`, query: { agent_type: agent.agent_type, agent_role: agent.role , agent_dbname: agent.db_name}
                     
                   }"
                   class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -361,8 +361,6 @@
       </table>
     </div>
 
-   
-
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="mt-4 flex justify-center space-x-4">
       <button
@@ -387,8 +385,6 @@ definePageMeta({
   middleware: ['auth', 'adminmanager']
 })
 
-
-
 import { ref, computed } from 'vue';
 import { useManageSalesAgentStore } from '../../../stores/manage_sales_agents';
 import { onMounted } from 'vue';
@@ -398,7 +394,6 @@ const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
 
 const currentUser = authStore.state.user 
-
 
 
 const marketAgentStore =  useMarketStore()
@@ -524,9 +519,8 @@ const openEditAgentLoginModal = (agentLogin) => {
     console.log('update value for updating login', currentAgentLogin.value)
   }
   
- 
-};
 
+};
 
 const closeModal = () => {
   isModalOpen.value = false;
@@ -567,8 +561,6 @@ const resetCurrentAgentLogin = () => {
 };
 
 
-
-
 const addAgent = async() => {
   try {
     await manageSalesAgentStore.addSalesAgent(currentAgent.value);
@@ -579,8 +571,6 @@ const addAgent = async() => {
   
   
 };
-
-
 
 const updateAgent = () => {
   

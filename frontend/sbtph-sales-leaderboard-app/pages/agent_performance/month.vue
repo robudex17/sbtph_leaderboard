@@ -75,7 +75,7 @@
         <div v-else class="overflow-x-auto shadow-xl rounded-lg">
           <h1 class="text-2xl font-bold mb-4 text-center">Performance Monthy Summary </h1>
           <leader-board-table-view :agents="[agent]"></leader-board-table-view>
-          <agentDetails class="p-4 mt-5"/>
+          <agentDetails class="p-4 mt-5" :fullyear="false"/>
       </div>
         </div>
       </div>
@@ -122,77 +122,66 @@
           <!-- Table for Additional Information -->
           <div class="mt-6 w-full overflow-x-auto">
             <table class="min-w-full table-auto">
-              <thead>
-                <tr>
-                  <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Metric</th>
-                  <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Value</th>
-                </tr>
-              </thead>
-              <tbody>
-  
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Target</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.target }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.shipok }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok Percent</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 ">{{ selectedAgent.shipok_percent }}%</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Shipok Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.shipok_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.absence_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.tardiness_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.memo_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.feedback_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Deposit Score</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.deposit_score }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Performance Rating</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.performance_rating }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence Rating</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.absence_rating }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 ">Tardiness Rating</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.tardiness_rating }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo Rating</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.memo_rating }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback Rating</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.feedback_rating }}</td>
-                </tr>
-                <tr v-if="selectedAgent">
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Additional Points</td>
-                  <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">{{ selectedAgent.additional_points }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Metric</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Score</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Rating</th>
+              </tr>
+            </thead>
+            <tbody>
+
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Performance(80%)</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.shipok_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.performance_rating }}</td>
+              </tr>
+
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence(5%)</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness(5%)</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo(5%) </td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback(5%)</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_rating }}</td>
+              </tr>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">New Deposit(10%)</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.deposit_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.additional_points }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table class="min-w-full table-auto mt-6">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Target(Unit)</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">ShipOk(Unit)</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Percentage(%)</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="selectedAgent">
+                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.target }}</td>
+                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.shipok }}</td>
+                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.shipok_percent }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
   
           <button
             @click="closeModal"
@@ -234,6 +223,7 @@
   const router = useRouter()
   
   const query = route.query
+  query.agent_id = agentId
 
 
 
@@ -322,6 +312,7 @@
   watch(route, (newRoute) => {
     console.log('The route is change. we should react to the change..')
     router.push(newRoute.fullPath)
+    newRoute.query.agent_id = agentId
     leaderBoardData(newRoute.query)
     
   })

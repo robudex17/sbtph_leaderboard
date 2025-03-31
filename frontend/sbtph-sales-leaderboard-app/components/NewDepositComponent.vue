@@ -13,7 +13,7 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button :disabled="currentUser.role == 'user'"
+                <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                   @click="openModal('add')" 
                   class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   <font-awesome-icon icon="plus" />
@@ -34,12 +34,12 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.date }}</td>
               <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
-                <button  :disabled="currentUser.role == 'user'"
+                <button   :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                   @click="openModal('edit', index)" 
                   class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Edit
                 </button>
-                <button  :disabled="currentUser.role == 'user'"
+                <button   :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0 || currentUser.agent_type == 2"
                   @click="deleteNewDeposit(newDeposit.id , newDeposit.agent_id)" 
                   class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Delete
@@ -100,6 +100,10 @@
     newDepositDetails: {
         type: Array,
         required: true,
+    },
+    agent: {
+      type: Object, 
+      required: true
     }
 });
 
@@ -122,6 +126,7 @@ const errorDate = ref(null)
     new_deposit: '',
     date: '',
     description: '',
+    market_id: '',
   });
 
 
@@ -181,6 +186,7 @@ const openModal = (type, index = null) => {
         new_deposit: 10000,
         date: '',
         description: '',
+        market_id: props.agent.market_id
       };
     }
   };

@@ -27,10 +27,18 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         error: null
     })
 
-    const fetchSalesAgents = async () => {
+    const fetchSalesAgents = async (queryString) => {
         state.loading = true;
         state.error = null;
+
         let url = API.salesAgents
+        url = new URL(`${url}`)
+
+        if (queryString) {
+            Object.keys(queryString).forEach((key) =>
+                url.searchParams.append(key, queryString[key])
+            )
+        }
         try {
             // Fetch sales agent info
             const response = await fetch(url, {

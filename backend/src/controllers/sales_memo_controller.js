@@ -43,15 +43,18 @@ exports.fetchAgentMemo = async (req, res, next) => {
    
     let givenMonth
     let givenYear 
+    let fullyear = req.query.fullyear
     const currentDate = new Date()
+
+              // Get the month name
+    const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
  
     if (!req.query.month ||  req.query.month ==="") {
         
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
+  
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -67,11 +70,24 @@ exports.fetchAgentMemo = async (req, res, next) => {
 
     const connection =  await pool.getConnection()
 
-    const [result] = await connection.execute(
-        'SELECT * FROM  `memo` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
-    )
-    connection.release()
-    res.json(result)
+    if (fullyear == 'true' || fullyear == true){
+        const [result] = await connection.execute(
+            'SELECT * FROM  `memo` WHERE agent_id=?  AND year=?',[agentId,givenYear]  
+        )
+        connection.release()
+        result.sort((a,b) => {
+            return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
+            monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
+        })
+        res.json(result)
+    }else {
+        const [result] = await connection.execute(
+            'SELECT * FROM  `memo` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+        )
+        connection.release()
+        res.json(result)      
+    }
+    
 }
 
 exports.updateAgentMemo = async (req,res, next) => {

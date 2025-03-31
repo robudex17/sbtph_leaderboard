@@ -1,6 +1,6 @@
-// const HTTPADDR = `http://localhost:8080/api`
+const HTTPADDR = `http://localhost:8080/api`
 
-const HTTPADDR = `http://192.168.70.252:8080/api`
+// const HTTPADDR = `http://localhost:8080/api`
 const API = {
     salesAgents: `${HTTPADDR}/sales_agents`,
     fetchSaleAgentTargetShipok: `${HTTPADDR}/agent_target_shipok`,
@@ -29,6 +29,13 @@ const API = {
         memo: `${HTTPADDR}/agent_memo`,
     },
 
+    feedback: {
+        agent : `${HTTPADDR}/agents_feedback`,
+        lm : `${HTTPADDR}/lm_feedback`,
+        manager:  `${HTTPADDR}/managers_feedback`,
+        qa: `${HTTPADDR}/feedback_by_qa`,
+    },
+
     agentFeedback: `${HTTPADDR}/agent_feedback`,
 
     sales_login: `${HTTPADDR}/sales_login`,
@@ -44,6 +51,9 @@ const API = {
 
     fetch_market_target_shipok: `${HTTPADDR}/agent_market_target_shipok`,
     fetch_market_new_deposit: `${HTTPADDR}/agent_market_new_deposit`,
+    
+    fetch_market_target_shipok_year: `${HTTPADDR}/agent_market_target_shipok_year`,
+    fetch_market_new_deposit_year: `${HTTPADDR}/agent_market_new_deposit_year`,
 }
 
 export default API 

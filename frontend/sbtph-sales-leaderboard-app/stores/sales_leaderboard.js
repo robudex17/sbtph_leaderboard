@@ -24,6 +24,7 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
     // Reactive state definition
     const state = reactive({
         leaderboard: [],
+        agentYearPerformance: {},
         agentPerformance: [],
         loading: false,
         error: null,
@@ -68,8 +69,14 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
             
         
             const data = await response.json()
-            state.leaderboard = data
-            console.log(state.leaderboard)
+            if (queryString.fullyear == true){
+                state.agentYearPerformance = data
+                console.log('it came here?',  state.agentYearPerformance)
+            }else {
+                state.leaderboard = data
+                console.log('it came here?', state.leaderboard)
+            }
+           
         } catch (error) {
             console.error('Failed to fetch leaderboard:', error)
             state.error = error.message

@@ -57,15 +57,18 @@ exports.fetchAgentTarget = async (req, res, next) => {
    
     let givenMonth
     let givenYear 
+    let fullyear = req.query.fullyear
     const currentDate = new Date()
+
+                // Get the month name
+    const monthNames = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ];
  
     if (!req.query.month ||  req.query.month ==="") {
         
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
+
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -80,28 +83,57 @@ exports.fetchAgentTarget = async (req, res, next) => {
     const agentId = req.params.agent_id
 
     // const connection =  await pool.getConnection()
+    if(fullyear == 'true' || fullyear == true){
+        const [result] = await pool.execute(
+            //  'SELECT * FROM  `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+    
+          `
+          SELECT 
+            ts.agent_id,
+            ts.month,
+            ts.year,
+            ts.date,
+            ts.target,
+            ts.ship_ok,
+            ts.market_id,
+            market.market_name
+        FROM target_shipok ts
+        JOIN market ON ts.market_id = market.id
+        WHERE ts.agent_id = ?  AND ts.year = ?
+    
+          `,[agentId,givenYear]
+        )
+        // connection.release()
+        result.sort((a, b) => {
+            return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
+           monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
+        })
 
-    const [result] = await pool.execute(
-        //  'SELECT * FROM  `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+        res.json(result)       
+    }else {
+        const [result] = await pool.execute(
+            //  'SELECT * FROM  `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+    
+          `
+          SELECT 
+            ts.agent_id,
+            ts.month,
+            ts.year,
+            ts.date,
+            ts.target,
+            ts.ship_ok,
+            ts.market_id,
+            market.market_name
+        FROM target_shipok ts
+        JOIN market ON ts.market_id = market.id
+        WHERE ts.agent_id = ? AND ts.month = ? AND ts.year = ?
+    
+          `,[agentId,givenMonth,givenYear]
+        )
+        // connection.release()
+        res.json(result)
+    }
 
-      `
-      SELECT 
-        ts.agent_id,
-        ts.month,
-        ts.year,
-        ts.date,
-        ts.target,
-        ts.ship_ok,
-        ts.market_id,
-        market.market_name
-    FROM target_shipok ts
-    JOIN market ON ts.market_id = market.id
-    WHERE ts.agent_id = ? AND ts.month = ? AND ts.year = ?
-
-      `,[agentId,givenMonth,givenYear]
-    )
-    // connection.release()
-    res.json(result)
 }
 
 exports.updateAgentTarget = async (req,res, next) => {

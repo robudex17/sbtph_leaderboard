@@ -77,8 +77,26 @@ let menuItems
 
 if (currentUser.role === 'admin'){
     menuItems = [
-      { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
+      { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+        subMenu: [
+          { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+        ]
+
+      },
       { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+
+      { 
+        name: 'Feedback', 
+        route: null, icon: ['fas', 'poll'],
+        subMenu:[
+          { name: 'BY QA', route: '/feedback/feedback_by_qa', icon: ['fas', 'users']  },
+          
+        ] 
+      
+      },
+
       { 
         name: 'Analytics', 
         route: null, icon: ['fas', 'chart-bar'],
@@ -123,10 +141,28 @@ if (currentUser.role === 'admin'){
         ]
       }
     ];
-}else if (currentUser.role === 'manager'){
+}else if (currentUser.role === 'manager' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 2){
   menuItems = [
-      { name: 'Dashboard', route: '/dashboard', icon: ['fas', 'tachometer-alt'] },
+      { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+        subMenu: [
+          { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+        ]
+
+      },
       { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+      { 
+        name: 'Feedback', 
+        route: null, icon: ['fas', 'poll'],
+        subMenu:[
+         
+          { name: 'LOCAL MANAGER', route: '/feedback/lm_feedback', icon: ['fas', 'users']},
+         
+        ] 
+      
+      },
+
       { 
         name: 'Analytics', 
         route: null, icon: ['fas', 'chart-bar'],
@@ -145,6 +181,7 @@ if (currentUser.role === 'admin'){
         subMenu: [
           { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
           { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+          { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
         ]
       },
       { 
@@ -154,6 +191,7 @@ if (currentUser.role === 'admin'){
         subMenu: [
           { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
           { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+          { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
         ]
       },
 
@@ -172,10 +210,41 @@ if (currentUser.role === 'admin'){
         ]
       }
     ];
-}else if( currentUser.role == 'user'){
- activeMenu.value = "Agent Performance"
+}
+else if (currentUser.role === 'manager' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 1){
   menuItems = [
-     
+     { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+        subMenu: [
+          { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+          { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+        ]
+
+      },
+      { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
+      { 
+        name: 'Feedback', 
+        route: null, icon: ['fas', 'poll'],
+        subMenu:[
+         
+          { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
+          { name: 'AGENTS', route: '/feedback/agents_feedback', icon: ['fas', 'users']},
+         
+        ] 
+      
+      },
+
+      // { 
+      //   name: 'Analytics', 
+      //   route: null, icon: ['fas', 'chart-bar'],
+      //   subMenu:[
+      //     { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
+      //     { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
+      //     { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
+      //   ] 
+      
+      // },
+      // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
       { 
         name: 'Agent Performance', 
         route: null, 
@@ -183,6 +252,7 @@ if (currentUser.role === 'admin'){
         subMenu: [
           { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
           { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+          { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
         ]
       },
       { 
@@ -192,6 +262,58 @@ if (currentUser.role === 'admin'){
         subMenu: [
           { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
           { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+          { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
+        ]
+      },
+
+      { 
+        name: 'Admin Panel',
+        route: null,
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
+           { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
+          // { name: 'Manage Memos', route: '/admin/manage_memos', icon: ['fas', 'sticky-note'] },
+          // { name: 'Manage Roles', route: '/admin/manage_roles', icon: ['fas', 'user-shield'] },
+          // { name: 'Manage Teams', route: '/admin/manage_teams', icon: ['fas', 'users'] },
+          // { name: 'Activity Log', route: '/admin/activity_log', icon: ['fas', 'clipboard-list'] },
+          // { name: 'System Settings', route: '/admin/system_settings', icon: ['fas', 'cogs'] }
+        ]
+      }
+    ];
+}
+else if( currentUser.role == 'user' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 0){
+ activeMenu.value = "Agent Performance"
+  menuItems = [
+      { 
+        name: 'Feedback', 
+        route: null, icon: ['fas', 'poll'],
+        subMenu:[
+         
+          { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
+         
+         
+        ] 
+      
+      },
+      { 
+        name: 'Agent Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
+          { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+          { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
+        ]
+      },
+      { 
+        name: 'Team Performance', 
+        route: null, 
+        icon: ['fas', 'cog'],
+        subMenu: [
+          { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
+          { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+          { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
         ]
       },
 ]

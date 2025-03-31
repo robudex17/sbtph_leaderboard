@@ -137,7 +137,9 @@ validator.validateTarget = [
     check('market_id').trim().notEmpty().withMessage('shipok is Required')
 ]
 
+validator.validateDate = [
 
+]
 
 validator.validateNewAndUpdateAgent = [
 
@@ -314,6 +316,188 @@ validator.loginUser  = [
     check('password')
     .notEmpty().withMessage('Password is required')
 ]
+
+validator.validateFeedbackDate = [
+    check('date').trim().notEmpty().withMessage('Feedback is Date is required')
+    .isDate().withMessage('Invalid Date format').matches(/^\d{4}-\d{2}-\d{2}$/).withMessage('Date must be in YYYY-MM-DD format')
+    .custom(value => {
+
+        const timestamp = Date.now(); // Get the current timestamp in milliseconds
+
+        const date = new Date(timestamp); // Convert timestamp to a Date object
+        
+        // Extract year, month, and day
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed, so add 1
+        const day = date.getDate().toString().padStart(2, '0'); // Ensure two digits
+        
+        // Format as "YYYY-MM-DD"
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        let today = new Date(formattedDate)
+
+        let givenDate = new Date(value)
+        
+
+        if (givenDate > today){
+            throw new Error('Cannot do feedback on the future date')
+        }
+        return true
+    }),
+]
+
+validator.validateFeedbackResponsesValues = [
+    check('responses')
+    .notEmpty().withMessage('responses is required')
+    .custom((value) => {
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+            throw new Error('Data must be a valid JSON object');
+        }
+        return true;
+    }),
+
+    check('feedback_score')
+    .notEmpty().withMessage('Feedback Score is required')
+    .isNumeric().withMessage('Feedback Score must be a number'),
+
+    check('total_score')
+    .notEmpty().withMessage('Total Score is required')
+    .isNumeric().withMessage('Total Score must be a number'),
+
+    check('percentage')
+    .notEmpty().withMessage('Percentage is required')
+    .isNumeric().withMessage('Percentage  must be a number'),
+
+
+    
+]
+
+
+validator.validateAddAndUpdateAgentsFeedback = [
+    check('agent_id')
+    .notEmpty().withMessage('Agent ID is required')
+    .isNumeric().withMessage('Agent ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Agent ID must atleast 4 digits'),
+
+    check('lm_id')
+    .notEmpty().withMessage('LM ID is required')
+    .isNumeric().withMessage('LM ID must be a number')
+    .isLength({min:4, max:10}).withMessage('LM ID must atleast 4 digits'),
+    
+    check('agent_dbname')
+    .notEmpty().withMessage('Agent dbname is required'),
+
+    check('lm_dbname')
+    .notEmpty().withMessage('Agent dbname is required'),
+    
+]
+
+validator.validateAgentId = [
+    check('agent_id')
+    .notEmpty().withMessage('Agent ID is required')
+    .isNumeric().withMessage('Agent ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Agent ID must atleast 4 digits'),
+]
+
+
+
+
+validator.validateAddAndUpdateLmFeedback = [
+    check('manager_id')
+    .notEmpty().withMessage('Manager ID is required')
+    .isNumeric().withMessage('Manager ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Manager ID must atleast 4 digits'),
+
+    check('lm_id')
+    .notEmpty().withMessage('LM ID is required')
+    .isNumeric().withMessage('LM ID must be a number')
+    .isLength({min:4, max:10}).withMessage('LM ID must atleast 4 digits'),
+    
+    check('manager_dbname')
+    .notEmpty().withMessage('Manager dbname is required'),
+
+    check('lm_dbname')
+    .notEmpty().withMessage('Manager dbname is required'),
+    
+]
+
+validator.validateLmId = [
+    check('lm_id')
+    .notEmpty().withMessage('LM ID is required')
+    .isNumeric().withMessage('LM ID must be a number')
+    .isLength({min:4, max:10}).withMessage('LM ID must atleast 4 digits'),
+]
+
+
+
+validator.validateAddAndUpdateManagerFeedback = [
+    check('manager_id')
+    .notEmpty().withMessage('Manager ID is required')
+    .isNumeric().withMessage('Manager ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Manager ID must atleast 4 digits'),
+
+    check('agent_id')
+    .notEmpty().withMessage('Agent ID is required')
+    .isNumeric().withMessage('Agent ID must be a number')
+    .isLength({min:4, max:10}).withMessage('LM ID must atleast 4 digits'),
+    
+    check('manager_dbname')
+    .notEmpty().withMessage('Manager dbname is required'),
+
+    check('agent_dbname')
+    .notEmpty().withMessage('Agent dbname is required'),
+    
+]
+
+validator.validateManagerId = [
+    check('manager_id')
+    .notEmpty().withMessage('Manager ID is required')
+    .isNumeric().withMessage('Manager ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Manager ID must atleast 4 digits'),
+]
+
+validator.validateAddAndUpdateAgentsFeedbackByQa = [
+    check('agent_id')
+    .notEmpty().withMessage('Agent ID is required')
+    .isNumeric().withMessage('Agent ID must be a number')
+    .isLength({min:4, max:10}).withMessage('Agent ID must atleast 4 digits'),
+
+    check('qa_id')
+    .notEmpty().withMessage('QA ID is required')
+    .isNumeric().withMessage('QA ID must be a number')
+    .isLength({min:4, max:10}).withMessage('LM ID must atleast 4 digits'),
+    
+    check('agent_dbname')
+    .notEmpty().withMessage('Agent dbname is required'),
+
+    check('qa_dbname')
+    .notEmpty().withMessage('Qa dbname is required'),
+
+    check('role')
+    .notEmpty().withMessage('Role is required')
+    .isIn(['admin', 'manager','user']).withMessage('Role must be in admin, manager, or user only'),
+
+    check('feedback_score').trim().notEmpty().withMessage('Feedback Score is required.')
+    .isDecimal().withMessage('Must be a valid number')
+    .custom(value => {
+        if(parseFloat(value) <= 0){
+            throw new Error('Feedback score must be positive number')
+        }
+        return true
+    })
+    
+]
+
+validator.validateQaId = [
+    check('qa_id')
+    .notEmpty().withMessage('QA ID is required')
+    .isNumeric().withMessage('QA ID must be a number')
+    .isLength({min:4, max:10}).withMessage('QA ID must atleast 4 digits'),
+]
+
+
+
+
 
 
 module.exports = validator

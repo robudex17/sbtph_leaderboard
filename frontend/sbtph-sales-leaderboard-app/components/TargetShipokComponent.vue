@@ -16,7 +16,7 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market Name</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button :disabled="targetShipokDetails.length===1 || currentUser.role == 'user'" class="disabled:bg-gray-400 disabled:cursor-not-allowed"
+                <button :disabled="targetShipokDetails.length > 1 || currentUser.agent_type == 1 || currentUser.role == 'user'"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openModal('add')" 
                   :class="hasTarget">
                   <font-awesome-icon icon="plus" />
@@ -46,12 +46,20 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_id }}</td> 
               <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_name}}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
-                <button :disabled="currentUser.role == 'user'"
+                <button 
+                  :disabled="currentUser.role == 'user' ||
+                   currentUser.agent_type == 1 ||
+                  currentUser.agent_type == 0  || 
+                  fullyear == true"
                   @click="openModal('edit', index)" 
                   class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Edit
                 </button>
-                <button  :disabled="currentUser.role == 'user'"
+                <button  
+                 :disabled="currentUser.role == 'user' ||
+                  currentUser.agent_type == 1 || 
+                  currentUser.agent_type == 0 ||
+                   currentUser.agent_type == 2"
                   @click="deleteTarget(targetShipokDetail.agent_id, targetShipokDetail.date)" 
                   class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Delete
@@ -119,6 +127,7 @@
   const route = useRoute()
   const router = useRouter()
   
+  console.log(route.query.path)
   
   const props = defineProps({
 
@@ -130,6 +139,10 @@
       type: Object,
       required: true
     },
+    fullyear: {
+      type: Boolean, 
+      required: true
+    }
   
 });
 

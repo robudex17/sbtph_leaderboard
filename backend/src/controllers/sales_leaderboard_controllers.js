@@ -2,24 +2,77 @@ const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
 
-exports.getAgentMetrics = async ( givenMonth,givenYear) => {
+exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks) => {
     //CHECK FIRST IF THERE ARE AVAILABLE MONTH AND YEAR ON target_shipok if not return empty array Imediately
 
-    const [row] = await pool.execute(
-      'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=?',[givenMonth,givenYear]
-   )
-
-  const { count } = row[0]
-
+  
+     /*
+      iF withTrucks is true , all agents
+      if withTrucks is false , remove the market_id of 10 because it is trucks market
+     */  
+   let count ;
+ 
+   if(agent_id != ""){
+      const [row] = await pool.execute(
+        'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=? AND agent_id=?',[givenMonth,givenYear,agent_id]
+    )
+ 
+      count = row[0].count    
+   }else {
+    
+      if (withTrucks == "true" ){
+       
+        const [row] = await pool.execute(
+          'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=?',[givenMonth,givenYear]
+      )
+        count = row[0].count
+      }else{
+       
+        const [row] = await pool.execute(
+          'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=? AND market_id != 10',[givenMonth,givenYear]
+      )
+         count = row[0].count
+         
+      } 
+   }
+ 
+  
   if (count == 0){
   //  connection.release()
    return  []
   }
 
-   const [sales_agents] = await pool.execute(
-       'SELECT * FROM  `sales_agents`'  
-   )
+ /*
+  iF withTrucks is true , all agents
+  if withTrucks is false , remove the market_id of 10 because it is trucks market
+ */
+
+let sales_agents
+if (agent_id != ""){
+  const [sales_agents_result] = await pool.execute(
+    'SELECT * FROM  `sales_agents` WHERE id=?',[agent_id]  
+  )
   
+  sales_agents = sales_agents_result
+}else{
+
+  if (withTrucks === "true" || withTrucks === true){
+    const [sales_agents_result] = await pool.execute(
+      'SELECT * FROM  `sales_agents`'  
+    )
+    
+    sales_agents = sales_agents_result
+  }else {
+    
+    const [sales_agents_result] = await pool.execute(
+      'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
+  )
+  sales_agents = sales_agents_result
+  }
+}
+
+   
+
    //fetch  evaluation_criteria value and save it to evalulation_criteria 
    const [evaluation_criteria_array] = await pool.execute(
       'SELECT * FROM `evaluation_criteria`'
@@ -138,17 +191,93 @@ exports.getAgentMetrics = async ( givenMonth,givenYear) => {
 
 
    // get agent feedback for the given month and year
+    
+
+  //  const [feedback] = await pool.execute(
+  //    'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
+  //  )
+  //  let agentFeedbackScore 
+  //  if (feedback.length == 0) {
+  //    agentFeedbackScore = 0
+  //  }else{
+  //    agentFeedbackScore = feedback[0].feedback
+  //  }
+
+   
    const [feedback] = await pool.execute(
-     'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
-   )
-   let agentFeedbackScore 
-   if (feedback.length == 0) {
-     agentFeedbackScore = 0
-   }else{
-     agentFeedbackScore = feedback[0].feedback
-   }
+    'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
+  )
+  let overallAverageFeedback
+  if (feedback.length == 0) {
+        let averageAgentFeedback = null
+        let averageManagerFeedback = null
+        let averageLmsFeedback = null
+        let averageFeedbackByQa = null
+
+        const getAverageFeedback = (feedback_result) => {
+          if (!Array.isArray(feedback_result) || feedback_result.length === 0) return null;
+          const total = feedback_result.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+          return (total / feedback_result.length).toFixed(2);
+        }
+        // for saleas agent
+        if (agent.agent_type == 0){
+          const [agents_feedback_result] = await pool.execute(
+            'SELECT feedback_score FROM  `agents_feedback` WHERE agent_id=?  AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+          )
+          averageAgentFeedback  = getAverageFeedback(agents_feedback_result)
+        }
+       // for local manager
+       if(agent.agent_type == 1){
+          const [lm_feedback_result] = await pool.execute(
+            'SELECT feedback_score FROM  `lm_feedback` WHERE lm_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+          ) 
+        
+          const [managers_feedback_result] = await pool.execute(
+            'SELECT feedback_score FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
+         )
+         averageLmsFeedback = getAverageFeedback(lm_feedback_result )
+         averageManagerFeedback  = getAverageFeedback(managers_feedback_result)
+      }
+      // for senior manager.
+      if (agent.agent_type == 2){
+          const [managers_feedback_result] = await pool.execute(
+            'SELECT feedback_score FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
+          )
+          averageManagerFeedback = getAverageFeedback(managers_feedback_result)
+      }
+
+      const [feedback_by_qa_result] = await pool.execute(
+        'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+      )
+
+  
+       averageFeedbackByQa = getAverageFeedback(feedback_by_qa_result)
+    
+        // Compute the overall average, excluding empty feedback categories
+       const getOverallAverageFeedback = () => {
+          const scores = [];
+
+          if (averageAgentFeedback !== null) scores.push(parseFloat(averageAgentFeedback));
+          if (averageManagerFeedback !== null) scores.push(parseFloat(averageManagerFeedback));
+          if (averageLmsFeedback !== null) scores.push(parseFloat(averageLmsFeedback));
+          if (averageFeedbackByQa !== null) scores.push(parseFloat(averageFeedbackByQa));
+        
+          if (scores.length === 0) return null; // Return null if there's no valid data
+
+          return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2);
+      };
+
+
+    overallAverageFeedback = getOverallAverageFeedback()
+
       
-   agent['feedback_score'] = agentFeedbackScore
+  }else{
+    overallAverageFeedback = feedback[0].feedback
+  }
+   
+
+      
+   agent['feedback_score'] = overallAverageFeedback
 
    //get agent new deposit for the given and treat this as additional point
    
@@ -223,25 +352,37 @@ exports.getAgentMetrics = async ( givenMonth,givenYear) => {
   */
 }
 
+
+
 exports.fetchAgentLeaderBoard = async (req, res, next) => {
     //check if there is a month and year in the query string
     // if there is no query string set month to the latest month
- 
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    
+            // Get the month name
+    const monthNames = [
+              "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"
+    ];
 
     let givenMonth
     let givenYear 
+    let withTrucks
+    let fullyear = req.query.fullyear
+    let agentId 
+
+    if(!req.query.agent_id){
+      agentId = ""
+    }else {
+      agentId = req.query.agent_id
+    }
     const currentDate = new Date()
     if (!req.query.month ||  req.query.month ==="") {
         
-        // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -253,15 +394,114 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         givenYear = req.query.year
     }
 
+    if(!req.query.withTrucks || req.query.withTrucks === ""){
+      withTrucks = true      
+    }else{
+      withTrucks = req.query.withTrucks
+    }
+
+ 
+
     try {
     //fetch all agent available and save it to sales_agent array
     // const connection =  await pool.getConnection()
+    let agentMetircs
+    if(fullyear == 'true'){
+      
+      const queries = monthNames.map(month => 
+        this.getAgentsMetrics(agentId, month, givenYear, withTrucks).then(data => {
+            if (data) {
+                return data[0]
+            }
+            return null; // Skip null values
+        })
+    );
+    
+    const results = await Promise.all(queries);
+    const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
 
-    const agentMetircs = await this.getAgentMetrics( givenMonth, givenYear)
 
+ function calculateAverages(dataArray) {
+      const keysToAverage = [
+          "absence_score", 
+          "feedback_score",
+          "memo_score",
+          "tardiness_score", 
+          "deposit_score",
+          "shipok_score",
+          "absence_rating",
+          "memo_rating", 
+          "tardiness_rating", 
+          "feedback_rating",
+          "performance_rating",
+          "final_ratings",
+          "shipok_percent",
+          "additional_points",
+      ];
+  
+      const keysToSum = ["target", "shipok"];
+  
+      if (dataArray.length === 0) return {}; // Return empty if no data
+  
+      const sum = dataArray.reduce((acc, obj) => {
+          keysToAverage.forEach(key => {
+              acc[key] = (acc[key] || 0) + parseFloat(obj[key] || 0);
+          });
+          keysToSum.forEach(key => {
+              acc[key] = (acc[key] || 0) + parseFloat(obj[key] || 0);
+          });
+          return acc;
+      }, {});
+  
+      const count = dataArray.length;
+  
+      const result = {};
+  
+      // Calculate averages for the specified keys
+      keysToAverage.forEach(key => {
+          result[key] = Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
+      });
+  
+      // Store sums for "target" and "shipok"
+      keysToSum.forEach(key => {
+          result[key] = sum[key]; // Keep as total sum
+      });
+   
+
+   
+      
+      return result;
+  }
+
+
+  
+
+   const data = {
+    'agentMetircsFullYear': agentMetircsFullYear,
+    'yearAverage': calculateAverages(agentMetircsFullYear)
+   }
+
+   const [year_ratings] = await pool.execute(
+    'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[data['yearAverage']['final_ratings']]
+  )
+
+  data['yearAverage']['ratings_name'] = year_ratings[0].ratings_name
+  data['yearAverage']['db_name'] =  agentMetircsFullYear[0].db_name
+  data['yearAverage']['image_link'] = agentMetircsFullYear[0].image_link
+  data['yearAverage']['year'] = agentMetircsFullYear[0].year
+
+
+    res.status(200).json(data)
+    
+    }else{
+      agentMetircs = await this.getAgentsMetrics( agentId, givenMonth, givenYear, withTrucks)
+      console.log(agentMetircs)
+      res.status(200).json(agentMetircs)
+    }
+      
     // connection.release()
     
-    res.status(200).json(agentMetircs)
+   
     
     }
     catch(error){

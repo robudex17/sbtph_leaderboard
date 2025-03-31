@@ -1,6 +1,6 @@
 <template>
     <div >
-      <h1 class="text-2xl font-bold mb-4 text-center">Sales Agent Feedback</h1>
+      <h1 class="text-2xl font-bold mb-4 text-center">Sales Agent Feedback By Admin/Manager</h1>
       <div class="overflow-x-auto">
         <table class="min-w-full border border-green-500 rounded-lg">
           <thead class="bg-green-200">

@@ -13,7 +13,7 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button :disabled="currentUser.role == 'user'"
+                <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                   @click="openModal('add')" 
                   class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   <font-awesome-icon icon="plus" />
@@ -268,10 +268,9 @@ watch(
   }
 }
 );
-
-  </script>
+</script>
   
-  <style>
+<style>
   /* Add custom styles if needed */
-  </style>
+</style>
   

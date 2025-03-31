@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken')
 // const { refreshToken } = require('../controllers/sales_login_controller')
 
 exports.generateAccessToken = (user) => {
-    return jwt.sign({ username: user.username, role: user.role, login_id: user.login_id, 
+    return jwt.sign({ username: user.username, role: user.role, login_id: user.login_id, login_type: user.login_type,
         manager_id: user.manager_id, agent_type: user.agent_type, firstname: user.firstname, 
         lastname: user.lastname, db_name: user.db_name, market_id: user.market_id, image_link: user.image_link
     },

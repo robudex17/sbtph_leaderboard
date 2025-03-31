@@ -5,11 +5,22 @@
         </div>
        
         <div class ="p-4 mt-5 mb-5">
-          <TargetShipok :targetShipokDetails="salesAgentTargetShipok" :agent="salesAgentBio[0]" @passNewTarget="addNewTarget" @passUpdatedTarget="editTarget" @passDeleteTarget="deleteTarget" ></TargetShipok>
+          <TargetShipok :targetShipokDetails="salesAgentTargetShipok" 
+          :agent="salesAgentBio[0]"
+          :fullyear="fullyear"
+           @passNewTarget="addNewTarget"
+           @passUpdatedTarget="editTarget"
+            @passDeleteTarget="deleteTarget" ></TargetShipok>
         </div>
         <div class ="p-4 mt-5 mb-5">
-          <NewDeposit :newDepositDetails="salesAgentNewDeposit" @passNewDeposit="addNewDeposit" @passUpdatedNewDeposit="updateNewDeposit" @passDeleteDeposit="deleteNewDeposit"></NewDeposit>
+          <NewDeposit :newDepositDetails="salesAgentNewDeposit" 
+          :agent="salesAgentBio[0]"
+          @passNewDeposit="addNewDeposit" @passUpdatedNewDeposit="updateNewDeposit" 
+          @passDeleteDeposit="deleteNewDeposit"
+          
+          ></NewDeposit>
         </div>
+
         <div class ="p-4 mt-5 mb-5">
           <Feedback :feedbackDetails="salesAgentFeedback"
           @passFeedback="addFeedback"
@@ -17,6 +28,20 @@
           @passDeleteFeedback="deleteFeedback"
           ></Feedback>
         </div>
+
+       <div  class ="p-4 mt-5 mb-5">
+          <agent-feedback-summary-component
+          :agents="salesAgentBio"
+           :averageAgentFeedback = "averageAgentFeedback" 
+           :averageManagerFeedback = "averageManagerFeedback"
+           :averageLmsFeedback="averageLmsFeedback"
+           :averageFeedbackByQa="averageFeedbackByQa"
+           :overallAverageFeedback="overallAverageFeedback"
+           v-if="salesAgentBio.length > 0"
+          >
+          
+          </agent-feedback-summary-component>
+       </div>
         <div class ="p-4 mt-5 mb-5">
             <Absence attendanceType="absence" attendanceTitle="Sales Agent Absences" 
             :attendanceDetails="salesAgentAbsences"  @passAttendance="addAttendanceType" @passUpdateAttendance="updateAttendanceType"
@@ -60,12 +85,45 @@
   import AgentBio from '../../../components/AgentBioComponent.vue'
 
  
-  
+  const props = defineProps({
+      fullyear: {
+        type: Boolean, 
+        required: true
+      }
+
+    });
+
+
   const router = useRouter();
   const route = useRoute();
   const query = route.query;
   // const agentId = route.params.agent_id;
 
+ 
+  const month = ref(null)
+  const year = ref(null)
+
+  // Months for the dropdown
+  const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ];
+
+
+    month.value= route.query.month
+    year.value = route.query.year 
+
+    if (month.value == null || month.value == ""){
+        month.value= months[new Date().getMonth()]
+     }
+
+    if (year.value == null || year.value == ""){
+        year.value = new Date().getFullYear()
+    }
+   
+  
+    const today = new Date()
+    const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
   
   //get the current user
@@ -73,6 +131,9 @@
   authStore.fetchTokenFromLocalStore()
 
   const currentUser = authStore.state.user 
+
+  const agentType = query.agent_type 
+  const agentRole = query.agent_role
 
 
   let agentId;
@@ -158,9 +219,7 @@ const addAttendanceType = async (agentId, query,  attendanceType,attendance) => 
     
   }
 
-
-  
-  const  updateAttendanceType = async(agentId, query,  attendanceType,attendance) => {
+const  updateAttendanceType = async(agentId, query,  attendanceType,attendance) => {
    
    try {
      await useManageSalesStore.updateAgentAttendanceType(agentId, query, attendanceType, attendance)
@@ -217,8 +276,6 @@ const updateFeedback = async(agentId, query, feedback) => {
 }
 
   
-
-
   const salesAgentBio = computed(() => useManageSalesStore.state.salesAgentBio);
   const salesAgentTargetShipok = computed(() => useManageSalesStore.state.salesAgentTargetShipok);
   const salesAgentNewDeposit = computed(() => useManageSalesStore.state.salesAgentNewDeposit);
@@ -229,20 +286,151 @@ const updateFeedback = async(agentId, query, feedback) => {
   const salesAgentFeedback = computed(() => useManageSalesStore.state.salesAgentFeedback);
 
 
+       //use feedback state management
+  const useFeedbackStore  = feedbackStore()
+       // Reset the feedback data
+  useFeedbackStore.state.agents = [];
+  useFeedbackStore.state.managers = [];
+  useFeedbackStore.state.lms = [];
+  useFeedbackStore.state.qa = [];
+
+  const agentFeedback = computed(() => useFeedbackStore.state.agents);
+  const managerFeedback = computed(() => useFeedbackStore.state.managers);
+  const lmsFeedback = computed(() => useFeedbackStore.state.lms);
+
+  const feedbackByQa =  computed(() => useFeedbackStore.state.qa);
+  
+  const averageAgentFeedback = computed(() => {
+  if (!Array.isArray(agentFeedback.value) || agentFeedback.value.length === 0) return null;
+  const total = agentFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+  return (total / agentFeedback.value.length).toFixed(2);
+});
+
+const averageManagerFeedback = computed(() => {
+  if (!Array.isArray(managerFeedback.value) || managerFeedback.value.length === 0) return null;
+  const total = managerFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+  return (total / managerFeedback.value.length).toFixed(2);
+});
+
+const averageLmsFeedback = computed(() => {
+  if (!Array.isArray(lmsFeedback.value) || lmsFeedback.value.length === 0) return null;
+  const total = lmsFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+  return (total / lmsFeedback.value.length).toFixed(2);
+});
+
+const averageFeedbackByQa  = computed(() => {
+  if (!Array.isArray(feedbackByQa.value) || feedbackByQa.value.length === 0) return null;
+  const total = feedbackByQa.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+  return (total / feedbackByQa.value.length).toFixed(2);
+});
+
+
+
+// Compute the overall average, excluding empty feedback categories
+const overallAverageFeedback = computed(() => {
+  const scores = [];
+
+  if (averageAgentFeedback.value !== null) scores.push(parseFloat(averageAgentFeedback.value));
+  if (averageManagerFeedback.value !== null) scores.push(parseFloat(averageManagerFeedback.value));
+  if (averageLmsFeedback.value !== null) scores.push(parseFloat(averageLmsFeedback.value));
+  if (averageFeedbackByQa.value !== null) scores.push(parseFloat(averageFeedbackByQa.value));
+ 
+  if (scores.length === 0) return null; // Return null if there's no valid data
+
+  return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2);
+});
+
+//QA Feedback
+const addQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMethod) => {
+    try {
+        await useFeedbackStore.addUpdateDeleteFeedback(id, feedbackResponse, feedbackType, query, httpMethod)
+    }catch(error){
+      console.log(error)
+    }
+}
+
+const updateQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMethod) => {
+    try {
+        await useFeedbackStore.addUpdateDeleteFeedback(id, feedbackResponse, feedbackType, query, httpMethod)
+    }catch(error){
+      console.log(error)
+    }
+}
+
+const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMethod) => {
+    try {
+        await useFeedbackStore.addUpdateDeleteFeedback(id, feedbackResponse, feedbackType, query, httpMethod)
+    }catch(error){
+      console.log(error)
+    }
+    
+}
+
+
   onMounted(async()=> {
+         // Reset the feedback data
+    useFeedbackStore.state.agents = [];
+    useFeedbackStore.state.managers = [];
+    useFeedbackStore.state.lms = [];
+    useManageSalesStore.state.salesAgentTargetShipok = []
+    useManageSalesStore.state.salesAgentNewDeposit = []
+    useManageSalesStore.state.salesAgentAbsences = []
+    useManageSalesStore.state.salesAgentMemo = []
+    useManageSalesStore.state.salesAgentTardiness = []
+    useManageSalesStore.state.salesAgentFeedback = []
+
+    if (agentType == 0 && agentRole =='user'){
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'agents')
+      }else if(agentType == 1 && agentRole =='manager'){
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, }, 'managers')
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'lms')
+     
+      }else if (agentType == 2 && agentRole =='manager'){
+
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'managers')
+      }
+
+      await  useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'qa')
       await  useManageSalesStore.fetchSalesAgent(agentId)
+
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTargetShipok')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentNewDeposit')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentAbsences')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentMemo')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTardiness')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentFeedback')
+
+ 
     })
 
 
   
   watch(route, async (newRoute) => {
-  
+
+     // Reset the feedback data
+  useFeedbackStore.state.agents = [];
+  useFeedbackStore.state.managers = [];
+  useFeedbackStore.state.lms = [];
+  useManageSalesStore.state.salesAgentTargetShipok = []
+  useManageSalesStore.state.salesAgentNewDeposit = []
+  useManageSalesStore.state.salesAgentAbsences = []
+  useManageSalesStore.state.salesAgentMemo = []
+  useManageSalesStore.state.salesAgentTardiness = []
+  useManageSalesStore.state.salesAgentFeedback = []
+
+
+  const newAgentId = newRoute.params.agent_id;
+  await useManageSalesStore.fetchSalesAgent(newAgentId);
+
+  if (agentType == 0 && agentRole == 'user') {
+    await useFeedbackStore.fetchFeedback(newAgentId, newRoute.query, 'agents');
+  } else if (agentType == 1 && agentRole == 'manager') {
+    await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
+    await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'lms');
+  } else if (agentType == 2 && agentRole == 'manager') {
+    await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
+  }
+  await  useFeedbackStore.fetchFeedback(agentId,  newRoute.query, 'qa')
   router.push(newRoute.fullPath);
   await  useManageSalesStore.fetchSalesAgent(agentId)
   await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentTargetShipok')

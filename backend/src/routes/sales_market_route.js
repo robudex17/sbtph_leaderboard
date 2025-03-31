@@ -13,4 +13,9 @@ router.get('/agent_market_target_shipok', authenticateToken, validateMonthYear,s
 
 router.get('/agent_market_new_deposit', authenticateToken, validateMonthYear,salesMarketController.fetchAgentMarketNewDeposit)
 
+router.get('/agent_market_target_shipok_year', authenticateToken, validateMonthYear,salesMarketController.fetchAgentMarketTargetShipokYear)
+
+
+router.get('/agent_market_new_deposit_year', authenticateToken, validateMonthYear,salesMarketController.fetchAgentMarketNewDepositYear)
+
 module.exports = router

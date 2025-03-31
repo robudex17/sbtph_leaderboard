@@ -18,11 +18,12 @@ exports.addNewDeposit = async (req, res, next ) => {
     const depositMOnth = req.body.month
     const depositYear = req.body.year
     const depositDescription = req.body.description
+    const marketId = req.body.market_id
 
        
     try {
-        const query = "INSERT INTO new_deposit ( agent_id, month, year,new_deposit,description,date) VALUES (?,?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [agentId, depositMOnth,depositYear, newDeposit, depositDescription,depositDate])
+        const query = "INSERT INTO new_deposit ( agent_id, month, year,new_deposit,description,date, market_id) VALUES (?,?,?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, depositMOnth,depositYear, newDeposit, depositDescription,depositDate, marketId])
         console.log('the result is:', result)
         res.status(201).json({
             message: `New Deposit for agent_id: ${agentId} are created or recorded`
@@ -45,15 +46,16 @@ exports.fetchAgentNewDeposit = async (req, res, next) => {
    
     let givenMonth
     let givenYear 
+    let fullyear = req.query.fullyear
     const currentDate = new Date()
- 
+             // Get the month name
+    const monthNames = [
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
     if (!req.query.month ||  req.query.month ==="") {
         
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
+
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -69,11 +71,23 @@ exports.fetchAgentNewDeposit = async (req, res, next) => {
 
     const connection =  await pool.getConnection()
 
+   if (fullyear === 'true' || fullyear == true){
+    const [result] = await connection.execute(
+        'SELECT * FROM  `new_deposit` WHERE agent_id=?  AND year=?',[agentId, givenYear]  
+    )
+      result.sort((a,b) => {
+        return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
+        monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
+      })
+      res.json(result)
+   }else {
     const [result] = await connection.execute(
         'SELECT * FROM  `new_deposit` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth, givenYear]  
     )
-    connection.release()
     res.json(result)
+   }
+ 
+    connection.release()
 }
 
 
@@ -96,11 +110,12 @@ exports.updateAgentNewDeposit = async (req, res, next) => {
     const  depositMonth = req.body.month 
     const depositYear = req.body.year
     const depositDescription = req.body.description
+    const marketId = req.body.market_id
 
     try {
-        const query = "UPDATE new_deposit SET  new_deposit=?, date=?, month=?, year=?, description=? WHERE id=? AND agent_id=?"
+        const query = "UPDATE new_deposit SET  new_deposit=?, date=?, month=?, year=?, description=? WHERE id=? AND agent_id=? AND market_id=?"
         
-        const [result]  = await pool.execute(query, [newDeposit, depositDate, depositMonth, depositYear, depositDescription, depositId,agentId])
+        const [result]  = await pool.execute(query, [newDeposit, depositDate, depositMonth, depositYear, depositDescription, depositId,agentId, marketId])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'New Deposit ID Not Found'})

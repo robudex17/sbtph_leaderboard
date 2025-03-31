@@ -135,7 +135,8 @@ exports.loginUser = async(req,res, next) => {
         )
      
  
-  
+       user[0].login_type = "standarduser"
+       
        const accessToken = generateAccessToken(user[0])
     //    const refreshToken = generateRefreshToken(user[0])
        

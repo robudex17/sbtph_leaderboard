@@ -6,21 +6,29 @@
 
       <!-- Dropdown for Month and Year -->
       <div class="flex items-center gap-2">
-        <select v-if="isNotAnalytics"
+        <select v-if="hasMonthOption"
           v-model="selectedMonth"
           class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option disabled value="" >Select Month</option>
           <option v-for="month in months" :key="month" :value="month">{{ month }}</option>
         </select>
-        <select v-if="isNotmanagePath" 
+        <select v-if="hasYearOption" 
           v-model="selectedYear"
           class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option disabled value="">Select Year</option>
           <option v-for="year in years" :key="year" :value="year">{{ year }}</option>
         </select>
-        <button  v-if="isNotmanagePath" 
+
+        <select v-if="hasTrucksOption"
+          class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          v-model="truckOption"
+        >
+          <option :value="true">With Trucks</option>
+          <option :value="false">Without Trucks</option>
+        </select>
+        <button  v-if="hasYearOption" 
           class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
           @click="submitDateSelection"
         >
@@ -95,6 +103,7 @@ const showNotifications = ref(false);
 const viewMode = ref("card");
 const selectedMonth = ref("");
 const selectedYear = ref("");
+const truckOption = ref(true) //default is  include the truck 
 const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
@@ -107,17 +116,52 @@ const router = useRouter()
 const route = useRoute()
 const urlPath = ref(route.fullPath)
 
-const analyticsPath = ref([
-  '/analytics/agents', '/analytics/market', '/analytics/overall', '/admin/agent/manage_sales_agents', '/admin/manage_standard_users', '/agent_performance/year', '/team_performance/year'
+const pathWithoutMonthOption = ref([
+  '/analytics/agents',
+   '/analytics/market', 
+   '/analytics/overall',
+   '/admin/agent/manage_sales_agents', 
+   '/admin/manage_standard_users',
+   '/agent_performance/year',
+   '/team_performance/year',
+   '/feedback/feedback_by_qa',
+   '/feedback/managers_feedback',
+   '/feedback/agents_feedback',
+   '/feedback/lm_feedback',
+   '/dashboard/dashboard_year_view',
+   '/agent_performance/analytics',
+   '/team_performance/analytics'
+
+
 ])
 
-const managePath = ref([
-   '/admin/agent/manage_sales_agents', '/admin/manage_standard_users'
+const pathWithoutYearOption = ref([
+   '/admin/agent/manage_sales_agents',
+   '/admin/manage_standard_users',
+   '/feedback/feedback_by_qa',
+   '/feedback/managers_feedback',
+   '/feedback/agents_feedback',
+   '/feedback/lm_feedback',    
 ])
 
+const pathWithoutTrucksOption = ref([
+  '/admin/agent/manage_sales_agents',
+   '/admin/manage_standard_users',
+   '/feedback/feedback_by_qa',
+   '/feedback/managers_feedback',
+   '/feedback/agents_feedback',
+   '/feedback/lm_feedback',
+   '/agent_performance/analytics',
+   '/agent_performance/month',
+   '/agent_performance/year',
 
-const isNotmanagePath  = computed(() =>{
-  if(!managePath.value.includes(route.path)){
+])
+
+console.log(route.params.agent_id)
+
+
+const hasYearOption  = computed(() =>{
+  if(!pathWithoutYearOption.value.includes(route.path)  ){
     return true
   }else{
     return false
@@ -126,13 +170,23 @@ const isNotmanagePath  = computed(() =>{
 
 
 
-const isNotAnalytics = computed(() =>{
-  if(!analyticsPath.value.includes(route.path)){
+const hasMonthOption = computed(() =>{
+  if(!pathWithoutMonthOption.value.includes(route.path)){
     return true
   }else{
     return false
   }
 })
+
+
+const hasTrucksOption = computed(() =>{
+  if(!pathWithoutTrucksOption.value.includes(route.path) && !route.path.includes('/admin/agent') && !route.path.includes('/feedback')){
+    return true
+  }else{
+    return false
+  }
+})
+
 
 
 
@@ -195,7 +249,16 @@ const  validateInputYearDates = (year) => {
 
 
 const submitDateSelection = () => {
-  if (route.path == '/analytics/agents' || route.path == '/analytics/market' || route.path == '/analytics/overall' || route.path == '/agent_performance/year' || route.path == '/team_performance/year' ){
+  if (route.path == '/analytics/agents' || 
+      route.path == '/analytics/market' || 
+      route.path == '/analytics/overall' || 
+      route.path == '/agent_performance/year' || 
+      route.path == '/team_performance/year' ||
+      route.path == '/dashboard/dashboard_year_view' || 
+      route.path == '/agent_performance/analytics' ||  
+      route.path == '/team_performance/analytics'
+    
+    ){
     
     if (!validateInputYearDates(selectedYear.value)){
     alert('Cannot Select Year greater than current Year')
@@ -205,7 +268,7 @@ const submitDateSelection = () => {
       const currentRoute = router.currentRoute.value;
       router.push({
         path: currentRoute.path,
-        query: { ...currentRoute.query, year: selectedYear.value },
+        query: { ...currentRoute.query, year: selectedYear.value,  withTrucks:truckOption.value },
       });
       
     } else {
@@ -220,7 +283,7 @@ const submitDateSelection = () => {
       const currentRoute = router.currentRoute.value;
       router.push({
         path: currentRoute.path,
-        query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value },
+        query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value, withTrucks:truckOption.value },
       });
       console.log(`Redirecting to: ${currentRoute.path} with Month: ${selectedMonth.value}, Year: ${selectedYear.value}`);
     } else {
