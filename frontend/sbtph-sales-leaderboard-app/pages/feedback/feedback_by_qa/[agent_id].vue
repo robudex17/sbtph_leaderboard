@@ -11,8 +11,6 @@
            :overallAverageFeedback="overallAverageFeedback"
            v-if="salesAgentBio.length > 0"
             
-            
-            
             ></agent-feedback-summary-component>
 
         </div> 
@@ -54,8 +52,7 @@
   
   import AgentBio from '../../../components/AgentBioComponent.vue'
 
- 
-  
+
   const router = useRouter();
   const route = useRoute();
   
@@ -94,24 +91,21 @@
     const today = new Date()
     const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-
-  
   const agentId = route.params.agent_id
  
   const agentType = query.agent_type 
   const agentRole = query.agent_role
 
  
-  
-
   const useManageSalesStore = useManageSalesAgentStore();
 
   const salesAgentBio = computed(() => useManageSalesStore.state.salesAgentBio);
 
   
-     //use feedback state management
+  //use feedback state management
   const useFeedbackStore  = feedbackStore()
-       // Reset the feedback data
+  
+  // Reset the feedback data
   useFeedbackStore.state.agents = [];
   useFeedbackStore.state.managers = [];
   useFeedbackStore.state.lms = [];
@@ -189,8 +183,6 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
     
 }
 
-
-
 onMounted(async()=> {
       
       await  useManageSalesStore.fetchSalesAgent(agentId)
@@ -230,8 +222,9 @@ watch(route, async (newRoute) => {
   } else if (agentType == 2 && agentRole == 'manager') {
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
   }
-});
+  await  useFeedbackStore.fetchFeedback(newAgentId, newRoute.query, 'qa')
 
+});
 
 
   </script>

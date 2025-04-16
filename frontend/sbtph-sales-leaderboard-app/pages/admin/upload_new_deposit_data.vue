@@ -1,0 +1,18 @@
+<template>
+    <div>
+      <upload-data-component uploadTitle="Upload New Deposit Sales Data" :uploadDataUrl="uploadDataUrl"></upload-data-component>
+    </div>
+</template>
+
+<script setup>
+   const config = useRuntimeConfig()
+
+   const apiUrl = config.public.apiUrl
+
+   const uploadDataUrl =  `${apiUrl}/upload_new_deposit_data`
+
+</script>
+
+<style>
+
+</style>

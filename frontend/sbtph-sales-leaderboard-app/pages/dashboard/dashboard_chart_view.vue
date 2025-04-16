@@ -4,93 +4,105 @@
        <div v-if="dashBoardStore.state.loading">
         <spinner></spinner>
        </div>
-       <div v-else> 
-      
-          <!-- Heading and Overall Performance Section -->
-            <!-- Heading and Active Agents Section -->
+        <div v-else> 
+          
+              <!-- Heading and Overall Performance Section -->
+                <!-- Heading and Active Agents Section -->
+                  
+              <h1  class="text-3xl font-semibold text-gray-800 mb-8 uppercase p-4 bg-gray-200 border-2 border-gray-300 rounded-lg">
+                  Active Agents: 
+                  <span class="text-green-700 font-bold">{{ activeAgents }}</span>
+              </h1>
               
-            <h1  class="text-3xl font-semibold text-gray-800 mb-8 uppercase p-4 bg-gray-200 border-2 border-gray-300 rounded-lg">
-              Active Agents: 
-              <span class="text-green-700 font-bold">{{ activeAgents }}</span>
-            </h1>
-          
-          <div >
-              <h1 class="text-3xl font-semibold text-gray-800  mb-8 uppercase">Performance</h1>
-              <p class="text-xl font-medium text-gray-600 mt-10 mb-4 border-b-2 border-gray-200 pb-2">1. Overall Performance Metrics</p>
+              <div >
+                  <h1 class="text-3xl font-semibold text-gray-800  mb-8 uppercase">Performance</h1>
+                  <p class="text-xl font-medium text-gray-600 mt-10 mb-4 border-b-2 border-gray-200 pb-2">1. Overall Performance Metrics</p>
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Monthly Target vs ShipOK -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Month Target vs. ShipOK ({{ month }} {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="monthlyTargetChart"></canvas>
+                        <p>
+                          <span v-for="(part, index) in monthTargetShipOk.message" :key="index">
+                            <span v-if="typeof part ==='object'" :class="part.class">{{ part.text }}</span>
+                            <template v-else>{{ part }}</template>
+                            
+                          </span>
+                          <span class="font-bold">{{ month }}</span>
+                        </p>
+                      <p>ShipOk percentage: <span :class="monthTargetShipOk.percent_class">{{ monthTargetShipOk.percentage }}%</span></p>
+                      </div>
+                    
+                    </div>
               
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Monthly Target vs ShipOK -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Month Target vs. ShipOK ({{ month }} {{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="monthlyTargetChart"></canvas>
-                    <p>
-                      <span v-for="(part, index) in monthTargetShipOk.message" :key="index">
-                        <span v-if="typeof part ==='object'" :class="part.class">{{ part.text }}</span>
-                        <template v-else>{{ part }}</template>
-                        
-                      </span>
-                      <span class="font-bold">{{ month }}</span>
-                    </p>
-                  <p>ShipOk percentage: <span :class="monthTargetShipOk.percent_class">{{ monthTargetShipOk.percentage }}%</span></p>
-                  </div>
-                
-                </div>
-          
-                <!-- Yearly Target vs ShipOK -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Year Target vs. ShipOK ({{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="yearlyTargetChart"></canvas>
-                    <p>
-                      <span v-for="(part, index) in yearTargetShipOk.message" :key="index">
-                        <span v-if="typeof part ==='object'" :class="part.class">{{ part.text }}</span>
-                        <template v-else>{{ part }}</template>
-                        
-                      </span>
-                      <span class="font-bold">{{ year }}</span>
-                    </p>
-                  <p>ShipOk percentage: <span :class="yearTargetShipOk.percent_class">{{ yearTargetShipOk.percentage }}%</span></p>
-                  </div>
-                </div>
-          
-                <!-- Monthly New Deposit -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Month New Deposit ({{ month }} {{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="monthlyDepositChart"></canvas>
-                  </div>
-                </div>
-          
-                <!-- Yearly New Deposit -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Year New Deposit ({{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="yearlyDepositChart"></canvas>
-                  </div>
-                </div>
-          
-                <!-- Agent Ratings -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Agent Ratings: ({{ month }} {{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="agentRatingsChart"></canvas>
-                  </div>
-                </div>
-          
-                <!-- Market Data -->
-                <div class="card bg-white shadow-md rounded-lg p-6">
-                  <h3 class="text-lg font-semibold text-gray-800 mb-4">Per Market Target and ShipOk Distribution: ({{ month }} {{ year }})</h3>
-                  <div class="chart-container w-full h-56">
-                    <canvas id="marketChart"></canvas>
-                  </div>
-                </div>
-              </div>
-          </div>
+                    <!-- Yearly Target vs ShipOK -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Year Target vs. ShipOK ({{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="yearlyTargetChart"></canvas>
+                        <p>
+                          <span v-for="(part, index) in yearTargetShipOk.message" :key="index">
+                            <span v-if="typeof part ==='object'" :class="part.class">{{ part.text }}</span>
+                            <template v-else>{{ part }}</template>
+                            
+                          </span>
+                          <span class="font-bold">{{ year }}</span>
+                        </p>
+                      <p>ShipOk percentage: <span :class="yearTargetShipOk.percent_class">{{ yearTargetShipOk.percentage }}%</span></p>
+                      </div>
+                    </div>
+              
+                    <!-- Monthly New Deposit -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Month New Deposit ({{ month }} {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="monthlyDepositChart"></canvas>
+                      </div>
+                    </div>
+              
+                    <!-- Yearly New Deposit -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Year New Deposit ({{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="yearlyDepositChart"></canvas>
+                      </div>
+                    </div>
+              
+                    <!-- Agent Ratings -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Agent Ratings: ({{ month }} {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="agentRatingsChart"></canvas>
+                      </div>
+                    </div>
 
-      
-       
-     </div>
+                    <!-- Agent Ratings Year -->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Agent Ratings Year: ( {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="agentRatingsChartYear"></canvas>
+                      </div>
+                    </div>                
+              
+                    <!-- Market Data  Monthly-->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Per Market Target and ShipOk Distribution: ({{ month }} {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="marketChart"></canvas>
+                      </div>
+                    </div>
+                    <!-- Market Data  Monthly-->
+                    <div class="card bg-white shadow-md rounded-lg p-6">
+                      <h3 class="text-lg font-semibold text-gray-800 mb-4">Per Market Target and ShipOk Distribution: ( {{ year }})</h3>
+                      <div class="chart-container w-full h-56">
+                        <canvas id="marketChartYear"></canvas>
+                      </div>
+                    </div>  
+                  </div>
+             </div>
+        </div>
     </div>
   </template>
   
@@ -344,20 +356,46 @@ function initializeCharts() {
     },
   });
 
+
+    // Agent Ratings Chart Year
+    new Chart(document.getElementById('agentRatingsChartYear'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(data.value.agent_ratings_year),
+      datasets: [
+        {
+          label: 'Agent Ratings Year',
+          data: Object.values(data.value.agent_ratings_year),
+          backgroundColor: ['#4caf50', '#8bc34a', '#ffeb3b', '#ff9800', '#f44336'],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      indexAxis: 'y',
+      scales: {
+        x: {
+            beginAtZero: true,
+        }
+      }
+    },
+  });
+
   // Market Data Chart
   new Chart(document.getElementById('marketChart'), {
     type: 'bar',
     data: {
-      labels: data.value.market.map(market => market.market_name),
+      labels: data.value.target_shipok_market.map(market => market.market_name),
       datasets: [
         {
           label: 'Total Target',
-          data: data.value.market.map(market => market.total_target),
+          data: data.value.target_shipok_market.map(market => market.total_target),
           backgroundColor: '#2196f3',
         },
         {
           label: 'Total ShipOK',
-          data: data.value.market.map(market => market.total_ship_ok),
+          data: data.value.target_shipok_market.map(market => market.total_ship_ok),
           backgroundColor: '#ffc107',
         },
       ],
@@ -367,6 +405,31 @@ function initializeCharts() {
       maintainAspectRatio: true,
     },
   });
+
+    // Market Data Chart
+    new Chart(document.getElementById('marketChartYear'), {
+    type: 'bar',
+    data: {
+      labels: data.value.target_shipok_market_year.map(market => market.market_name),
+      datasets: [
+        {
+          label: 'Total Target',
+          data: data.value.target_shipok_market_year.map(market => market.total_target),
+          backgroundColor: '#2196f3',
+        },
+        {
+          label: 'Total ShipOK',
+          data: data.value.target_shipok_market_year.map(market => market.total_ship_ok),
+          backgroundColor: '#ffc107',
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+    },
+  });
+
 
   // Attendance and Behavior Chart
   new Chart(document.getElementById('attendanceChart'), {

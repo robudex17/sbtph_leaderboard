@@ -10,12 +10,18 @@
       <div v-else>
             <!-- Toggle Button for Card/Table View -->
         <div class="mb-4 flex justify-end">
-          <button 
+          <button v-if="!isAdmin"
             @click="toggleView" 
             class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
           >
             Toggle to {{ isCardView ? 'Table' : 'Card' }} View
           </button>
+          <export-to-excel-component  v-if="isAdmin" class="ml-2"
+            :exportUrl="exportUrl"
+            :exportFileName="exportFileName"
+            :query="query"
+            :token="token"
+        ></export-to-excel-component>          
         </div>
         
         <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
@@ -73,7 +79,8 @@
           </div>
                 <!-- Table View -->
         <div v-else class="overflow-x-auto shadow-xl rounded-lg">
-          <h1 class="text-2xl font-bold mb-4 text-center">Performance Monthy Summary </h1>
+          <!-- <h1 class="text-2xl font-bold mb-4 text-center">Performance Monthy Summary </h1> -->
+          <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.month}} {{agent.year}} Monthly Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
           <leader-board-table-view :agents="[agent]"></leader-board-table-view>
           <agentDetails class="p-4 mt-5" :fullyear="false"/>
       </div>
@@ -200,6 +207,9 @@
   import { onMounted, reactive,ref, watch } from 'vue';
 
  import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
+
+ import API from '~/utils/api'
+
   
   definePageMeta({
     middleware: ['auth'] 
@@ -210,25 +220,51 @@
   authStore.fetchTokenFromLocalStore()
   
   const currentUser = authStore.state.user 
-  const agentId = currentUser.login_id
-  
- 
-   
+  const token = authStore.state.token
+  const isAdmin = ref(false)
+
+
+
   const leaderBoardStore = useLeaderBoardStore();
   const selectedAgent = reactive({});
   const showModal = ref(false);
   const isCardView = ref(true)
+  const query = ref({})
+
+  if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+    isCardView.value = false
+  }
+
   
   const route = useRoute()
   const router = useRouter()
   
-  const query = route.query
-  query.agent_id = agentId
+  query.value = route.query 
+
+  const exportUrl = API.export.agent_peformance
+
+  const exportFileName = computed(()=> {
+  return `agent-monthly-performance-${query.value.month}-${query.value.year}.xlsx`
+})
 
 
+  // if the user is standuser and it is admin It will use the agentId for the query (query.agent_id) so that able view all agent performance details
+  // in the case of salesagent user,  which he/she can view only his/her performance details agentId is equal to currentUser login_id
+  let agentId;
+   if (query.value.agent_id) {
+    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+       agentId = query.value.agent_id
+       
+    }
+  }else {
+    agentId = currentUser.login_id
+    query.value.agent_id = agentId
+  }
+
+console.log('agentid is',agentId)
 
 
-  
   const agent = computed(() => {
     const foundAgent = leaderBoardStore.state.leaderboard.find(agent => agent.id == agentId)
     if(foundAgent){
@@ -312,21 +348,19 @@
   watch(route, (newRoute) => {
     console.log('The route is change. we should react to the change..')
     router.push(newRoute.fullPath)
-    newRoute.query.agent_id = agentId
+    // newRoute.query.agent_id = agentId
     leaderBoardData(newRoute.query)
-    
+    query.value = newRoute.query
   })
   
   
   
   // Fetch leaderboard data on mount
   onMounted( async() => {
-    await leaderBoardData(query);
+    await leaderBoardData(query.value);
     
   });
-  
-  
-  
+    
   // Star rating calculation
   const getStarClass = (rating, index) => {
     const fullStar = 'text-yellow-500';

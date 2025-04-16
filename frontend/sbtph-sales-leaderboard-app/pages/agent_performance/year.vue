@@ -10,12 +10,18 @@
       <div v-else>
             <!-- Toggle Button for Card/Table View -->
         <div class="mb-4 flex justify-end">
-          <button 
+          <button v-if="!isAdmin"
             @click="toggleView" 
             class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
           >
             Toggle to {{ isCardView ? 'Table' : 'Card' }} View
           </button>
+          <export-to-excel-component  v-if="isAdmin" class="ml-2"
+            :exportUrl="exportUrl"
+            :exportFileName="exportFileName"
+            :query="query"
+            :token="token"
+        ></export-to-excel-component>   
         </div>
      
         <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
@@ -75,7 +81,7 @@
         <div v-else class="overflow-x-auto shadow-xl rounded-lg">
           <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
           <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
-          <agentDetails class="p-4 mt-5" :fullyear="true"/>
+          <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/>
       </div>
         </div>
       </div>
@@ -193,14 +199,15 @@
       </div>
     </div>
     </div>
-  </template>
+</template>
   
   <script setup>
+
   import { useLeaderBoardStore } from '../stores/sales_leaderboard';
   import { onMounted, reactive,ref, watch } from 'vue';
+  import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
+  import API from '~/utils/api'
 
- import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
-  
   definePageMeta({
     middleware: ['auth'] 
   })
@@ -210,34 +217,72 @@
   authStore.fetchTokenFromLocalStore()
   
   const currentUser = authStore.state.user 
-  const agentId = currentUser.login_id
-  
- 
-   
+  const isAdmin = ref(false)
+
   const leaderBoardStore = useLeaderBoardStore();
   const selectedAgent = reactive({});
   const showModal = ref(false);
   const isCardView = ref(true)
+  const token = authStore.state.token
+  const query = ref({})
+
+    // Months for the dropdown
+    const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ];
+
+
   
+
+  
+  if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+    isCardView.value = false
+  }
+
   const route = useRoute()
   const router = useRouter()
   
-  const query = route.query
+  route.query.fullyear = true
 
-  query.fullyear = true
-  query.agent_id = agentId
-
+  route.query.month = months[new Date().getMonth()]
+  
+   query.value = route.query
 
   
+
+  const exportUrl = API.export.agent_peformance
+
+  const exportFileName = computed(()=> {
+  return `agent-yearly-performance.xlsx`
+  })
+
+    
+    // query.agent_id = agentId
+    // if the user is standuser and it is admin It will use the agentId for the query (query.agent_id) 
+    // so that able view all agent performance details
+    // in the case of salesagent user,  which he/she can view only 
+    // his/her performance details agentId is equal to currentUser login_id
+
+  let agentId;
+   if (query.value.agent_id) {
+    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+       agentId = query.value.agent_id
+       
+    }
+  }else {
+    agentId = currentUser.login_id
+    query.value.agent_id = agentId
+  }
+
+
   const agent = computed(() => {
     return leaderBoardStore.state.agentYearPerformance.yearAverage
   })
 
-
-
 //   console.log('the agent object is', agent.value)
 
- 
   const ratingClassModal = computed(() => {
     if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
       return 'text-purple-600'
@@ -312,19 +357,17 @@
     router.push(newRoute.fullPath)
     newRoute.query.fullyear = true
     newRoute.query.agent_id = agentId
-    leaderBoardData(newRoute.query)
+    query.value = newRoute.query
+    leaderBoardData(query.value)
     
   })
   
   
-  
   // Fetch leaderboard data on mount
   onMounted( async() => {
-    await leaderBoardData(query);
+    await leaderBoardData(query.value);
     
   });
-  
-  
   
   // Star rating calculation
   const getStarClass = (rating, index) => {
@@ -362,6 +405,5 @@
     max-height: 80vh; /* Set the maximum height to 80% of the viewport height */
     overflow-y: auto;  /* Allow vertical scrolling if content exceeds max height */
   }
-  
   
   </style>

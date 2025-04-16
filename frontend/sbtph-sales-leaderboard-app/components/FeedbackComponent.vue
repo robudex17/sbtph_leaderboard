@@ -11,18 +11,13 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Feedback</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center  disabled:bg-gray-400 disabled:cursor-not-allowed">
-                Actions
-              
+                 Actions
                  <button :disabled="feedbackDetails.length===1 || currentUser.role == 'user'" class=" disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  @click="openModal('add')" 
-                  :class="hasFeedback">
-                  <font-awesome-icon icon="plus" />
-
-                  Add 
+                    @click="openModal('add')" 
+                    :class="hasFeedback">
+                    <font-awesome-icon icon="plus" />
+                    Add 
                 </button>
-                
-             
-
               </th>
             </tr>
           </thead>
@@ -51,39 +46,39 @@
             </tr>
           </tbody>
         </table>
-      </div>
+       </div>
   
-      <!-- Modal -->
-      <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
-          <h2 class="text-xl font-bold mb-4">{{ modalType === 'add' ? `Add Feedback`  : `Edit Feedback` }}</h2>
-          <form @submit.prevent="submitForm">
+        <!-- Modal -->
+        <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg shadow-lg p-6 w-1/3">
+            <h2 class="text-xl font-bold mb-4">{{ modalType === 'add' ? `Add Feedback`  : `Edit Feedback` }}</h2>
+            <form @submit.prevent="submitForm">
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Agent ID</label>
+                <input v-model="form.agent_id" type="number" class="w-full border rounded-lg p-2" disabled required />
+              </div>
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">MOnth</label>
+                <input type="text" class="w-full border rounded-lg p-2" v-model="form.month" disabled required />
+            </div>
+            <!-- Year Field - Current Year -->
             <div class="mb-4">
-              <label class="block text-sm font-medium mb-2">Agent ID</label>
-              <input v-model="form.agent_id" type="number" class="w-full border rounded-lg p-2" disabled required />
+              <label class="block text-sm font-medium mb-2">Year</label>
+              <input type="text" class="w-full border rounded-lg p-2" v-model="form.year" disabled required />
             </div>
-            <div class="mb-4">
-              <label class="block text-sm font-medium mb-2">MOnth</label>
-              <input type="text" class="w-full border rounded-lg p-2" v-model="form.month" disabled required />
+      
+              <div class="mb-4" >
+                <label class="block text-sm font-medium mb-2">Feedback</label>
+                <input v-model="form.feedback" type="text" class="w-full border rounded-lg p-2"  />
+                <p v-if="errorFeedback" class="text-red-500 text-sm mt-2">{{ errorFeedback }}</p>
+              </div>
+              <div class="flex justify-end gap-2">
+                <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
+                <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Submit</button>
+              </div>
+            </form>
           </div>
-          <!-- Year Field - Current Year -->
-          <div class="mb-4">
-            <label class="block text-sm font-medium mb-2">Year</label>
-            <input type="text" class="w-full border rounded-lg p-2" v-model="form.year" disabled required />
-          </div>
-    
-            <div class="mb-4" >
-              <label class="block text-sm font-medium mb-2">Feedback</label>
-              <input v-model="form.feedback" type="text" class="w-full border rounded-lg p-2"  />
-              <p v-if="errorFeedback" class="text-red-500 text-sm mt-2">{{ errorFeedback }}</p>
-            </div>
-            <div class="flex justify-end gap-2">
-              <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
-              <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Submit</button>
-            </div>
-          </form>
         </div>
-      </div>
     </div>
   </template>
   

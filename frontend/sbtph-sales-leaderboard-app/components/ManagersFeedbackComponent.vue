@@ -41,50 +41,49 @@
   </template>
   
   <script setup>
-  import { ref,defineProps } from 'vue';
+      import { ref,defineProps } from 'vue';
 
-  const props = defineProps({
-
-    managers: {
-        type: Array,
-        required: true,
-    },
-    title: {
-      type: String,
-      required: true,
-    }
-});
-  
+      const props = defineProps({
+        managers: {
+            type: Array,
+            required: true,
+        },
+        title: {
+          type: String,
+          required: true,
+        }
+      });
+      
   </script>
   
   <style scoped>
-  .status {
-    font-weight: bold;
-  }
-  
-  .status.active {
-    color: #4caf50;
-  }
-  
-  .status.inactive {
-    color: #f44336;
-  }
-  
-  .agent-photo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .agent-photo img {
-    width: 3rem;
-    height: 3rem;
-    object-fit: cover;
-  }
-  
-  .agent-photo span {
-    font-size: 0.875rem;
-    color: #777;
-  }
+      .status {
+        font-weight: bold;
+      }
+      
+      .status.active {
+        color: #4caf50;
+      }
+      
+      .status.inactive {
+        color: #f44336;
+      }
+      
+      .agent-photo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .agent-photo img {
+        width: 3rem;
+        height: 3rem;
+        object-fit: cover;
+      }
+      
+      .agent-photo span {
+        font-size: 0.875rem;
+        color: #777;
+      }
   </style>
   

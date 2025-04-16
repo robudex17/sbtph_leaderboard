@@ -1,432 +1,367 @@
 <template>
-    <div class="p-4 mt-20">
-        <div class="p-4">
-          <AgentBio :agents="salesAgentBio"></AgentBio>
-        </div>
-       
-        <div class ="p-4 mt-5 mb-5">
-          <TargetShipok :targetShipokDetails="salesAgentTargetShipok" :agent="salesAgentBio[0]" @passNewTarget="addNewTarget" @passUpdatedTarget="editTarget" @passDeleteTarget="deleteTarget" ></TargetShipok>
-        </div>
-        <div class ="p-4 mt-5 mb-5">
-          <NewDeposit :newDepositDetails="salesAgentNewDeposit" @passNewDeposit="addNewDeposit" @passUpdatedNewDeposit="updateNewDeposit" @passDeleteDeposit="deleteNewDeposit"></NewDeposit>
-        </div>
-        <div class ="p-4 mt-5 mb-5">
-          <Feedback :feedbackDetails="salesAgentFeedback"
-          @passFeedback="addFeedback"
-          @passUpdateFeedback="updateFeedback"
-          @passDeleteFeedback="deleteFeedback"
-          ></Feedback>
-        </div>
-        <div class ="p-4 mt-5 mb-5">
-            <Absence attendanceType="absence" attendanceTitle="Sales Agent Absences" 
-            :attendanceDetails="salesAgentAbsences"  @passAttendance="addAttendanceType" @passUpdateAttendance="updateAttendanceType"
-             @passDeleteAttendance="deleteAttendanceType"
-             />
-        </div>
-        <div  class =" p-4 mt-5 mb-5">
-            <Tardiness attendanceType="tardiness" attendanceTitle="Sales Agent Tardiness" 
-             :attendanceDetails="salesAgentTardiness"  @passAttendance="addAttendanceType"
-               @passUpdateAttendance="updateAttendanceType"
-               @passDeleteAttendance="deleteAttendanceType" 
-            />
-        </div>
-        <div  class ="p-4 mt-5 mb-5">
-            <Memo attendanceType="memo" attendanceTitle="Sales Agent Memo" 
-             :attendanceDetails="salesAgentMemo " 
-              @passAttendance="addAttendanceType" @passUpdateAttendance="updateAttendanceType"
-              @passDeleteAttendance="deleteAttendanceType" 
-              />
-        </div>
-       
-    
+  <div>
+  <div class="p-4 mt-20">
+    <!-- Loading Spinner -->
+    <div v-if="leaderBoardStore.state.loading">
+      <spinner></spinner>
     </div>
-  </template>
-  
-  <script setup>
 
-  definePageMeta({
-    middleware: 'auth'
-  })
-
-  import { onMounted, watch, computed } from 'vue';
-  import { useRouter, useRoute } from 'vue-router';
-
-  import Absence from '../../../components/AttendanceComponent.vue'
-  import Tardiness from '../../../components/AttendanceComponent.vue'
-  import Memo from '../../../components/AttendanceComponent.vue'
-  import TargetShipok from '../../../components/TargetShipokComponent.vue'
-  import Feedback from '../../../components/FeedbackComponent.vue'
-  import NewDeposit from '../../../components/NewDepositComponent.vue'
-  import AgentBio from '../../../components/AgentBioComponent.vue'
-
- 
-  
-  const router = useRouter();
-  const route = useRoute();
-  const query = route.query;
-  // const agentId = route.params.agent_id;
-
-
-  
-  //get the current user
-  const authStore = useAuthStore()
-  authStore.fetchTokenFromLocalStore()
-
-  const currentUser = authStore.state.user 
-
-
-  let agentId;
-
-  agentId = route.params.agent_id
-
-  if(!agentId){
-    agentId = currentUser.login_id
-  }
-  const useManageSalesStore = useManageSalesAgentStore();
-
-  const addNewTarget = async(agentId, query, target) => {
-    try {
-      await useManageSalesStore.addAgentTarget(agentId, query, target)
-    }catch(error){
-      console.log(error.errors)
-    }
+    <!-- Leaderboard View -->
+    <div v-else>
+          <!-- Toggle Button for Card/Table View -->
+      <div class="mb-4 flex justify-end">
+        <button 
+          @click="toggleView" 
+          class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
+        >
+          Toggle to {{ isCardView ? 'Table' : 'Card' }} View
+        </button>
+      </div>
    
-    
-  }
-
-  const deleteTarget= async(agentId, query, target_date) => {
- 
-    try {
-      await useManageSalesStore.deleteAgentTarget(agentId, query, target_date)
-    }catch(error){
-      console.log(error.errors)
-    }
-   
-    
-  }
-
-  const editTarget = async(agentId, query, target) => {
-   
-    try {
-      await useManageSalesStore.updateAgentTarget(agentId, query, target)
-    }catch(error){
-      console.log(error.errors)
-    }
-   
-    
-  }
-
-  const addNewDeposit = async (agentId, query, newDeposit) => {
-    try {
-      await useManageSalesStore.addAgentDeposit(agentId, query, newDeposit)
-    }catch(error){
-      console.log(error.errors)
-    }
-  }
-
-
-  const updateNewDeposit = async(agentId, query,  updateNewDeposit) => {
-   
-   try {
-     await useManageSalesStore.updateAgentDeposit(agentId, query,  updateNewDeposit)
-   }catch(error){
-     console.log(error.errors)
-   }
-  
-   
- }
-
- const  deleteNewDeposit= async(agentId, query, newDeposit) => {
- 
- try {
-   await useManageSalesStore.deleteAgentNewDeposit(agentId, query, newDeposit)
- }catch(error){
-   console.log(error.errors)
- }
-
- 
-}
-
-const addAttendanceType = async (agentId, query,  attendanceType,attendance) => {
-    try {
-      await useManageSalesStore.addAgentAttendanceType(agentId, query, attendanceType, attendance)
-      
-    }catch(error){
-      console.log(error.errors)
-    }
-
-    
-  }
-
-
-  
-  const  updateAttendanceType = async(agentId, query,  attendanceType,attendance) => {
-   
-   try {
-     await useManageSalesStore.updateAgentAttendanceType(agentId, query, attendanceType, attendance)
-   }catch(error){
-     console.log(error.errors)
-   }
-  
-   
- }
-
-
- const  deleteAttendanceType = async(agentId, query,  attendanceType,attendance) => {
- 
- try {
-   await useManageSalesStore.deleteAgentAttendanceType(agentId, query,  attendanceType, attendance)
- }catch(error){
-   console.log(error.errors)
- }
-
- 
-}
-
-
-const addFeedback = async(agentId, query, feedback) => {
-    try {
-      await useManageSalesStore.addAgentFeedback(agentId, query, feedback)
-    }catch(error){
-      console.log(error.errors)
-    }
-   
-    
-  }
-
- const deleteFeedback= async(agentId, query, feedback_date) => {
- 
- try {
-   await useManageSalesStore.deleteAgentFeedback(agentId, query, feedback_date)
- }catch(error){
-   console.log(error.errors)
- }
-
- 
-}
-
-const updateFeedback = async(agentId, query, feedback) => {
-
- try {
-   await useManageSalesStore.updateAgentFeedback(agentId, query, feedback)
- }catch(error){
-   console.log(error.errors)
- }
-
- 
-}
-
-  
-
-
-  const salesAgentBio = computed(() => useManageSalesStore.state.salesAgentBio);
-  const salesAgentTargetShipok = computed(() => useManageSalesStore.state.salesAgentTargetShipok);
-  const salesAgentNewDeposit = computed(() => useManageSalesStore.state.salesAgentNewDeposit);
-  const salesAgentAbsences = computed(() => useManageSalesStore.state.salesAgentAbsences);
-  const salesAgentMemo = computed(() => useManageSalesStore.state.salesAgentMemo);
-  const salesAgentTardiness = computed(() => useManageSalesStore.state.salesAgentTardiness);
-
-  const salesAgentFeedback = computed(() => useManageSalesStore.state.salesAgentFeedback);
-
-
-  onMounted(async()=> {
-      await  useManageSalesStore.fetchSalesAgent(agentId)
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTargetShipok')
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentNewDeposit')
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentAbsences')
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentMemo')
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTardiness')
-      await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentFeedback')
-    })
-
-
-  
-  watch(route, async (newRoute) => {
-  
-  router.push(newRoute.fullPath);
-  await  useManageSalesStore.fetchSalesAgent(agentId)
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentTargetShipok')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentNewDeposit')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentAbsences')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentMemo')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentTardiness')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentFeedback')
-});
-
-
-import { defineStore } from 'pinia'
-import { reactive } from 'vue'
-
-import API from '~/utils/api'
-
-export const feedbackStore = defineStore('feedback', () => {
-      //call auth store fetch the token on the localstorage 
-    //save it to state.token
-    const authStore = useAuthStore()
-    authStore.fetchTokenFromLocalStore()
-
-    const  token = authStore.state.token 
-
-    // Reactive state definition
-    const state = reactive({
-        agents: [],
-        lms: [],
-        managers: [],
-        
-        loading:false,
-        error: null
-    })
-
-    // Action to fetch sales leaderboard
-    const fetchFeedback = async (id, queryString, feedbackType) => {
-        let errorMessage ;
-        let url;
-      
-        switch(feedbackType){
-           
-            case "agents" :
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.agent
-               break 
-            case "lms":
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.lm
-                break
-            case "managers":
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.manager
-                break                
-       
-            
-                
-            default:
-                console.log('Invalid Feedback  Type')
-                throw new Error(`Invalid Feedback Type: ${feedbackType}`)
-        }
-        
-         url = new URL(`${url}/${id}`)
-        if (queryString) {
-            Object.keys(queryString).forEach((key) =>
-                url.searchParams.append(key, queryString[key])
-            )
-        }
-        
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            //token is  invalid  remove to local storage 
-            if(!response.ok && response.status == 403){
-                const errors = await response.json()
-                if (errors.message == 'Invalid Access Token'){
-                    localStorage.removeItem('jwt')
-                    alert('Your Session has been expired, Please Login again.')
-                    location.reload()
-                }
-            }            
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status} ${response.statusText}`);
-            }
-    
-            const data = await response.json();
-            state[feedbackType] = data;
-
-        } catch (error) {
-            const customError = new Error(`${errorMessage}: ${error.message}`);
-            customError.originalError = error;  // Attach the original error
-            throw customError;
-        }
-    }
-
-    const addUpdateDeleteFeedback = async (id, feedbackResponse, feedbackType, query, method) => {
-        state.loading = true
-        state.error = null
-
-        switch(feedbackType){
-        
-            case "agents":
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.agent
-                break 
-            case "lms":
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.lm
-                break
-            case "managers":
-                errorMessage = `Failed to fetch  ${feedbackType} feedback`
-                url = API.feedback.manager
-                break                
-       
-            
-                
-            default:
-                console.log('Invalid Feedback  Type')
-                throw new Error(`Invalid Feedback Type: ${feedbackType}`)
-        }
-        
-         url = new URL(`${url}/${id}`)      
-        try {
-            const response = await fetch(`${url}`, {
-                method: method,
-                body: JSON.stringify(feedbackResponse),
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-                },
-            }) 
+      <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
+      <div v-else-if="agent?.target == 0 || !agent" class="text-red-700 font-bold  text-5xl">
+        No Available Data.
+      </div>
+      <div v-else>
+        <!-- CARD VIEW -->
+        <div v-if="isCardView" class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
+          <div
          
-            //token is  invalid  remove to local storage 
-            if(!response.ok && response.status == 403){
-                const errors = await response.json()
-                if (errors.message == 'Invalid Access Token'){
-                    localStorage.removeItem('jwt')
-                    alert('Your Session has been expired, Please Login again.')
-                    location.reload()
-                }
-            }           
+          class="bg-gray-800 text-white border rounded-lg shadow-lg overflow-hidden"
+        >
+          <div class="flex flex-col items-center p-4">
+            <img
+              v-if="agent.image_link"
+              :src="agent.image_link"
+              alt="Agent Image"
+              class="w-20 h-20 rounded-full object-cover mb-4"
+            />
+            <div v-else class="w-20 h-20 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
+              <span class="text-xl">{{ agent.db_name.charAt(0) }}</span>
+            </div>
+            <div class="text-center">
+              <h3 class="text-lg font-semibold">{{ agent.db_name }}</h3>
+              <p class="text-sm  font-bold" :class="setRatingNameColor(agent)" >{{ agent.ratings_name }}</p>
 
-            if (!response.ok) {
-                
-                const errors = await response.json()
-                throw new Error(errors || "An unknown error occurred");
-            }
-  
-           
-           await fetchFeedback(id, query, feedbackType)
-           if (method == 'POST'){
-                alert(`Adding New ${feedbackType} feedback with id of ${id} is successful` ) 
-           }else if (method == 'PUT'){
-                alert(`${feedbackType} feedback with id of ${id} is updated` ) 
-           }else if (method == 'DELETE'){
-                alert(`${feedbackType} feedback with id of ${id} is deleted` ) 
-           }
-          
-        } catch (error) {
-            console.log(error.message)
-            state.error = error.message
-        } finally {
-            state.loading = false
-        }
-    }
+              <div class="flex items-center mt-2">
+                <template v-for="i in 5" :key="i">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    :class="getStarClass(agent.final_ratings, i)"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                </template>
+              </div>
+
+              <p class="text-xl font-bold mt-2">{{ agent.final_ratings }}</p>
+              <p class="text-xl font-bold mt-2"  v-if="agent.month">{{ agent.month }}</p>
+              <p class="text-xl font-bold mt-2">{{ agent.year }}</p>
+            </div>
+            <button
+              @click="showAgentDetails(agent)"
+              class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+            >
+              Agent Performance Details
+            </button>
+          </div>
+        </div>
+        </div>
+              <!-- Table View -->
+      <div v-else class="overflow-x-auto shadow-xl rounded-lg">
+        <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
+        <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
+        <agentDetails class="p-4 mt-5" :fullyear="true"/>
+    </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Agent Details -->
+  <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div class="bg-gray-800 text-white p-6 rounded-lg w-full md:w-2/3 lg:w-1/2 xl:w-1/3 h-auto overflow-auto">
+      <div class="flex flex-col items-center">
+        <img
+          v-if="selectedAgent && selectedAgent.image_link"
+          :src="selectedAgent.image_link"
+          alt="Agent Image"
+          class="w-40 h-40 rounded-full object-cover mb-4"
+        />
+        <div v-else class="w-40 h-40 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
+          <span class="text-4xl">{{ selectedAgent ? selectedAgent.db_name.charAt(0) : '' }}</span>
+        </div>
+        <div class="text-center">
+          <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
+          <h3 class="text-xl font-semibold">AgentID: {{ selectedAgent ? selectedAgent.id : 'Agent has no ID' }}</h3>
+          <p class="text-lg text-gray-600 font-bold" :class="ratingClassModal">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
+
+          <div class="flex items-center mt-2">
+            <template v-for="i in 5" :key="i">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                :class="getStarClass(selectedAgent ? selectedAgent.final_ratings : 0, i)"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+            </template>
+          </div>
+
+          <p class="text-3xl font-bold mt-2">{{ selectedAgent ? selectedAgent.final_ratings : '' }}</p>
+         
+        </div>
+        <p  v-if="agent.month" class="text-lg font-bold mt-2">Month Of: {{ selectedAgent ? selectedAgent.month : '' }}</p>
+        <p class="text-lg font-bold mt-2">Year: {{ selectedAgent ? selectedAgent.year : '' }}</p>
+        <!-- Table for Additional Information -->
+        <div class="mt-6 w-full overflow-x-auto">
+          <table class="min-w-full table-auto">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Metric</th>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Score</th>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Performance(80%)</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.shipok_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.performance_rating }}</td>
+            </tr>
+
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence(5%)</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_rating }}</td>
+            </tr>
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness(5%)</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_rating }}</td>
+            </tr>
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo(5%) </td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_rating }}</td>
+            </tr>
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback(5%)</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_rating }}</td>
+            </tr>
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">New Deposit(10%)</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.deposit_score }}</td>
+              <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.additional_points }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <table class="min-w-full table-auto mt-6">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Target(Unit)</th>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">ShipOk(Unit)</th>
+              <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Percentage(%)</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="selectedAgent">
+              <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.target }}</td>
+              <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.shipok }}</td>
+              <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedAgent.shipok_percent }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+        <button
+          @click="closeModal"
+          class="mt-6 text-blue-300 hover:text-blue-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>
+</template>
+
+<script setup>
+import { useLeaderBoardStore } from '../stores/sales_leaderboard';
+import { onMounted, reactive,ref, watch } from 'vue';
+
+import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
+
+definePageMeta({
+  middleware: ['auth'] 
+})
+
+//get the current user
+const authStore = useAuthStore()
+authStore.fetchTokenFromLocalStore()
+
+const currentUser = authStore.state.user 
+const agentId = currentUser.login_id
+
 
  
+const leaderBoardStore = useLeaderBoardStore();
+const selectedAgent = reactive({});
+const showModal = ref(false);
+const isCardView = ref(true)
 
-    // Expose individual state properties and actions
-    return {
-        state,  
-        fetchFeedback ,
-        addUpdateDeleteFeedback,
-    }
+const route = useRoute()
+const router = useRouter()
+
+const query = route.query
+
+query.fullyear = true
+query.agent_id = agentId
+
+
+
+const agent = computed(() => {
+  return leaderBoardStore.state.agentYearPerformance.yearAverage
 })
 
 
 
+//   console.log('the agent object is', agent.value)
 
-  </script>
+
+const ratingClassModal = computed(() => {
+  if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
+    return 'text-purple-600'
+  }
   
+  if (selectedAgent.ratings_name == 'VERY SATISFACTORY') {
+    return 'text-blue-600'
+  }
+
+  if (selectedAgent.ratings_name == 'SATISFACTORY') {
+    return 'text-green-600'
+  }
+  if (selectedAgent.ratings_name == 'NEEDS IMPROVEMENT') {
+    return 'text-yellow-600'
+  }
+
+  if (selectedAgent.ratings_name == 'POOR') {
+    return 'text-red-600'
+  }
+
+})
+
+const setRatingNameColor = (agent) => {
+  if (agent.ratings_name == 'EXCEPTIONAL') {
+    return 'text-purple-600'
+  }
+  
+  if (agent.ratings_name == 'VERY SATISFACTORY') {
+    return 'text-blue-600'
+  }
+
+  if (agent.ratings_name == 'SATISFACTORY') {
+    return 'text-green-600'
+  }
+  if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
+    return 'text-yellow-600'
+  }
+
+  if (agent.ratings_name == 'POOR') {
+    return 'text-red-600'
+  }
+}
+
+// Method to fetch leaderboard data
+const leaderBoardData = async(query) => {
+
+  await leaderBoardStore.fetchLeaderboard(query);
+};
+
+// Show the details of the selected agent
+const showAgentDetails = (agent) => {
+  // selectedAgent.value = agent;
+  Object.assign(selectedAgent, agent);
+  showModal.value = true; // Show the modal
+};
+
+// Close the modal
+const closeModal = () => {
+  showModal.value = false; // Hide the modal
+};
+
+//Toggle the view mode between card and table
+
+const  toggleView = () => {
+  isCardView.value = !isCardView.value
+}
+
+//watch for the route change
+
+watch(route, (newRoute) => {
+  console.log('The route is change. we should react to the change..')
+  router.push(newRoute.fullPath)
+  newRoute.query.fullyear = true
+  newRoute.query.agent_id = agentId
+  leaderBoardData(newRoute.query)
+  
+})
+
+
+
+// Fetch leaderboard data on mount
+onMounted( async() => {
+  await leaderBoardData(query);
+  
+});
+
+
+
+// Star rating calculation
+const getStarClass = (rating, index) => {
+  const fullStar = 'text-yellow-500';
+  const halfStar = 'text-yellow-300';
+  const emptyStar = 'text-gray-300';
+
+  const decimalPart = rating - Math.floor(rating);
+  if (index <= Math.floor(rating)) {
+    return fullStar;
+  } else if (index - 1 < decimalPart) {
+    return halfStar;
+  } else {
+    return emptyStar;
+  }
+};
+</script>
+
+<style scoped>
+/* Modal container adjustments */
+@media (min-width: 768px) {
+  .modal {
+    width: 75%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal {
+    width: 50%;
+  }
+}
+
+/* Modal content */
+.bg-gray-800 {
+  max-height: 80vh; /* Set the maximum height to 80% of the viewport height */
+  overflow-y: auto;  /* Allow vertical scrolling if content exceeds max height */
+}
+
+
+</style>

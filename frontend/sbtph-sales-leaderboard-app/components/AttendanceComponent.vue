@@ -94,180 +94,177 @@
   </template>
   
   <script setup>
-  import { ref, defineProps, defineEmits,computed } from 'vue';
-  import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+      import { ref, defineProps, defineEmits,computed } from 'vue';
+      import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-  //get the current user
-  const authStore = useAuthStore()
-  authStore.fetchTokenFromLocalStore()
+      //get the current user
+      const authStore = useAuthStore()
+      authStore.fetchTokenFromLocalStore()
 
-  const currentUser = authStore.state.user 
-  
-  const props = defineProps({
-    attendanceTitle: {
-        type: String,
-        required: true,
-    },
-    attendanceType: {
-        type: String,
-        required: true,
-    },
-    attendanceDetails: {
-        type: Array,
-        required: true,
-    }
-});
+      const currentUser = authStore.state.user 
+      
+      const props = defineProps({
+          attendanceTitle: {
+              type: String,
+              required: true,
+          },
+          attendanceType: {
+              type: String,
+              required: true,
+          },
+          attendanceDetails: {
+              type: Array,
+              required: true,
+          }
+      });
 
-const route = useRoute()
-const router = useRouter()
+      const route = useRoute()
+      const router = useRouter()
 
-const showModal = ref(false);
-const modalType = ref('add');
+      const showModal = ref(false);
+      const modalType = ref('add');
 
-const month  = ref(null)
-const year = ref(null)
-const agentId = route.params.agent_id
-const errorDate = ref(null)
-
-
-const form = ref({
-    id: null,
-    agent_id: '',
-    month: '',
-    year: '',
-    date: '',
-    description: '',
-  });
+      const month  = ref(null)
+      const year = ref(null)
+      const agentId = route.params.agent_id
+      const errorDate = ref(null)
 
 
-// Months for the dropdown
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+      const form = ref({
+          id: null,
+          agent_id: '',
+          month: '',
+          year: '',
+          date: '',
+          description: '',
+        });
 
 
-month.value= route.query.month
-year.value = route.query.year 
-if (month.value == null || month.value == ""){
-month.value= months[new Date().getMonth()]
-}
-
-if (year.value == null || year.value == ""){
-year.value = new Date().getFullYear()
-}
+      // Months for the dropdown
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
 
 
+      month.value= route.query.month
+      year.value = route.query.year 
+      if (month.value == null || month.value == ""){
+      month.value= months[new Date().getMonth()]
+      }
 
-const validateDateEntry = () => {
- 
-  const inputDate = new Date(form.value.date)
-
-  const inputYear = inputDate.getFullYear()
-  const inputMonth = months[inputDate.getMonth()]
+      if (year.value == null || year.value == ""){
+      year.value = new Date().getFullYear()
+      }
 
 
 
-  if(inputDate.getTime() > new Date().getTime()) {
-    errorDate.value = `Cannot Set ${props.attendanceType} on the  Future Date`
-    return
-  }
+      const validateDateEntry = () => {
+    
+          const inputDate = new Date(form.value.date)
 
-  if (month.value == inputMonth && year.value == inputYear){
-    errorDate.value = ""
-  }else{
-    errorDate.value = "Please Enter Date on Specific Month And Year"
-  }
+          const inputYear = inputDate.getFullYear()
+          const inputMonth = months[inputDate.getMonth()]
 
-}
-  
-  const openModal = (type, index = null) => {
-    modalType.value = type;
-    showModal.value = true;
-     
-    if (type === 'edit' && index !== null) {
-     
-    form.value = { ...props.attendanceDetails[index]}
-    } else {
-      validateDateEntry()
-      form.value = {
-        id: null,
-        agent_id: agentId,
-        month: month.value,
-        year: year.value,
-        date: '',
-        description: '',
+          if(inputDate.getTime() > new Date().getTime()) {
+            errorDate.value = `Cannot Set ${props.attendanceType} on the  Future Date`
+            return
+          }
+
+          if (month.value == inputMonth && year.value == inputYear){
+            errorDate.value = ""
+          }else{
+            errorDate.value = "Please Enter Date on Specific Month And Year"
+          }
+
+      }
+      
+      const openModal = (type, index = null) => {
+        modalType.value = type;
+        showModal.value = true;
+        
+        if (type === 'edit' && index !== null) {
+        
+        form.value = { ...props.attendanceDetails[index]}
+        } else {
+          validateDateEntry()
+          form.value = {
+            id: null,
+            agent_id: agentId,
+            month: month.value,
+            year: year.value,
+            date: '',
+            description: '',
+          };
+        }
       };
-    }
-  };
-  
-  const closeModal = () => {
-    showModal.value = false;
-    modalType.value = null
-  };
-  
-  const emit = defineEmits(['passAttendance', 'passUpdateAttendance', 'passDeleteAttendance'])
-  const submitForm = () => {
-      // If there are any errors, do not proceed
-    if (errorDate.value) {
-      return;
-    }
+      
+      const closeModal = () => {
+        showModal.value = false;
+        modalType.value = null
+      };
+      
+      const emit = defineEmits(['passAttendance', 'passUpdateAttendance', 'passDeleteAttendance'])
+      const submitForm = () => {
+          // If there are any errors, do not proceed
+          if (errorDate.value) {
+            return;
+          }
 
-    
-    if (modalType.value === 'add') {
-        const searchDeate = props.attendanceDetails.find(agentDetial => agentDetial.date  == form.value.date)
-       if (searchDeate){
-        alert(`Cannot Set ${props.attendanceType} with the same date`)
-        return
-       }
-       if(currentUser.role != 'admin'){
-        alert('"Access Denied: Insufficient Permission')
-        closeModal();
-       }
-       emit('passAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, form.value)   
-    } else if (modalType.value === 'edit') {
-      emit('passUpdateAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, form.value)
-      console.log(form.value)   
-    }
-    closeModal();
-  };
-  
-  const deleteAttendanceType = (attendanceId) => {
-    if (confirm(`Are you sure you want to delete this ${props.attendanceType}?`)) {
-      emit('passDeleteAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, {id: attendanceId})
-  };
+          
+          if (modalType.value === 'add') {
+              const searchDeate = props.attendanceDetails.find(agentDetial => agentDetial.date  == form.value.date)
+              if (searchDeate){
+                alert(`Cannot Set ${props.attendanceType} with the same date`)
+                return
+              }
+              if(currentUser.role != 'admin'){
+                alert('"Access Denied: Insufficient Permission')
+                closeModal();
+              }
+              emit('passAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, form.value)   
+          } else if (modalType.value === 'edit') {
+              emit('passUpdateAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, form.value)
+              console.log(form.value)   
+          }
+          closeModal();
+      };
+      
+      const deleteAttendanceType = (attendanceId) => {
+        if (confirm(`Are you sure you want to delete this ${props.attendanceType}?`)) {
+             emit('passDeleteAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, {id: attendanceId})
+        };
 
-  }
+      }
 
-  watch(route, async (newRoute) => {
-  console.log("The route is changed, reacting to the change..");
-  router.push(newRoute.fullPath);
-  month.value = newRoute.query.month 
-  year.value = newRoute.query.year
+      watch(route, async (newRoute) => {
+      console.log("The route is changed, reacting to the change..");
+      router.push(newRoute.fullPath);
+      month.value = newRoute.query.month 
+      year.value = newRoute.query.year
 
-});
+    });
 
-// Watcher for the target field
-watch(
-() => form.value.date,
-(newValue) => {
-  
-  const inputDate = new Date(newValue)
+    // Watcher for the target field
+    watch(
+      () => form.value.date,
+      (newValue) => {
+          const inputDate = new Date(newValue)
+          const inputYear = inputDate.getFullYear()
+          const inputMonth = months[inputDate.getMonth()]
 
-  const inputYear = inputDate.getFullYear()
-  const inputMonth = months[inputDate.getMonth()]
-  if(inputDate.getTime() > new Date().getTime()) {
-    errorDate.value =`Cannot Set ${props.attendanceType} on the  Future Date`
-    return
-    }
-    
-  if (month.value == inputMonth && year.value == inputYear){
-      errorDate.value = ""
-    }else{
-      errorDate.value = "Please Enter Date on Specific Month And Year"
-  }
-}
-);
+          if(inputDate.getTime() > new Date().getTime()) {
+            errorDate.value =`Cannot Set ${props.attendanceType} on the  Future Date`
+            return
+          }
+            
+          if (month.value == inputMonth && year.value == inputYear){
+              errorDate.value = ""
+          }else{
+              errorDate.value = "Please Enter Date on Specific Month And Year"
+          }
+      }
+    );
 </script>
   
 <style>

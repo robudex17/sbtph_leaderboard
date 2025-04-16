@@ -1,4 +1,8 @@
-const HTTPADDR = `http://localhost:8080/api`
+//const HTTPADDR = `http://localhost:8080/api`
+
+const config = useRuntimeConfig()
+
+const HTTPADDR = config.public.apiUrl
 
 // const HTTPADDR = `http://localhost:8080/api`
 const API = {
@@ -54,6 +58,16 @@ const API = {
     
     fetch_market_target_shipok_year: `${HTTPADDR}/agent_market_target_shipok_year`,
     fetch_market_new_deposit_year: `${HTTPADDR}/agent_market_new_deposit_year`,
+
+    export: {
+        leaderboard: `${HTTPADDR}/sales_leaderboard_export`,
+        agent_peformance: `${HTTPADDR}/sales_agent_performanace_export`,
+        team_performance_monthly :  `${HTTPADDR}/agent_market_target_shipok_new_deposit_export`,
+        team_performance_yearly :   `${HTTPADDR}/agent_market_target_shipok_new_deposit_year_export`,
+
+    }
+
+  
 }
 
 export default API 

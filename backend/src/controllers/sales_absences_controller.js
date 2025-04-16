@@ -16,6 +16,8 @@ exports.recordNewAbsent = async (req, res, next) => {
     const absentYear = req.body.year
     const agentAbsentDescription = req.body.description
 
+   
+
     
     try {
         const query = "INSERT INTO absences ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
@@ -42,6 +44,7 @@ exports.fetchAgentAbsent = async (req, res, next) => {
     let givenMonth
     let givenYear
     let fullyear  = req.query.fullyear
+    const export_to_excel  = req.export_to_excel
     const currentDate = new Date()
 
                 // Get the month name
@@ -63,26 +66,48 @@ exports.fetchAgentAbsent = async (req, res, next) => {
     }else {
         givenYear = req.query.year
     }
-    const agentId = req.params.agent_id
+    let agentId 
+
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
+
+
 
     // const connection =  await pool.getConnection()
  
     if(fullyear == 'true' || fullyear == true) {
+      
         const [result] = await pool.execute(
-            'SELECT * FROM  `absences` WHERE agent_id=?  AND year=?',[agentId,givenYear]  
+            'SELECT * FROM  `absences` WHERE agent_id=? AND year=?',[agentId,givenYear]  
         )
         // connection.release()
         result.sort((a, b) => {
             return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
             monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
         })
-        res.json(result)  
+
+        if(export_to_excel){
+            req.agent_absences = result
+            next()
+        }else{
+            res.json(result)  
+        }
+      
     }else {
         const [result] = await pool.execute(
             'SELECT * FROM  `absences` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
         )
-        // connection.release()
-        res.json(result)
+        
+        if(export_to_excel){
+            req.agent_absences = result
+            next()
+        }else{
+            res.json(result)
+        }
+       
     }
     
 }

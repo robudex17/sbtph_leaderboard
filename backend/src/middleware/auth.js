@@ -13,7 +13,7 @@ exports.authenticateToken = async (req,res,next) => {
             return res.status(403).json({message: 'Invalid Access Token'})
 
         }
-        console.log(user)
+        // console.log(user)
         req.user = user
         next()
     })

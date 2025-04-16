@@ -14,14 +14,16 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     let givenYear 
     let withTrucks
     const currentDate = new Date()
- 
-    if (!req.query.month ||  req.query.month ==="") {
-        
-            // Get the month name
-        const monthNames = [
+
+           // Get the month name
+    const monthNames = [
             "January", "February", "March", "April", "May", "June",
             "July", "August", "September", "October", "November", "December"
         ];
+ 
+    if (!req.query.month ||  req.query.month ==="") {
+        
+     
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -133,13 +135,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       dashboard.active_agents = activeAgents
 
       //get ratings summarries
-      const agentsMetics =  await getAgentsMetrics( givenMonth, givenYear, withTrucks, "")  
+      const agentsMetics =  await getAgentsMetrics( "", givenMonth, givenYear, withTrucks)  
 
       const ratingsCount = {
         EXCEPTIONAL: 0,
-        VERY_SATISFACTORY: 0,
+        "VERY SATISFACTORY": 0,
         SATISFACTORY: 0,
-        NEEDS_IMPROVEMENT: 0,
+        "NEEDS IMPROVEMENT": 0,
         POOR: 0
       }
 
@@ -160,6 +162,141 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }else{
         dashboard.agent_ratings = ratingsCount
       }
+
+
+   //get agent yearly ratings
+   
+   function calculateAverages(dataArray) {
+    const keysToAverage = [
+        "absence_score", 
+        "feedback_score",
+        "memo_score",
+        "tardiness_score", 
+        "deposit_score",
+        "shipok_score",
+        "absence_rating",
+        "memo_rating", 
+        "tardiness_rating", 
+        "feedback_rating",
+        "performance_rating",
+        "final_ratings",
+        "shipok_percent",
+        "additional_points",
+    ];
+
+      const keysToSum = ["target", "shipok"];
+
+      if (dataArray.length === 0) return {}; // Return empty if no data
+
+      const sum = dataArray.reduce((acc, obj) => {
+          keysToAverage.forEach(key => {
+              acc[key] = (acc[key] || 0) + parseFloat(obj[key] || 0);
+          });
+          keysToSum.forEach(key => {
+              acc[key] = (acc[key] || 0) + parseFloat(obj[key] || 0);
+          });
+          return acc;
+      }, {});
+
+      const count = dataArray.length;
+
+      const result = {};
+
+      // Calculate averages for the specified keys
+      keysToAverage.forEach(key => {
+          result[key] = Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
+      });
+
+      // Store sums for "target" and "shipok"
+      keysToSum.forEach(key => {
+          result[key] = sum[key]; // Keep as total sum
+      });
+  
+
+  
+      
+      return result;
+}
+
+let sales_agents = []
+let agentYearlyMetrics = []
+if (withTrucks === "true" || withTrucks === true){
+  const [sales_agents_result] = await pool.execute(
+    'SELECT * FROM  `sales_agents`'  
+  )
+  
+  sales_agents = sales_agents_result
+}else {
+  
+  const [sales_agents_result] = await pool.execute(
+    'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
+)
+sales_agents = sales_agents_result
+}
+
+for (const sales_agent of sales_agents){
+      const queries = monthNames.map(month => 
+        getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks).then(data => {
+            if (data) {
+                return data[0]
+            }
+            return null; // Skip null values
+        })
+    );
+
+    const results = await Promise.all(queries);
+    const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
+    const yearAverage = calculateAverages(agentMetircsFullYear)
+    if(yearAverage.final_ratings){
+        const [year_ratings] = await pool.execute(
+      'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[yearAverage.final_ratings]
+    )
+    yearAverage['ratings_name'] = year_ratings[0].ratings_name
+    }else {
+      yearAverage['ratings_name'] = "NO_RATING"
+        yearAverage['final_ratings'] = "NO_RATING"
+    }
+
+    yearAverage['id'] =sales_agent.id
+    yearAverage['db_name'] =  sales_agent.db_name
+    yearAverage['image_link'] = sales_agent.image_link
+    yearAverage['year'] = givenYear
+
+    agentYearlyMetrics.push(yearAverage)
+
+  
+}
+
+const ratingsCountYear = {
+  EXCEPTIONAL: 0,
+  "VERY SATISFACTORY": 0,
+  SATISFACTORY: 0,
+  "NEEDS IMPROVEMENT": 0,
+  POOR: 0,
+  NO_RATING: 0
+  
+}
+
+const calculateRatingsYear = ( agentYearlyMetrics,ratingsCountYear) => {
+
+  agentYearlyMetrics.forEach(agentMetic => {
+    if (ratingsCountYear[agentMetic.ratings_name] != undefined) {
+      ratingsCountYear[agentMetic.ratings_name]++
+    }
+  })
+
+  return ratingsCountYear
+}
+
+if (agentYearlyMetrics.length > 0){
+  dashboard.agent_ratings_year = calculateRatingsYear(agentYearlyMetrics,ratingsCountYear)
+}else{
+  dashboard.agent_ratings_year = ratingsCountYear
+}
+
+
+
+   //end year ratings
 
       //get per  target shipok  new deposit per market per month 
       let queryPerMarket 
@@ -356,14 +493,6 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
 
 
-
-      console.log(dashboard.monthly_target_shipok)
-      console.log( dashboard.year_target_shipok)
-      console.log( dashboard.current_month_newdeposit)
-      console.log(  dashboard.current_year_newdeposit)
-      //attendance behavior metrics
-
-      
       const [tardinessResult] = await pool.execute(
         "SELECT COUNT(*) AS tardiness  FROM `tardiness` WHERE `month`=? AND `year`=? GROUP BY month,year", [givenMonth,givenYear]
       )

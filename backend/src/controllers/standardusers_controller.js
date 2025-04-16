@@ -34,42 +34,6 @@ exports.fetchStandardUsers = async (req,res, next ) => {
     }  
 }
 
-// exports.fetchStandardUser = async( req,res, next) => {
-
-//     try {
-//         // const connection = await pool.getConnection()
-//         const agentId = req.params.agent_id
-//         const [rows, fields] = await pool.execute(
-//             // 'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
-
-//             `
-//             SELECT 
-//                 sa.id AS id,
-               
-//                 sa.firstname,
-//                 sa.lastname,
-//                 sa.db_name,
-//                 sa.image_link,
-               
-//                 sa.status,
-              
-//             FROM sales_agents sa
-//             JOIN market ON sa.market_id = market.id
-//             JOIN managers ON sa.manager_id = managers.id
-//             WHERE sa.status = ?  AND sa.id=?
-
-//             `,['active', agentId]
-//         )
-    
-//         // connection.release()
-//         res.json(rows)
-        
-//     }catch(error){
-//         console.error(`Error In Fetching Agent with agent_id of ${agentId}`, error)
-//         res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
-//     }  
-
-// }
 
 exports.addNewStandardUser = async( req, res, next) => {
     // const connection  = await pool.getConnection()

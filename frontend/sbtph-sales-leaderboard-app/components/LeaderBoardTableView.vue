@@ -1,12 +1,5 @@
 <template>
     <div>
-
-   <!-- <div class="py-2">
-    <button @click="printTable" class="px-4 py-2 bg-blue-500 text-white rounded shadow hover:bg-blue-600">
-      <font-awesome-icon :icon="['fas', 'print']" />
-      Print Page
-    </button>
-  </div> -->
       <div class="overflow-x-auto" id="print-table">
         <table class="min-w-full border-collapse border border-gray-300">
           <thead>
@@ -68,72 +61,73 @@
   </template>
 
   <script setup>
-  import printJS from "print-js";
+      import printJS from "print-js";
 
-  const printTable = () => {
-    const printContent = document.getElementById("print-table").innerHTML;
-    const originalContent = document.body.innerHTML;
+      const printTable = () => {
+          const printContent = document.getElementById("print-table").innerHTML;
+          const originalContent = document.body.innerHTML;
 
-    document.body.innerHTML = printContent;
-    window.print();
-    document.body.innerHTML = originalContent;
-  };
-    const props = defineProps({
-        agents : {
-            type: Array
+          document.body.innerHTML = printContent;
+          window.print();
+          document.body.innerHTML = originalContent;
+      };
+
+      const props = defineProps({
+            agents : {
+                type: Array
+            }
+        })
+
+      const totalTheRating = (rating1, rating2) =>{
+            return  Number(rating1) + Number(rating2)
         }
-    })
 
-    const totalTheRating = (rating1, rating2) =>{
-        return  Number(rating1) + Number(rating2)
-    }
+      const setRatingNameColor = (agent) => {
+          if (agent.ratings_name == 'EXCEPTIONAL') {
+            return 'text-purple-700'
+          }
+          
+          if (agent.ratings_name == 'VERY SATISFACTORY') {
+            return 'text-blue-700'
+          }
 
-  const setRatingNameColor = (agent) => {
-    if (agent.ratings_name == 'EXCEPTIONAL') {
-      return 'text-purple-700'
-    }
-    
-    if (agent.ratings_name == 'VERY SATISFACTORY') {
-      return 'text-blue-700'
-    }
+          if (agent.ratings_name == 'SATISFACTORY') {
+            return 'text-green-700'
+          }
+          if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
+            return 'text-yellow-700'
+          }
 
-    if (agent.ratings_name == 'SATISFACTORY') {
-      return 'text-green-700'
-    }
-    if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
-      return 'text-yellow-700'
-    }
-
-    if (agent.ratings_name == 'POOR') {
-      return 'text-red-700'
-    }
-}
+          if (agent.ratings_name == 'POOR') {
+            return 'text-red-700'
+          }
+        }
 
 </script>
   
   <style scoped>
-  /* Ensure text resizes to fit within the cells */
-  table {
-    table-layout: auto;
-  }
-  th, td {
-    font-size: 0.875rem; /* Tailwind's text-sm */
-    white-space: normal; /* Allow text wrapping */
-  }
+      /* Ensure text resizes to fit within the cells */
+      table {
+        table-layout: auto;
+      }
+      th, td {
+        font-size: 0.875rem; /* Tailwind's text-sm */
+        white-space: normal; /* Allow text wrapping */
+      }
 
-  @media print {
-  body * {
-    visibility: hidden;
-  }
-  #print-table, #print-table * {
-    visibility: visible;
-  }
-  #print-table {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-  }
-}
+      @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-table, #print-table * {
+        visibility: visible;
+      }
+      #print-table {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+      }
+    }
   </style>
   

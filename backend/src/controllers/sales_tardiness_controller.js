@@ -43,6 +43,7 @@ exports.fetchAgentTardiness = async (req, res, next) => {
     let givenYear 
     let fullyear = req.query.fullyear
     const currentDate = new Date()
+    const export_to_excel = req.export_to_excel
 
                 // Get the month name
     const monthNames = [
@@ -66,9 +67,15 @@ exports.fetchAgentTardiness = async (req, res, next) => {
 
     
 
-    const agentId = req.params.agent_id
+    // const agentId = req.params.agent_id
 
-    
+    let agentId 
+
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
     if(fullyear == 'true' || fullyear == true){
@@ -80,13 +87,24 @@ exports.fetchAgentTardiness = async (req, res, next) => {
             return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
             monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
         })
-        res.json(result)
+        if(export_to_excel){
+            req.agent_tardiness = result
+            next()
+        }else{
+            res.json(result)
+        }
+        
     }else{
         const [result] = await pool.execute(
             'SELECT * FROM  `tardiness` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
         )
-        // connection.release()
-        res.json(result)
+        if(export_to_excel){
+            req.agent_tardiness = result
+            next()
+        }else{
+            res.json(result)
+        }
+       
     }
    
 }

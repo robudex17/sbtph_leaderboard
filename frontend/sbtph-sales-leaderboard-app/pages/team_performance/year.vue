@@ -10,6 +10,14 @@
           No Available Data.
        </div>
        <div v-else>
+            <div class="mb-4 flex justify-end">
+                <export-to-excel-component  v-if="isAdmin" class="ml-2"
+                    :exportUrl="exportUrl"
+                    :exportFileName="exportFileName"
+                    :query="query"
+                    :token="token"
+                ></export-to-excel-component> 
+             </div>
                 <h1 class="text-2xl font-bold mb-4 text-center">Market Target/ShipOk</h1>
                 <div class="overflow-x-auto">
                 <table class="min-w-full border border-green-500 rounded-lg">
@@ -85,6 +93,7 @@
   
   <script setup>
     import { ref, onMounted, watch } from 'vue';
+     import API from '~/utils/api'
    
     definePageMeta({
       middleware: ['auth'] 
@@ -95,6 +104,7 @@
     const authStore = useAuthStore()
     authStore.fetchTokenFromLocalStore()
     const currentUser = authStore.state.user 
+    const token = authStore.state.token
 
 
    
@@ -112,11 +122,35 @@
    const route = useRoute()
    const router = useRouter()
 
-   const query = route.query
+  
   
    const  errorTarget = ref("")
    const errorShipOk = ref("")
+   const isAdmin = ref(false)
+   const year = ref(null)
+   const query = ref({})
+   query.value  = route.query
 
+   
+    year.value = query.value.year 
+
+  
+    if (year.value == null || year.value == ""){
+        year.value = new Date().getFullYear()
+    }
+   
+
+
+    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+         isAdmin.value = true
+        
+    }
+
+    const exportUrl = API.export.team_performance_yearly
+
+    const exportFileName = computed(()=> {
+    return `yearly-(${year.value})-teamperformance.xlsx`
+    })
 
 
 
@@ -124,8 +158,8 @@
     marketStore.state.market_target_shipok_year = []; // Clear previous data
     marketStore.state.market_new_deposit_year = [];  // Clear previous data
 
-   await marketStore.fetchAgentMarketTargetShipokYear(query);
-   await marketStore.fetchAgentMarketNewDepositYear(query);
+   await marketStore.fetchAgentMarketTargetShipokYear(query.value);
+   await marketStore.fetchAgentMarketNewDepositYear(query.value);
 });
 
 watch(() => route.query, async (newQuery, oldQuery) => {
@@ -138,9 +172,11 @@ watch(() => route.query, async (newQuery, oldQuery) => {
     marketStore.state.market_target_shipok_year = [];
     marketStore.state.market_new_deposit_year = [];
 
-    console.log(newQuery);
-    await marketStore.fetchAgentMarketTargetShipokYear(newQuery);
-    await marketStore.fetchAgentMarketNewDepositYear(newQuery);
+    query.value = newQuery
+    year.value = newQuery.year
+
+    await marketStore.fetchAgentMarketTargetShipokYear(query.value);
+    await marketStore.fetchAgentMarketNewDepositYear(query.value);
 }, { deep: true }); // Ensures deep watching of query object
 
 

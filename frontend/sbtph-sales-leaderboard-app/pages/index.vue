@@ -16,6 +16,12 @@
         >
           Toggle to {{ isCardView ? 'Table' : 'Card' }} View
         </button>
+        <export-to-excel-component  v-if="!isCardView" class="ml-2"
+         :exportUrl="exportUrl"
+         :exportFileName="exportFileName"
+         :query="query"
+         :token="token"
+        ></export-to-excel-component>
       </div>
       
       <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
@@ -197,7 +203,9 @@
 
 <script setup>
 import { useLeaderBoardStore } from '../stores/sales_leaderboard';
-import { onMounted, reactive,ref, watch } from 'vue';
+import { onMounted, reactive,ref, watch, computed  } from 'vue';
+
+import API from '~/utils/api'
 
 definePageMeta({
   middleware: ['auth', 'adminmanager'] 
@@ -208,22 +216,43 @@ const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
 
 const currentUser = authStore.state.user 
+const token = authStore.state.token
 
-console.log('The current user is: ', currentUser)
 
 
+
+const config = useRuntimeConfig()
+const apiUrl = config.public.apiUrl
 
 const leaderBoardStore = useLeaderBoardStore();
 const selectedAgent = reactive({});
 const showModal = ref(false);
 const isCardView = ref(true)
 
+
 const route = useRoute()
 const router = useRouter()
+const query = ref({})
 
-const query = route.query
+query.value = route.query
 
-console.log(query)
+ const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ]
+
+    if (!query.value.month){
+        query.value.month = months[new Date().getMonth()]
+     }
+
+    if (!query.value.year){
+        query.value.year = new Date().getFullYear()
+    }
+
+const exportUrl = API.export.leaderboard
+const exportFileName = computed(()=> {
+  return `salesleaderboard-${query.value.month}-${query.value.year}.xlsx`
+})
 
 const ratingClassModal = computed(() => {
   if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
@@ -295,8 +324,10 @@ const  toggleView = () => {
 
 watch(route, (newRoute) => {
   console.log('The route is change. we should react to the change..')
+
   router.push(newRoute.fullPath)
   leaderBoardData(newRoute.query)
+  query.value = newRoute.query
   
 })
 
@@ -304,7 +335,7 @@ watch(route, (newRoute) => {
 
 // Fetch leaderboard data on mount
 onMounted(() => {
-  leaderBoardData(query);
+  leaderBoardData(query.value);
   
 });
 

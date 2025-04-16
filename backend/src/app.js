@@ -2,6 +2,8 @@ const express = require('express')
 const cors = require('cors')
 const coookieParser = require('cookie-parser')
 
+
+
 require('dotenv').config()
 
 const app = express()
@@ -19,6 +21,8 @@ const salesAnalyticsRoutes = require('./routes/sales_analytics_route')
 const salesMarketRoutes = require('./routes/sales_market_route') 
 const salesManagerRoutes = require('./routes/sales_managers_route')
 
+const importExportDataRoutes = require('./routes/import_export_data_routes')
+
 const {authenticateToken, authorizeRoles  } = require('./middleware/auth')
 
 const salesLoginRoutes = require('./routes/sales_login_routes')
@@ -29,6 +33,12 @@ const path = require('path')
 const pool = require('./config/db')
 
 const PORT = process.env.PORT || 3000;
+
+//new added - 04/03/2025 
+const http = require('http')
+const server = http.createServer(app)
+const { Server }  = require('socket.io')
+const io = new Server(server, { cors: {origin: "*"}})
 
 
 const  startServer = async () => {
@@ -90,9 +100,10 @@ const  startServer = async () => {
         app.use("/api", salesAnalyticsRoutes);
         app.use("/api", salesMarketRoutes);
         app.use("/api", salesManagerRoutes);
+        app.use("/api", importExportDataRoutes(io))  // pass the io instance on the importDataRoutes
 
 
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`Server is running on http://localhost:${PORT}`)
         })
 

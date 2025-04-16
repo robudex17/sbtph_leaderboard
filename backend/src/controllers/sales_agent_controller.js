@@ -201,10 +201,19 @@ exports.fetchSalesAgents = async (req,res, next ) => {
 }
 
 exports.fetchSalesAgent = async( req,res, next) => {
+    const export_to_excel = req.export_to_excel
 
     try {
         // const connection = await pool.getConnection()
-        const agentId = req.params.agent_id
+        //const agentId = req.params.agent_id
+        let agentId 
+
+        if(req.params.agent_id){
+            agentId = req.params.agent_id
+        }else{
+            agentId = req.query.agent_id
+        }
+
         const [rows, fields] = await pool.execute(
             // 'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
 
@@ -229,8 +238,14 @@ exports.fetchSalesAgent = async( req,res, next) => {
             `,['active', agentId]
         )
     
-        // connection.release()
-        res.json(rows)
+        if(export_to_excel){
+            req.agent_info = rows
+            req.agent_type = rows[0].agent_type
+            next()
+        }else{
+            res.json(rows)
+        }
+      
         
     }catch(error){
         console.error(`Error In Fetching Agent with agent_id of ${agentId}`, error)

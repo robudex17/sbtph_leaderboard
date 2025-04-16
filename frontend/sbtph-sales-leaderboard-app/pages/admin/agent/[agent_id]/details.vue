@@ -3,7 +3,9 @@
         <div class="p-4">
           <AgentBio :agents="salesAgentBio"></AgentBio>
         </div>
-       
+        <div>
+         
+        </div>
         <div class ="p-4 mt-5 mb-5">
           <TargetShipok :targetShipokDetails="salesAgentTargetShipok" 
           :agent="salesAgentBio[0]"
@@ -37,6 +39,7 @@
            :averageLmsFeedback="averageLmsFeedback"
            :averageFeedbackByQa="averageFeedbackByQa"
            :overallAverageFeedback="overallAverageFeedback"
+           :feedbackData="feedbackData"
            v-if="salesAgentBio.length > 0"
           >
           
@@ -93,7 +96,7 @@
 
     });
 
-
+  
   const router = useRouter();
   const route = useRoute();
   const query = route.query;
@@ -136,13 +139,26 @@
   const agentRole = query.agent_role
 
 
+
+ 
   let agentId;
 
   agentId = route.params.agent_id
-
+ 
   if(!agentId){
-    agentId = currentUser.login_id
+    if (query.agent_id) {
+      if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+        agentId = query.agent_id
+        
+      }
+    }else {
+      agentId = currentUser.login_id
+      query.agent_id = agentId
+    }
   }
+
+
+
   const useManageSalesStore = useManageSalesAgentStore();
 
   const addNewTarget = async(agentId, query, target) => {
@@ -299,7 +315,83 @@ const updateFeedback = async(agentId, query, feedback) => {
   const lmsFeedback = computed(() => useFeedbackStore.state.lms);
 
   const feedbackByQa =  computed(() => useFeedbackStore.state.qa);
-  
+
+  const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+const feedbackData = computed(() => {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonthIndex = currentDate.getMonth(); // 0-based index
+
+  const results = [];
+
+  const processMonth = (month, index) => {
+    // Skip future months in current year
+    if (parseInt(year.value) === currentYear && index > currentMonthIndex) return;
+
+    // Filter feedbacks by month and year
+    const filterByMonthYear = (data) => {
+    
+      return data.filter(item => 
+        
+        item.month === month && item.year === parseInt(year.value)
+      );
+    };
+
+    const agentData = filterByMonthYear(agentFeedback.value || []);
+    const managerData = filterByMonthYear(managerFeedback.value || []);
+    const lmsData = filterByMonthYear(lmsFeedback.value || []);
+    const qaData = filterByMonthYear(feedbackByQa.value || []);
+    
+   
+    const calculateAverage = (data) => {
+      if (!Array.isArray(data) || data.length === 0) return null;
+      const total = data.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+      return (total / data.length).toFixed(2);
+    };
+
+    const avgAgent = calculateAverage(agentData);
+    const avgManager = calculateAverage(managerData);
+    const avgLms = calculateAverage(lmsData);
+    const avgQa = calculateAverage(qaData);
+
+    const overall = (() => {
+      const scores = [avgAgent, avgManager, avgLms, avgQa]
+        .filter(score => score !== null)
+        .map(parseFloat);
+      if (scores.length === 0) return null;
+      return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
+    })();
+
+    results.push({
+      month,
+      year: year.value,
+      averageAgentFeedback: avgAgent,
+      averageManagerFeedback: avgManager,
+      averageLmsFeedback: avgLms,
+      averageFeedbackByQa: avgQa,
+      overallAverageFeedback: overall
+    });
+  };
+
+  if (props.fullyear) {
+    monthNames.forEach((month, index) => {
+      processMonth(month, index);
+    });
+  } else {
+    const selectedIndex = monthNames.findIndex(m => m === month.value);
+   
+    if (selectedIndex !== -1) {
+      processMonth(month.value, selectedIndex);
+    }
+  }
+
+  return results;
+});
+
+
   const averageAgentFeedback = computed(() => {
   if (!Array.isArray(agentFeedback.value) || agentFeedback.value.length === 0) return null;
   const total = agentFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
@@ -379,18 +471,18 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
     useManageSalesStore.state.salesAgentTardiness = []
     useManageSalesStore.state.salesAgentFeedback = []
 
-    if (agentType == 0 && agentRole =='user'){
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'agents')
-      }else if(agentType == 1 && agentRole =='manager'){
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, }, 'managers')
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'lms')
+    if (agentType == 0){
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'agents')
+      }else if(agentType == 1 ){
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'lms')
      
-      }else if (agentType == 2 && agentRole =='manager'){
+      }else if (agentType == 2){
 
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'managers')
+        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
       }
 
-      await  useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value}, 'qa')
+      await  useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'qa')
       await  useManageSalesStore.fetchSalesAgent(agentId)
 
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTargetShipok')
@@ -400,11 +492,9 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTardiness')
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentFeedback')
 
- 
     })
 
 
-  
   watch(route, async (newRoute) => {
 
      // Reset the feedback data
@@ -422,12 +512,12 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
   const newAgentId = newRoute.params.agent_id;
   await useManageSalesStore.fetchSalesAgent(newAgentId);
 
-  if (agentType == 0 && agentRole == 'user') {
+  if (agentType == 0 ) {
     await useFeedbackStore.fetchFeedback(newAgentId, newRoute.query, 'agents');
-  } else if (agentType == 1 && agentRole == 'manager') {
+  } else if (agentType == 1 ) {
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'lms');
-  } else if (agentType == 2 && agentRole == 'manager') {
+  } else if (agentType == 2) {
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
   }
   await  useFeedbackStore.fetchFeedback(agentId,  newRoute.query, 'qa')
@@ -443,4 +533,7 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
 
 
   </script>
+
+
+
   

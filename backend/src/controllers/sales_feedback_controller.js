@@ -82,6 +82,9 @@ exports.addNewFeedback = async (req, res, next) => {
     let givenMonth
     let givenYear 
     const currentDate = new Date()
+
+    let fullyear = req.query.fullyear
+    const export_to_excel = req.query.export_to_excel
  
     if (!req.query.month ||  req.query.month ==="") {
         
@@ -101,15 +104,43 @@ exports.addNewFeedback = async (req, res, next) => {
         givenYear = req.query.year
     }
     
-    const agentId = req.params.agent_id
+    // const agentId = req.params.agent_id
+
+    let agentId 
+
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
+    if(fullyear == 'true' || fullyear == true){
+        const [result] = await pool.execute(
+            'SELECT * FROM  `feedback` WHERE agent_id=?  AND year=?',[agentId,givenYear]  
+        )
+        if(export_to_excel){
+            req.feeback_admin = result
+            next()
+        }else{
+            res.json(result)
+ 
+        }
+    }else{
+        const [result] = await pool.execute(
+            'SELECT * FROM  `feedback` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+        )
 
-    const [result] = await pool.execute(
-        'SELECT * FROM  `feedback` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
-    )
-    // connection.release()
-    res.json(result)
+        if(export_to_excel){
+            req.feeback_admin = result
+            next()
+        }else{
+            res.json(result)
+ 
+        }
+       
+    }
+   
 
  }
 
@@ -206,6 +237,8 @@ exports.addNewFeedback = async (req, res, next) => {
     let givenMonth
     let givenYear 
     let fullyear = req.query.fullyear
+    console.log(fullyear)
+    const export_to_excel = req.export_to_excel
     const currentDate = new Date()
 
               // Get the month name
@@ -228,8 +261,14 @@ exports.addNewFeedback = async (req, res, next) => {
         givenYear = req.query.year
     }
     
-    const agentId = req.params.agent_id
+    // const agentId = req.params.agent_id
+    let agentId 
 
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
     if(fullyear == 'true' || fullyear == true){
@@ -241,13 +280,25 @@ exports.addNewFeedback = async (req, res, next) => {
             return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
             monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
         })
-        res.json(result)        
+        if(export_to_excel){
+            return result
+        }else{
+          
+            res.json(result)  
+        }
+              
     }else {
         const [result] = await pool.execute(
             'SELECT * FROM  `agents_feedback` WHERE agent_id=?  AND month=? AND year=?',[agentId,givenMonth,givenYear]  
         )
         // connection.release()
-        res.json(result)
+        if(export_to_excel){
+            return result
+        }else{
+            
+            res.json(result)
+        }
+      
     }
   
 
@@ -359,6 +410,10 @@ exports.addNewFeedback = async (req, res, next) => {
     //     return res.status(404).json({message: "The Senior Manager is only allowed to get feedback on LMs"})
     // }
 
+    let fullyear = req.query.fullyear
+   
+    const export_to_excel = req.export_to_excel
+
     let givenMonth
     let givenYear 
     const currentDate = new Date()
@@ -381,15 +436,38 @@ exports.addNewFeedback = async (req, res, next) => {
         givenYear = req.query.year
     }
     
-    const lmId = req.params.lm_id
+    // const lmId = req.params.lm_id
+
+    let lmId
+
+    if(req.params.lm_id){
+        lmId = req.params.lm_id
+    }else{
+        lmId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
+    if(fullyear == 'true' || fullyear == true){
+        const [result] = await pool.execute(
+            'SELECT * FROM  `lm_feedback` WHERE lm_id=?  AND year=?',[lmId,givenYear]  
+        )
 
-    const [result] = await pool.execute(
-        'SELECT * FROM  `lm_feedback` WHERE lm_id=? AND month=? AND year=?',[lmId,givenMonth,givenYear]  
-    )
-    // connection.release()
-    res.json(result)
+        if(export_to_excel){
+            return result
+        }else{
+            res.json(result)
+        }
+    }else{
+        const [result] = await pool.execute(
+            'SELECT * FROM  `lm_feedback` WHERE lm_id=? AND month=? AND year=?',[lmId,givenMonth,givenYear]  
+        )
+        if(export_to_excel){
+            return result
+        }else{
+            res.json(result)
+        }
+
+    }
 
 
  }
@@ -487,11 +565,15 @@ exports.addNewFeedback = async (req, res, next) => {
  }
 
  exports.getMangerFeedback = async (req, res, next) => {
- 
+   
     let givenMonth
     let givenYear 
     const currentDate = new Date()
+    const export_to_excel = req.export_to_excel
+    let fullyear = req.query.fullyear
 
+    console.log(req.query)
+    
     if (!req.query.month ||  req.query.month ==="") {
         
             // Get the month name
@@ -510,25 +592,70 @@ exports.addNewFeedback = async (req, res, next) => {
         givenYear = req.query.year
     }
     
-    const managerId = req.params.manager_id
+    //const managerId = req.params.manager_id
+
+    
     const agentId = req.query.agent_id
 
-    if (agentId){    
-        const [result] = await pool.execute(
-            'SELECT * FROM  `managers_feedback` WHERE manager_id=? AND agent_id=? AND month=? AND year=?',[managerId, agentId,givenMonth,givenYear]  
-        )
-    
-        return  res.json(result)
+    let managerId 
+
+    if (req.params.manager_id){
+        managerId = req.params.manager_id
+    }else{
+        managerId = req.query.agent_id
+    }
+
+    if (agentId){   
+        if(fullyear == 'true' || fullyear == true) {
+            const [result] = await pool.execute(
+                'SELECT * FROM  `managers_feedback` WHERE manager_id=? AND agent_id=?  AND year=?',[managerId, agentId,givenYear]  
+            )
+            if(export_to_excel){
+                return result
+            }else{
+                res.json(result)
+            }
+        }else{
+            const [result] = await pool.execute(
+                'SELECT * FROM  `managers_feedback` WHERE manager_id=? AND agent_id=? AND month=? AND year=?',[managerId, agentId,givenMonth,givenYear]  
+            )
+
+            if(export_to_excel){
+                return result
+            }else{
+              
+                return  res.json(result)
+            }
+        }
+
+
+        
    }else {
-        const [result] = await pool.execute(
-            'SELECT * FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[managerId,givenMonth,givenYear]  
-        )
-        return  res.json(result)
+        if(fullyear == 'true' || fullyear == true){
+            const [result] = await pool.execute(
+                'SELECT * FROM  `managers_feedback` WHERE manager_id=?  AND year=?',[managerId,givenYear]  
+            )
+            if(export_to_excel){
+                return result
+            }else{
+                res.json(result)
+            }
+        }else{
+            const [result] = await pool.execute(
+                'SELECT * FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[managerId,givenMonth,givenYear]  
+            )
+            if(export_to_excel){
+               return result
+            }else{
+                
+                return  res.json(result)
+            }
+            
+        }
+ 
    }
 
-   
-
-    
+       
  }
  exports.removeManagerFeedback = async(req,res, next) => {
  
@@ -625,7 +752,11 @@ exports.addNewFeedback = async (req, res, next) => {
     let givenMonth
     let givenYear 
     const currentDate = new Date()
- 
+    const export_to_excel = req.export_to_excel
+   
+    let fullyear = req.query.fullyear
+   
+   
     if (!req.query.month ||  req.query.month ==="") {
         
             // Get the month name
@@ -644,16 +775,43 @@ exports.addNewFeedback = async (req, res, next) => {
         givenYear = req.query.year
     }
     
-    const agentId = req.params.agent_id
+    //const agentId = req.params.agent_id
+
+    let agentId 
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
+    if(fullyear == 'true' || fullyear == true){
+        const [result] = await pool.execute(
+            'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND year=?',[agentId,givenYear]  
+        )
+        if(export_to_excel){
+            req.qa_feedback = result 
+            next()
+        }else{
+           
+            res.json(result)
+    
+        }
+    }else{
+        const [result] = await pool.execute(
+            'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
+        )
+        if(export_to_excel){
+            req.qa_feedback = result 
+            next()
+        }else{
+           
+            res.json(result)
+    
+        }
+    }
 
-    const [result] = await pool.execute(
-        'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
-    )
-    // connection.release()
-    res.json(result)
-
+    
  }
 
  exports.removeAgentsFeedbackByQa = async(req,res, next) => {

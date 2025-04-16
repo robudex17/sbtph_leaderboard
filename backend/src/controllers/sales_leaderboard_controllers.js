@@ -190,18 +190,6 @@ if (agent_id != ""){
    agent['memo_score'] = agentMemoScore
 
 
-   // get agent feedback for the given month and year
-    
-
-  //  const [feedback] = await pool.execute(
-  //    'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
-  //  )
-  //  let agentFeedbackScore 
-  //  if (feedback.length == 0) {
-  //    agentFeedbackScore = 0
-  //  }else{
-  //    agentFeedbackScore = feedback[0].feedback
-  //  }
 
    
    const [feedback] = await pool.execute(
@@ -373,6 +361,19 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     let givenYear 
     let withTrucks
     let fullyear = req.query.fullyear
+    let yearSummary = req.query.year_summary
+    let exportToExcel = req.export_to_excel
+    
+    if( fullyear == 'true'){
+      fullyear = true
+    }else {
+      fullyear = false
+    }
+    if (yearSummary == 'true'){
+      yearSummary = true
+    }else {
+      yearSummary = false
+    }
     let agentId 
 
     if(!req.query.agent_id){
@@ -405,23 +406,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     try {
     //fetch all agent available and save it to sales_agent array
     // const connection =  await pool.getConnection()
-    let agentMetircs
-    if(fullyear == 'true'){
-      
-      const queries = monthNames.map(month => 
-        this.getAgentsMetrics(agentId, month, givenYear, withTrucks).then(data => {
-            if (data) {
-                return data[0]
-            }
-            return null; // Skip null values
-        })
-    );
-    
-    const results = await Promise.all(queries);
-    const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
 
-
- function calculateAverages(dataArray) {
+    function calculateAverages(dataArray) {
       const keysToAverage = [
           "absence_score", 
           "feedback_score",
@@ -467,14 +453,24 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           result[key] = sum[key]; // Keep as total sum
       });
    
-
-   
-      
       return result;
   }
 
+    let agentMetircs
+    if(fullyear){
+    
+      const queries = monthNames.map(month => 
+        this.getAgentsMetrics(agentId, month, givenYear, withTrucks).then(data => {
+            if (data) {
+                return data[0]
+            }
+            return null; // Skip null values
+        })
+    );
+    
+    const results = await Promise.all(queries);
+    const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
 
-  
 
    const data = {
     'agentMetircsFullYear': agentMetircsFullYear,
@@ -487,16 +483,98 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
   data['yearAverage']['ratings_name'] = year_ratings[0].ratings_name
   data['yearAverage']['db_name'] =  agentMetircsFullYear[0].db_name
+  data['yearAverage']['agent_id'] = agentMetircsFullYear[0].id
   data['yearAverage']['image_link'] = agentMetircsFullYear[0].image_link
   data['yearAverage']['year'] = agentMetircsFullYear[0].year
 
-
-    res.status(200).json(data)
-    
+    if(exportToExcel) {
+      req.performance = data
+      next()
     }else{
-      agentMetircs = await this.getAgentsMetrics( agentId, givenMonth, givenYear, withTrucks)
-      console.log(agentMetircs)
-      res.status(200).json(agentMetircs)
+      res.status(200).json(data)
+    }
+    
+    
+ 
+  }
+  
+  else{
+      // get only the given month and year (for leaderboard )
+      if(!yearSummary){  
+        agentMetircs = await this.getAgentsMetrics( agentId, givenMonth, givenYear, withTrucks)
+       
+        if(exportToExcel){
+          req.performance = agentMetircs 
+          req.params.agent_id = agentId //manually place agentId in the
+          next()
+        }else{
+          res.status(200).json(agentMetircs)
+        }
+      
+      }else {
+     
+      
+        let sales_agents = []
+        let agentYearlyMetrics = []
+        if (withTrucks === "true" || withTrucks === true){
+          const [sales_agents_result] = await pool.execute(
+            'SELECT * FROM  `sales_agents`'  
+          )
+          
+          sales_agents = sales_agents_result
+        }else {
+          
+          const [sales_agents_result] = await pool.execute(
+            'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
+        )
+        sales_agents = sales_agents_result
+        }
+
+        for (const sales_agent of sales_agents){
+          const queries = monthNames.map(month => 
+            this.getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks).then(data => {
+                if (data) {
+                    return data[0]
+                }
+                return null; // Skip null values
+            })
+        );
+        
+        const results = await Promise.all(queries);
+        const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
+        const yearAverage = calculateAverages(agentMetircsFullYear)
+        if(yearAverage.final_ratings){
+            const [year_ratings] = await pool.execute(
+          'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[yearAverage.final_ratings]
+        )
+        yearAverage['ratings_name'] = year_ratings[0].ratings_name
+        }else {
+          yearAverage['ratings_name'] = "No Ratings"
+            yearAverage['final_ratings'] = "No Ratings"
+        }
+    
+        yearAverage['id'] =sales_agent.id
+        yearAverage['agent_type'] = sales_agent.agent_type
+        yearAverage['db_name'] =  sales_agent.db_name
+        yearAverage['image_link'] = sales_agent.image_link
+        yearAverage['year'] = givenYear
+       
+        agentYearlyMetrics.push(yearAverage)
+
+        
+        
+        }
+
+        if(exportToExcel){
+          req.performance= agentYearlyMetrics 
+          next()
+        }else{
+          res.status(200).json(agentYearlyMetrics)
+        }
+       
+        
+      }
+    
     }
       
     // connection.release()

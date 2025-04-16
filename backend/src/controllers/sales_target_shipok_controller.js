@@ -58,6 +58,8 @@ exports.fetchAgentTarget = async (req, res, next) => {
     let givenMonth
     let givenYear 
     let fullyear = req.query.fullyear
+    const export_to_excel = req.export_to_excel
+   
     const currentDate = new Date()
 
                 // Get the month name
@@ -80,7 +82,15 @@ exports.fetchAgentTarget = async (req, res, next) => {
         givenYear = req.query.year
     }
 
-    const agentId = req.params.agent_id
+
+
+    let agentId 
+
+    if(req.params.agent_id){
+        agentId = req.params.agent_id
+    }else{
+        agentId = req.query.agent_id
+    }
 
     // const connection =  await pool.getConnection()
     if(fullyear == 'true' || fullyear == true){
@@ -108,8 +118,14 @@ exports.fetchAgentTarget = async (req, res, next) => {
             return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
            monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
         })
-
-        res.json(result)       
+        //if true pass it to the next middleware for export handling
+        if(export_to_excel){
+            req.agent_target = result
+            next()
+        }else{
+            res.json(result)  
+        }
+            
     }else {
         const [result] = await pool.execute(
             //  'SELECT * FROM  `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
@@ -130,8 +146,14 @@ exports.fetchAgentTarget = async (req, res, next) => {
     
           `,[agentId,givenMonth,givenYear]
         )
-        // connection.release()
-        res.json(result)
+            //if true pass it to the next middleware for export handling
+        if(export_to_excel){
+            req.agent_target = result
+            next()
+        }else{
+            res.json(result)
+        }
+     
     }
 
 }

@@ -15,14 +15,13 @@ exports.fetchAgentMarket = async (req, res, next) => {
 
 exports.fetchAgentMarketTargetShipok = async (req, res, next)  => {
    
-      
+   const export_to_excel = req.export_to_excel
+
    const errors = validationResult(req)
    
      if (!errors.isEmpty()) {
            return res.status(400).json({ errors: errors.array() });
-    }else{
-         console.log('All input is valid..')
-     }
+    }
     let givenMonth
     let givenYear 
     const currentDate = new Date()
@@ -97,8 +96,13 @@ exports.fetchAgentMarketTargetShipok = async (req, res, next)  => {
      try {
         
         const [result]  = await pool.execute(query, [givenYear, givenMonth, givenYear, givenMonth])
-
-        res.json(result)
+        if(export_to_excel){
+            req.month_market_target_shipok = result
+            next()
+        }else{
+            res.json(result)
+        }
+        
         
     }catch(error){
         console.error(`Cannot fetch target shipok per market`, error)
@@ -111,14 +115,12 @@ exports.fetchAgentMarketTargetShipok = async (req, res, next)  => {
 
 exports.fetchAgentMarketTargetShipokYear = async (req, res, next)  => {
    
-      
+    const export_to_excel = req.export_to_excel
     const errors = validationResult(req)
     
       if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
-     }else{
-          console.log('All input is valid..')
-      }
+     }
      
      let givenYear 
      const currentDate = new Date()
@@ -177,8 +179,13 @@ exports.fetchAgentMarketTargetShipokYear = async (req, res, next)  => {
       try {
          
          const [result]  = await pool.execute(query, [givenYear, givenYear])
- 
-         res.json(result)
+         if(export_to_excel){
+            req.year_market_target_shipok = result
+            next()
+         }else{
+            res.json(result)
+         }  
+         
          
      }catch(error){
          console.error(`Cannot fetch target shipok per market`, error)
@@ -190,12 +197,10 @@ exports.fetchAgentMarketTargetShipokYear = async (req, res, next)  => {
 
 exports.fetchAgentMarketNewDeposit = async (req, res, next)  => {
     const errors = validationResult(req)
-   
+    const export_to_excel = req.export_to_excel
     if (!errors.isEmpty()) {
           return res.status(400).json({ errors: errors.array() });
-   }else{
-        console.log('All input is valid..')
-    }
+   }
    
     let givenMonth
     let givenYear 
@@ -259,8 +264,13 @@ exports.fetchAgentMarketNewDeposit = async (req, res, next)  => {
      try {
         
         const [result]  = await pool.execute(query, [ givenYear, givenMonth,givenMonth, givenYear])
-
-        res.json(result)
+        if(export_to_excel){
+            req.month_market_new_deposit = result
+            next()
+        }else{
+            res.json(result)
+        }
+        
         
     }catch(error){
         console.error(`Cannot fetch new deposit per market`, error)
@@ -273,12 +283,10 @@ exports.fetchAgentMarketNewDeposit = async (req, res, next)  => {
 
 exports.fetchAgentMarketNewDepositYear = async (req, res, next)  => {
     const errors = validationResult(req)
-   
+    const export_to_excel = req.export_to_excel
     if (!errors.isEmpty()) {
           return res.status(400).json({ errors: errors.array() });
-   }else{
-        console.log('All input is valid..')
-    }
+   }
    
  
     let givenYear 
@@ -330,8 +338,13 @@ exports.fetchAgentMarketNewDepositYear = async (req, res, next)  => {
      try {
         
         const [result]  = await pool.execute(query, [ givenYear, givenYear])
-
-        res.json(result)
+        if(export_to_excel){
+            req.year_market_new_deposit = result 
+            next()
+        }else {
+            res.json(result)
+        }
+       
         
     }catch(error){
         console.error(`Cannot fetch new deposit per market`, error)
