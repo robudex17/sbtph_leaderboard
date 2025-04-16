@@ -91,6 +91,11 @@
 
   })
 
+  const authStore = useAuthStore()
+  authStore.fetchTokenFromLocalStore()
+  const currentUser = authStore.state.user   
+  const token = authStore.state.token
+
   
   const config = useRuntimeConfig()
   const socketUrl = config.public.socketUrl
@@ -141,6 +146,10 @@
     try {
       const response = await fetch(url, {
         method: 'POST',
+        // headers: {
+        //           'Content-Type': 'application/json',
+        //           'Authorization': `Bearer ${token}`,
+        //         },
         body: formData
       })
       const result = await response.json()
