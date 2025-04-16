@@ -35,7 +35,7 @@ module.exports = (io) => {
                 )
   
     router.post('/upload_new_deposit_data', 
-                 authenticateToken, authorizeRoles('admin'),uploadData.single("file"), 
+                uploadData.single("file"), 
                 (req, res,) =>  importExportDataController.importNewDepositData(req, res, io) )
     
 

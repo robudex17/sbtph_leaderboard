@@ -750,7 +750,157 @@ exports.salesTeamPerformanceExportToExcel = async (req, res, next) => {
 }
 
 
-exports.importTargetShipokData = async (req, res, io, next) => {
+exports.importNewDepositData = async (req, res, io, next) => {
+  const duplicateAction = req.query.duplicateAction || 'skip'; // 'skip' | 'update' | 'replace'
+
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
+  }
+
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+
+    if (!/^NewDeposit$/i.test(sheetName)) {
+      return res.status(400).json({
+        error: `Invalid sheet name: "${sheetName}". Sheet name must be 'target' (case-insensitive).`,
+        sheetName
+      });
+    }
+
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+ 
+    if (data.length === 0) {
+      return res.status(400).json({ error: 'Sheet is empty', sheetName });
+    }
+
+    const requiredFields = ['YEAR', 'MONTH', 'NEW DEPOSIT', 'AGENT_ID'];
+    const headers = Object.keys(data[0]);
+    const missingFields = requiredFields.filter(field => !headers.includes(field));
+
+
+
+    let totalRecords = data.length;
+    let insertedCount = 0;
+    let updatedCount = 0;
+    let replacedCount = 0;
+    let duplicateSkippedCount = 0;
+    let notRegisteredAgentCount = 0;
+    let emptyValuesCount = 0;
+    
+    for (let i = 0; i < totalRecords; i++) {
+      const row = data[i];
+      const dataFileds = Object.keys(row)
+      
+      const missingFields = requiredFields.filter(field => !dataFileds.includes(field));
+     
+      if (missingFields.length > 0) {
+        emptyValuesCount++;
+        
+        continue;
+      }
+
+      const [agentResult] = await pool.execute(
+        "SELECT market_id FROM sales_agents WHERE id = ?",
+        [row.AGENT_ID]
+      );
+
+      if (agentResult.length === 0) {
+        notRegisteredAgentCount++;
+        continue;
+      }
+
+      const marketId = agentResult[0].market_id;
+
+      const [checkResult] = await pool.execute(
+        "SELECT COUNT(*) AS count FROM new_deposit_test WHERE agent_id = ? AND month = ? AND year = ?",
+        [row.AGENT_ID, row.MONTH, row.YEAR]
+      );
+     
+      const isDuplicate = checkResult[0].count == parseFloat(row['NEW DEPOSIT']);
+   
+      const date = new Date();
+      const currentDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+      if (isDuplicate) {
+        if (duplicateAction === 'update') {
+         const [result] = await pool.execute(
+            `UPDATE new_deposit_test SET date=?, market_id=?, description=?
+             WHERE agent_id = ? AND month = ? AND year = ?`,
+            [currentDate,  marketId, `New Deposit For New Customer(updated)- ${currentDate}`, row.AGENT_ID, row.MONTH, row.YEAR]
+          );
+          updatedCount = updatedCount + result.affectedRows;
+        } else if (duplicateAction === 'replace') {
+          const [result] = await pool.execute(
+            `DELETE FROM new_deposit_test WHERE agent_id = ? AND month = ? AND year = ?`,
+            [row.AGENT_ID, row.MONTH, row.YEAR]
+          );
+          for (let i = 0 ; i<row['NEW DEPOSIT'] ; i++){
+            await pool.execute(
+              `INSERT INTO new_deposit_test (agent_id, month, year, date,  market_id , new_deposit, description)
+               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              [row.AGENT_ID, row.MONTH, row.YEAR, currentDate,  marketId, 100000, `New Deposit For New Customer (replaced) ${currentDate}`]
+            );
+            replacedCount++;
+          }
+      
+        } else {
+          duplicateSkippedCount++;
+        }
+      } else {
+       
+        let toInsert = 0
+        if(row['NEW DEPOSIT'] > checkResult[0].count){
+          toInsert = row['NEW DEPOSIT'] - parseInt(checkResult[0].count)
+         
+        }else{
+          toInsert = row['NEW DEPOSIT'] 
+        }
+        if(checkResult[0].count > row['NEW DEPOSIT']){
+          
+          continue
+        }
+        for (let i = 0 ; i<toInsert ; i++){
+          await pool.execute(
+            `INSERT INTO new_deposit_test (agent_id, month, year, date,  market_id , new_deposit, description)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [row.AGENT_ID, row.MONTH, row.YEAR, currentDate,  marketId, 100000, `New Deposit For New Customer - ${currentDate}`]
+          );
+          insertedCount++;
+        }
+    
+      }
+
+      const progress = Math.round(((i + 1) / totalRecords) * 100);
+      io.emit("uploadProgress", {
+        progress,
+        insertedCount,
+        updatedCount,
+        replacedCount,
+        duplicateSkippedCount,
+        notRegisteredAgentCount,
+        emptyValuesCount
+      });
+    }
+
+    res.json({
+      message: "Upload completed",
+      insertedCount,
+      updatedCount,
+      replacedCount,
+      duplicateSkippedCount,
+      notRegisteredAgentCount,
+      emptyValuesCount
+    });
+
+  } catch (err) {
+    console.error("Error processing file:", err);
+    res.status(500).send("Error processing file: " + err.message);
+  }
+};
+
+
+exports.importTargetShipokData  = async (req, res, io, next) => {
   const duplicateAction = req.query.duplicateAction || 'skip'; // 'skip' | 'update' | 'replace'
 
   if (!req.file) {
@@ -884,4 +1034,5 @@ exports.importTargetShipokData = async (req, res, io, next) => {
     res.status(500).send("Error processing file: " + err.message);
   }
 };
+
 
