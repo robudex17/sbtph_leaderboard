@@ -1,5 +1,6 @@
 const ExcelJS = require('exceljs');
-
+const xlsx = require('xlsx');
+const pool = require('../config/db')
 
 const createTargetExcelTable = (data, worksheet, secondTableStartRow, title) => {
   const getCell = (rowOffset, col) => worksheet.getCell(secondTableStartRow + rowOffset, col);
@@ -747,3 +748,140 @@ exports.salesTeamPerformanceExportToExcel = async (req, res, next) => {
     
 
 }
+
+
+exports.importTargetShipokData = async (req, res, io, next) => {
+  const duplicateAction = req.query.duplicateAction || 'skip'; // 'skip' | 'update' | 'replace'
+
+  if (!req.file) {
+    return res.status(400).send("No file uploaded.");
+  }
+
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+
+    if (!/^target$/i.test(sheetName)) {
+      return res.status(400).json({
+        error: `Invalid sheet name: "${sheetName}". Sheet name must be 'target' (case-insensitive).`,
+        sheetName
+      });
+    }
+
+    const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+ 
+    if (data.length === 0) {
+      return res.status(400).json({ error: 'Sheet is empty', sheetName });
+    }
+
+    const requiredFields = ['YEAR', 'MONTH', 'TARGET', 'SHIPOK', 'AGENT_ID'];
+    const headers = Object.keys(data[0]);
+    const missingFields = requiredFields.filter(field => !headers.includes(field));
+
+    // if (missingFields.length > 0) {
+    //   return res.status(400).json({
+    //     error: `Missing required fields: ${missingFields.join(', ')}`,
+    //     sheetName
+    //   });
+    // }
+
+    let totalRecords = data.length;
+    let insertedCount = 0;
+    let updatedCount = 0;
+    let replacedCount = 0;
+    let duplicateSkippedCount = 0;
+    let notRegisteredAgentCount = 0;
+    let emptyValuesCount = 0;
+
+    for (let i = 0; i < totalRecords; i++) {
+      const row = data[i];
+      const dataFileds = Object.keys(row)
+      const missingFields = requiredFields.filter(field => !dataFileds.includes(field));
+      
+      if (missingFields.length > 0) {
+        emptyValuesCount++;
+        console.log('did I came here?')
+        continue;
+      }
+
+      const [agentResult] = await pool.execute(
+        "SELECT market_id FROM sales_agents WHERE id = ?",
+        [row.AGENT_ID]
+      );
+
+      if (agentResult.length === 0) {
+        notRegisteredAgentCount++;
+        continue;
+      }
+
+      const marketId = agentResult[0].market_id;
+
+      const [checkResult] = await pool.execute(
+        "SELECT COUNT(*) AS count FROM target_shipok_test WHERE agent_id = ? AND month = ? AND year = ?",
+        [row.AGENT_ID, row.MONTH, row.YEAR]
+      );
+
+      const isDuplicate = checkResult[0].count > 0;
+      const date = new Date();
+      const currentDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+      if (isDuplicate) {
+        if (duplicateAction === 'update') {
+          await pool.execute(
+            `UPDATE target_shipok_test SET date = ?, target = ?, ship_ok = ?, market_id = ?
+             WHERE agent_id = ? AND month = ? AND year = ?`,
+            [currentDate, row.TARGET, row.SHIPOK, marketId, row.AGENT_ID, row.MONTH, row.YEAR]
+          );
+          updatedCount++;
+        } else if (duplicateAction === 'replace') {
+          await pool.execute(
+            `DELETE FROM target_shipok_test WHERE agent_id = ? AND month = ? AND year = ?`,
+            [row.AGENT_ID, row.MONTH, row.YEAR]
+          );
+
+          await pool.execute(
+            `INSERT INTO target_shipok_test (agent_id, month, year, date, target, ship_ok, market_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [row.AGENT_ID, row.MONTH, row.YEAR, currentDate, row.TARGET, row.SHIPOK, marketId]
+          );
+          replacedCount++;
+        } else {
+          duplicateSkippedCount++;
+        }
+      } else {
+        await pool.execute(
+          `INSERT INTO target_shipok_test (agent_id, month, year, date, target, ship_ok, market_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [row.AGENT_ID, row.MONTH, row.YEAR, currentDate, row.TARGET, row.SHIPOK, marketId]
+        );
+        insertedCount++;
+      }
+
+      const progress = Math.round(((i + 1) / totalRecords) * 100);
+      io.emit("uploadProgress", {
+        progress,
+        insertedCount,
+        updatedCount,
+        replacedCount,
+        duplicateSkippedCount,
+        notRegisteredAgentCount,
+        emptyValuesCount
+      });
+    }
+
+    res.json({
+      message: "Upload completed",
+      insertedCount,
+      updatedCount,
+      replacedCount,
+      duplicateSkippedCount,
+      notRegisteredAgentCount,
+      emptyValuesCount
+    });
+
+  } catch (err) {
+    console.error("Error processing file:", err);
+    res.status(500).send("Error processing file: " + err.message);
+  }
+};
+
