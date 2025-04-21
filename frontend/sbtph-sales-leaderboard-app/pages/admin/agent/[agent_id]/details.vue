@@ -23,7 +23,7 @@
           ></NewDeposit>
         </div>
 
-        <div class ="p-4 mt-5 mb-5">
+        <div class ="p-4 mt-5 mb-5" v-if="isAdmin">
           <Feedback :feedbackDetails="salesAgentFeedback"
           @passFeedback="addFeedback"
           @passUpdateFeedback="updateFeedback"
@@ -132,6 +132,7 @@
   //get the current user
   const authStore = useAuthStore()
   authStore.fetchTokenFromLocalStore()
+  const isAdmin = ref(false)
 
   const currentUser = authStore.state.user 
 
@@ -139,6 +140,12 @@
   const agentRole = query.agent_role
 
 
+  if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+    isCardView.value = false
+  }
+
+  
 
  
   let agentId;

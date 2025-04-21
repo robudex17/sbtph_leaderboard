@@ -175,22 +175,7 @@
 });
 
 
-// watch(
-//   () => route.query,
-//    (newQuery, oldQuery) => {
-//     // Only run if there's a real change
-//     if (JSON.stringify(newQuery) !== JSON.stringify(oldQuery)) {
-//       marketStore.state.market_target_shipok = [];
-//       marketStore.state.market_new_deposit = [];
-//       marketStore.fetchAgentMarketTargetShipok(newQuery);
-//       marketStore.fetchAgentMarketNewDeposit(newQuery);
-//       query.value = newQuery;
-//       month.value = query.value.month;
-//       year.value = query.value.year;
-//     }
-//   },
-//   { deep: true }
-// );
+
 
 watch(() => route.query, async (newQuery, oldQuery) => {
     console.log("Route query changed, fetching new data...");

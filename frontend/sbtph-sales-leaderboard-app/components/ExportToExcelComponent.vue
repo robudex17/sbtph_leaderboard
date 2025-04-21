@@ -4,7 +4,8 @@
         @click="exportExcel"
         class="flex items-center justify-center gap-2 w-full py-3 px-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200"
       >
-        <FontAwesomeIcon :icon="['fas', 'file-excel']" class="text-xl" />
+        <!-- <FontAwesomeIcon :icon="['fas', 'file-excel']" class="text-xl" /> -->
+        <font-awesome-icon :icon="['fas', 'file-excel']" />
         Export to Excel
       </button>
     </div>

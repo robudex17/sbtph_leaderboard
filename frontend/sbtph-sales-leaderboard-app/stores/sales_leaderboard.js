@@ -64,6 +64,9 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
                 }
             }
             if (!response.ok) {
+                state.agentYearPerformance = []
+                state.agentPerformance = []
+                state.leaderboard = []
                 throw new Error(`Error: ${response.status} ${response.statusText}`)
             }
             
@@ -79,6 +82,7 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
            
         } catch (error) {
             console.error('Failed to fetch leaderboard:', error)
+            state.
             state.error = error.message
         } finally {
             state.loading = false
@@ -109,13 +113,16 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
             }
             const data = await response.json()
             state.agentPerformance = data
-            console.log(state.agentPerformance)
+          
         
         }
 
         catch (error){
             console.error('Failed to fetch Agent Performance Details', error)
             state.error = error.message
+            // state.agentYearPerformance = []
+            // state.agentPerformance = []
+            // state.leaderboard = []
         }
         finally {
             state.loading = false

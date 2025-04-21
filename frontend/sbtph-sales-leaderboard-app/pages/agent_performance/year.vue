@@ -14,9 +14,10 @@
             @click="toggleView" 
             class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
           >
+          <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
             Toggle to {{ isCardView ? 'Table' : 'Card' }} View
           </button>
-          <export-to-excel-component  v-if="isAdmin" class="ml-2"
+          <export-to-excel-component  v-if="isAdmin && leaderBoardStore.state.agentYearPerformance.length != 0" class="ml-2"
             :exportUrl="exportUrl"
             :exportFileName="exportFileName"
             :query="query"
@@ -25,7 +26,7 @@
         </div>
      
         <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
-        <div v-else-if="agent?.target == 0 || !agent" class="text-red-700 font-bold  text-5xl">
+        <div v-else-if="agent?.target == 0 || !agent || leaderBoardStore.state.error"  class="text-red-700 font-bold  text-5xl">
           No Available Data.
         </div>
         <div v-else>
@@ -79,9 +80,15 @@
           </div>
                 <!-- Table View -->
         <div v-else class="overflow-x-auto shadow-xl rounded-lg">
-          <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
-          <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
-          <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/>
+          <div v-if="leaderBoardStore.state.error" class="text-red-700 font-bold  text-5xl">
+            No Available Data.
+          </div>
+          <div v-else>
+            <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
+            <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
+            <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/>
+          </div>
+
       </div>
         </div>
       </div>
@@ -231,10 +238,6 @@
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
          ];
-
-
-  
-
   
   if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
     isAdmin.value = true
@@ -280,6 +283,8 @@
   const agent = computed(() => {
     return leaderBoardStore.state.agentYearPerformance.yearAverage
   })
+
+  console.log(agent)
 
 //   console.log('the agent object is', agent.value)
 

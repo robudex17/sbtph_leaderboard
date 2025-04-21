@@ -813,7 +813,7 @@ exports.importNewDepositData = async (req, res, io, next) => {
       const marketId = agentResult[0].market_id;
 
       const [checkResult] = await pool.execute(
-        "SELECT COUNT(*) AS count FROM new_deposit_test WHERE agent_id = ? AND month = ? AND year = ?",
+        "SELECT COUNT(*) AS count FROM new_deposit WHERE agent_id = ? AND month = ? AND year = ?",
         [row.AGENT_ID, row.MONTH, row.YEAR]
       );
      
@@ -825,19 +825,19 @@ exports.importNewDepositData = async (req, res, io, next) => {
       if (isDuplicate) {
         if (duplicateAction === 'update') {
          const [result] = await pool.execute(
-            `UPDATE new_deposit_test SET date=?, market_id=?, description=?
+            `UPDATE new_deposit SET date=?, market_id=?, description=?
              WHERE agent_id = ? AND month = ? AND year = ?`,
             [currentDate,  marketId, `New Deposit For New Customer(updated)- ${currentDate}`, row.AGENT_ID, row.MONTH, row.YEAR]
           );
           updatedCount = updatedCount + result.affectedRows;
         } else if (duplicateAction === 'replace') {
           const [result] = await pool.execute(
-            `DELETE FROM new_deposit_test WHERE agent_id = ? AND month = ? AND year = ?`,
+            `DELETE FROM new_deposit WHERE agent_id = ? AND month = ? AND year = ?`,
             [row.AGENT_ID, row.MONTH, row.YEAR]
           );
           for (let i = 0 ; i<row['NEW DEPOSIT'] ; i++){
             await pool.execute(
-              `INSERT INTO new_deposit_test (agent_id, month, year, date,  market_id , new_deposit, description)
+              `INSERT INTO new_deposit (agent_id, month, year, date,  market_id , new_deposit, description)
                VALUES (?, ?, ?, ?, ?, ?, ?)`,
               [row.AGENT_ID, row.MONTH, row.YEAR, currentDate,  marketId, 100000, `New Deposit For New Customer (replaced) ${currentDate}`]
             );
@@ -862,7 +862,7 @@ exports.importNewDepositData = async (req, res, io, next) => {
         }
         for (let i = 0 ; i<toInsert ; i++){
           await pool.execute(
-            `INSERT INTO new_deposit_test (agent_id, month, year, date,  market_id , new_deposit, description)
+            `INSERT INTO new_deposit (agent_id, month, year, date,  market_id , new_deposit, description)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [row.AGENT_ID, row.MONTH, row.YEAR, currentDate,  marketId, 100000, `New Deposit For New Customer - ${currentDate}`]
           );
@@ -967,7 +967,7 @@ exports.importTargetShipokData  = async (req, res, io, next) => {
       const marketId = agentResult[0].market_id;
 
       const [checkResult] = await pool.execute(
-        "SELECT COUNT(*) AS count FROM target_shipok_test WHERE agent_id = ? AND month = ? AND year = ?",
+        "SELECT COUNT(*) AS count FROM target_shipok WHERE agent_id = ? AND month = ? AND year = ?",
         [row.AGENT_ID, row.MONTH, row.YEAR]
       );
 
@@ -978,19 +978,19 @@ exports.importTargetShipokData  = async (req, res, io, next) => {
       if (isDuplicate) {
         if (duplicateAction === 'update') {
           await pool.execute(
-            `UPDATE target_shipok_test SET date = ?, target = ?, ship_ok = ?, market_id = ?
+            `UPDATE target_shipok SET date = ?, target = ?, ship_ok = ?, market_id = ?
              WHERE agent_id = ? AND month = ? AND year = ?`,
             [currentDate, row.TARGET, row.SHIPOK, marketId, row.AGENT_ID, row.MONTH, row.YEAR]
           );
           updatedCount++;
         } else if (duplicateAction === 'replace') {
           await pool.execute(
-            `DELETE FROM target_shipok_test WHERE agent_id = ? AND month = ? AND year = ?`,
+            `DELETE FROM target_shipok WHERE agent_id = ? AND month = ? AND year = ?`,
             [row.AGENT_ID, row.MONTH, row.YEAR]
           );
 
           await pool.execute(
-            `INSERT INTO target_shipok_test (agent_id, month, year, date, target, ship_ok, market_id)
+            `INSERT INTO target_shipok (agent_id, month, year, date, target, ship_ok, market_id)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
             [row.AGENT_ID, row.MONTH, row.YEAR, currentDate, row.TARGET, row.SHIPOK, marketId]
           );
@@ -1000,7 +1000,7 @@ exports.importTargetShipokData  = async (req, res, io, next) => {
         }
       } else {
         await pool.execute(
-          `INSERT INTO target_shipok_test (agent_id, month, year, date, target, ship_ok, market_id)
+          `INSERT INTO target_shipok (agent_id, month, year, date, target, ship_ok, market_id)
            VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [row.AGENT_ID, row.MONTH, row.YEAR, currentDate, row.TARGET, row.SHIPOK, marketId]
         );

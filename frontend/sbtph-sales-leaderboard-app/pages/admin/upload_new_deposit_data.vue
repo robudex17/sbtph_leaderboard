@@ -5,6 +5,9 @@
 </template>
 
 <script setup>
+
+
+
    const config = useRuntimeConfig()
 
    const apiUrl = config.public.apiUrl

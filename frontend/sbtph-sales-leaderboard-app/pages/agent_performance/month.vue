@@ -14,9 +14,10 @@
             @click="toggleView" 
             class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
           >
+          <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
             Toggle to {{ isCardView ? 'Table' : 'Card' }} View
           </button>
-          <export-to-excel-component  v-if="isAdmin" class="ml-2"
+          <export-to-excel-component  v-if="isAdmin && agent.target !=0" class="ml-2"
             :exportUrl="exportUrl"
             :exportFileName="exportFileName"
             :query="query"

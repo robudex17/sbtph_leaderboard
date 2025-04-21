@@ -14,9 +14,10 @@
           @click="toggleView" 
           class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
         >
+        <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
           Toggle to {{ isCardView ? 'Table' : 'Card' }} View
         </button>
-        <export-to-excel-component  v-if="!isCardView" class="ml-2"
+        <export-to-excel-component  v-if=" isAdmin && !isCardView && leaderBoardStore.state.leaderboard.length" class="ml-2"
          :exportUrl="exportUrl"
          :exportFileName="exportFileName"
          :query="query"
@@ -214,11 +215,16 @@ definePageMeta({
 //get the current user
 const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
+const isAdmin = ref(false)
 
 const currentUser = authStore.state.user 
 const token = authStore.state.token
 
 
+if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+    isCardView.value = false
+  }
 
 
 const config = useRuntimeConfig()
