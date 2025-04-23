@@ -104,7 +104,7 @@
         <div class="text-center">
           <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
           <h3 class="text-xl font-semibold">AgentID: {{ selectedAgent ? selectedAgent.id : 'Agent has no ID' }}</h3>
-          <p class="text-lg text-gray-600 font-bold" :class="ratingClassModal">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
+          <p class="text-lg  font-bold" :class="setRatingNameColor(selectedAgent)">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
 
           <div class="flex items-center mt-2">
             <template v-for="i in 5" :key="i">
@@ -221,10 +221,6 @@ const currentUser = authStore.state.user
 const token = authStore.state.token
 
 
-if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
-    isAdmin.value = true
-    isCardView.value = false
-  }
 
 
 const config = useRuntimeConfig()
@@ -239,8 +235,15 @@ const isCardView = ref(true)
 const route = useRoute()
 const router = useRouter()
 const query = ref({})
+const { setRatingNameColor } = useRatingColor()
 
 query.value = route.query
+
+if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+   
+  }
+
 
  const months = [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -260,48 +263,8 @@ const exportFileName = computed(()=> {
   return `salesleaderboard-${query.value.month}-${query.value.year}.xlsx`
 })
 
-const ratingClassModal = computed(() => {
-  if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
-    return 'text-purple-600'
-  }
-  
-  if (selectedAgent.ratings_name == 'VERY SATISFACTORY') {
-    return 'text-blue-600'
-  }
 
-  if (selectedAgent.ratings_name == 'SATISFACTORY') {
-    return 'text-green-600'
-  }
-  if (selectedAgent.ratings_name == 'NEEDS IMPROVEMENT') {
-    return 'text-yellow-600'
-  }
 
-  if (selectedAgent.ratings_name == 'POOR') {
-    return 'text-red-600'
-  }
-
-})
-
-const setRatingNameColor = (agent) => {
-  if (agent.ratings_name == 'EXCEPTIONAL') {
-    return 'text-purple-600'
-  }
-  
-  if (agent.ratings_name == 'VERY SATISFACTORY') {
-    return 'text-blue-600'
-  }
-
-  if (agent.ratings_name == 'SATISFACTORY') {
-    return 'text-green-600'
-  }
-  if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
-    return 'text-yellow-600'
-  }
-
-  if (agent.ratings_name == 'POOR') {
-    return 'text-red-600'
-  }
-}
 
 // Method to fetch leaderboard data
 const leaderBoardData = (query) => {

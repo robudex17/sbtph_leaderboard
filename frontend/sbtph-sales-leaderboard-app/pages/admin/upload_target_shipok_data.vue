@@ -5,11 +5,15 @@
 </template>
 
 <script setup>
-   const config = useRuntimeConfig()
 
-   const apiUrl = config.public.apiUrl
+  definePageMeta({
+    middleware: ['auth', 'adminmanager']
+  })
+    const config = useRuntimeConfig()
 
-   const uploadDataUrl =  `${apiUrl}/upload_target_shipok_data`
+    const apiUrl = config.public.apiUrl
+
+    const uploadDataUrl =  `${apiUrl}/upload_target_shipok_data`
 
 </script>
 

@@ -246,6 +246,7 @@
 
   const route = useRoute()
   const router = useRouter()
+  const { setRatingNameColor } = useRatingColor()
   
   route.query.fullyear = true
 
@@ -284,52 +285,7 @@
     return leaderBoardStore.state.agentYearPerformance.yearAverage
   })
 
-  console.log(agent)
 
-//   console.log('the agent object is', agent.value)
-
-  const ratingClassModal = computed(() => {
-    if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
-      return 'text-purple-600'
-    }
-    
-    if (selectedAgent.ratings_name == 'VERY SATISFACTORY') {
-      return 'text-blue-600'
-    }
-  
-    if (selectedAgent.ratings_name == 'SATISFACTORY') {
-      return 'text-green-600'
-    }
-    if (selectedAgent.ratings_name == 'NEEDS IMPROVEMENT') {
-      return 'text-yellow-600'
-    }
-  
-    if (selectedAgent.ratings_name == 'POOR') {
-      return 'text-red-600'
-    }
-  
-  })
-  
-  const setRatingNameColor = (agent) => {
-    if (agent.ratings_name == 'EXCEPTIONAL') {
-      return 'text-purple-600'
-    }
-    
-    if (agent.ratings_name == 'VERY SATISFACTORY') {
-      return 'text-blue-600'
-    }
-  
-    if (agent.ratings_name == 'SATISFACTORY') {
-      return 'text-green-600'
-    }
-    if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
-      return 'text-yellow-600'
-    }
-  
-    if (agent.ratings_name == 'POOR') {
-      return 'text-red-600'
-    }
-  }
   
   // Method to fetch leaderboard data
   const leaderBoardData = async(query) => {

@@ -7,6 +7,10 @@
 <script setup>
 
 
+definePageMeta({
+  middleware: ['auth', 'adminmanager']
+})
+
 
    const config = useRuntimeConfig()
 

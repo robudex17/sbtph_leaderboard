@@ -142,7 +142,7 @@
 
   if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
     isAdmin.value = true
-    isCardView.value = false
+    
   }
 
   

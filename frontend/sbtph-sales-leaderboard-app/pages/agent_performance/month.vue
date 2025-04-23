@@ -2,6 +2,7 @@
     <div>
     <div class="p-4 mt-20">
       <!-- Loading Spinner -->
+       
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
@@ -105,7 +106,7 @@
           <div class="text-center">
             <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
             <h3 class="text-xl font-semibold">AgentID: {{ selectedAgent ? selectedAgent.id : 'Agent has no ID' }}</h3>
-            <p class="text-lg text-gray-600 font-bold" :class="ratingClassModal">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
+            <p class="text-lg  font-bold"  :class="setRatingNameColor(selectedAgent)">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
   
             <div class="flex items-center mt-2">
               <template v-for="i in 5" :key="i">
@@ -241,6 +242,8 @@
   const route = useRoute()
   const router = useRouter()
   
+  const { setRatingNameColor } = useRatingColor()
+  
   query.value = route.query 
 
   const exportUrl = API.export.agent_peformance
@@ -263,9 +266,6 @@
     query.value.agent_id = agentId
   }
 
-console.log('agentid is',agentId)
-
-
   const agent = computed(() => {
     const foundAgent = leaderBoardStore.state.leaderboard.find(agent => agent.id == agentId)
     if(foundAgent){
@@ -275,52 +275,8 @@ console.log('agentid is',agentId)
     }
   })
 
-//   console.log('the agent object is', agent.value)
 
  
-  const ratingClassModal = computed(() => {
-    if (selectedAgent.ratings_name == 'EXCEPTIONAL') {
-      return 'text-purple-600'
-    }
-    
-    if (selectedAgent.ratings_name == 'VERY SATISFACTORY') {
-      return 'text-blue-600'
-    }
-  
-    if (selectedAgent.ratings_name == 'SATISFACTORY') {
-      return 'text-green-600'
-    }
-    if (selectedAgent.ratings_name == 'NEEDS IMPROVEMENT') {
-      return 'text-yellow-600'
-    }
-  
-    if (selectedAgent.ratings_name == 'POOR') {
-      return 'text-red-600'
-    }
-  
-  })
-  
-  const setRatingNameColor = (agent) => {
-    if (agent.ratings_name == 'EXCEPTIONAL') {
-      return 'text-purple-600'
-    }
-    
-    if (agent.ratings_name == 'VERY SATISFACTORY') {
-      return 'text-blue-600'
-    }
-  
-    if (agent.ratings_name == 'SATISFACTORY') {
-      return 'text-green-600'
-    }
-    if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
-      return 'text-yellow-600'
-    }
-  
-    if (agent.ratings_name == 'POOR') {
-      return 'text-red-600'
-    }
-  }
-  
   // Method to fetch leaderboard data
   const leaderBoardData = async(query) => {
     await leaderBoardStore.fetchLeaderboard(query);
