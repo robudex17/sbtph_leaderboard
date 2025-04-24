@@ -346,7 +346,27 @@
       };
 
       const setActiveMenuFromRoute = () => {
+        console.log('the Route is ', route)
         const currentRoute = route.path;
+
+        if (/^\/admin\/agent\/\d+\/details$/.test(currentRoute)) {
+              submenuStates.value["Admin Panel"] = true; // Open the Admin Panel submenu
+               activeMenu.value = "Manage Sales Agents";
+              return;
+        }
+
+        if(currentRoute == "/agent_performance/month"){
+            submenuStates.value["Agent Performance"] = true; // Open the Agent Performance submenu
+            activeMenu.value = "Agent_Monthly";
+            return;         
+        }
+
+        if(currentRoute == "/agent_performance/year"){
+            submenuStates.value["Agent Performance"] = true; // Open the Agent Performance  submenu
+            activeMenu.value = "Agent_Yearly";
+            return;         
+        }
+
         for (const item of menuItems) {
           if (item.route === currentRoute) {
             activeMenu.value = item.name;
@@ -359,6 +379,8 @@
               submenuStates.value[item.name] = true; // Open the submenu
               return;
             }
+       
+
           }
         }
       };
