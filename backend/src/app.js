@@ -1,12 +1,9 @@
+// app.js
 const express = require('express')
 const cors = require('cors')
-const coookieParser = require('cookie-parser')
-
-
-
+const cookieParser = require('cookie-parser')
+const path = require('path')
 require('dotenv').config()
-
-const app = express()
 
 const salesAgentsRoutes = require('./routes/sales_agents_route')
 const salesMemoRoutes = require('./routes/sales_memo_route')
@@ -18,100 +15,40 @@ const salesTargetShipokRoutes = require('./routes/sales_target_shipok_route')
 const salesLeaderboardRoutes = require('./routes/sales_leaderboard_route')
 const salesDashboardRoutes = require('./routes/sales_dashboard_routes')
 const salesAnalyticsRoutes = require('./routes/sales_analytics_route')
-const salesMarketRoutes = require('./routes/sales_market_route') 
+const salesMarketRoutes = require('./routes/sales_market_route')
 const salesManagerRoutes = require('./routes/sales_managers_route')
-
 const importExportDataRoutes = require('./routes/import_export_data_routes')
-
-const {authenticateToken, authorizeRoles  } = require('./middleware/auth')
-
 const salesLoginRoutes = require('./routes/sales_login_routes')
 const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
 
-const path = require('path')
-const pool = require('./config/db')
+const app = express()
 
-const PORT = process.env.PORT || 3000;
+app.use(express.json())
+app.use(cookieParser())
+app.use(cors())
+app.use('/images', express.static(path.join(__dirname, 'images')))
 
-//new added - 04/03/2025 
-const http = require('http')
-const server = http.createServer(app)
-const { Server }  = require('socket.io')
-const io = new Server(server, { cors: {origin: "*"}})
+app.use("/api", salesLoginRoutes)
+app.use("/api", standardUsersLoginRoutes)
+app.use("/api", standardUsersRoutes)
+app.use("/api", salesAgentsRoutes)
+app.use("/api", salesMemoRoutes)
+app.use("/api", salesAbsencesRoutes)
+app.use("/api", salesNewDepositRoutes)
+app.use("/api", salesFeedbackRoutes)
+app.use("/api", salesTardinessRoutes)
+app.use("/api", salesTargetShipokRoutes)
+app.use("/api", salesLeaderboardRoutes)
+app.use("/api", salesDashboardRoutes)
+app.use("/api", salesAnalyticsRoutes)
+app.use("/api", salesMarketRoutes)
+app.use("/api", salesManagerRoutes)
+app.use("/api", importExportDataRoutes())  // in test, we can pass fake io if needed
 
+// OPTIONAL: test-only route
+app.get('/api/ping', (req, res) => {
+  res.status(200).json({ message: 'pong' })
+})
 
-const  startServer = async () => {
-    try {
-        //test connection
-        const connection = await pool.getConnection()
-        console.log('Database connection established successfully')
-        connection.release()  // Release the connection back to the pool
-
-        app.use(express.json())
-        app.use('/images', express.static(path.join(__dirname, 'images')))
-
-        app.use(coookieParser())
-
-        // app.get('/protected', authenticateToken, (req,res, next)  => {
-        //     res.json({message: 'Welcome Authentication User'})
-        // })
-        
-        // app.get('/admin', authenticateToken, authorizeRoles('admin'), (req, res, next) => {
-        //     res.json({message: 'Welcome Administrator...'})
-        // })
-
-        //enable cors in all origin..
-        // app.use(cors({
-        //     origin: "http://localhost:3000", // Your frontend URL
-        //     credentials: true, // Allow cookies to be sent
-        // }))
-        // app.use(salesLoginRoutes)
-        // app.use(standardUsersLoginRoutes)
-        // app.use(standardUsersRoutes)
-        // app.use(salesAgentsRoutes)
-        // app.use(salesMemoRoutes)
-        // app.use(salesAbsencesRoutes)
-        // app.use(salesNewDepositRoutes)
-        // app.use(salesFeedbackRoutes)
-        // app.use(salesTardinessRoutes)
-        // app.use(salesTargetShipokRoutes)
-        // app.use(salesLeaderboardRoutes)
-        // app.use(salesDashboardRoutes)
-        // app.use(salesAnalyticsRoutes)
-        // app.use(salesMarketRoutes)
-        // app.use(salesManagerRoutes)
-
-        // Allow all origins
-        app.use(cors());
-
-        app.use("/api", salesLoginRoutes);
-        app.use("/api", standardUsersLoginRoutes);
-        app.use("/api", standardUsersRoutes);
-        app.use("/api", salesAgentsRoutes);
-        app.use("/api", salesMemoRoutes);
-        app.use("/api", salesAbsencesRoutes);
-        app.use("/api", salesNewDepositRoutes);
-        app.use("/api", salesFeedbackRoutes);
-        app.use("/api", salesTardinessRoutes);
-        app.use("/api", salesTargetShipokRoutes);
-        app.use("/api", salesLeaderboardRoutes);
-        app.use("/api", salesDashboardRoutes);
-        app.use("/api", salesAnalyticsRoutes);
-        app.use("/api", salesMarketRoutes);
-        app.use("/api", salesManagerRoutes);
-        app.use("/api", importExportDataRoutes(io))  // pass the io instance on the importDataRoutes
-
-
-        server.listen(PORT, () => {
-            console.log(`Server is running on http://localhost:${PORT}`)
-        })
-
-    }
-    catch(error){
-        console.log(error)
-    }
-}
-
-startServer()
-
+module.exports = app

@@ -1,0 +1,64 @@
+version: "3.8"
+
+services: 
+  sbtph-leaderboard-db:
+    container_name: sbtph-leaderboard-db
+    image: mariadb:latest
+    restart: unless-stopped
+    networks:
+      - sbtph-leaderboard-network
+    ports:
+      - "3306:3306"
+    volumes:
+      - sbtph_leaderboard:/var/lib/mysql
+      - /home/sbtphadmin/sbtph_leaderboard/database:/docker-entrypoint-initdb.d
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  sbtph-leaderboard-backend:
+    build: 
+      context: ./backend 
+      dockerfile: Dockerfile
+    image: robudex17/sbtph-leaderboard-backend 
+    container_name: sbtph-leaderboard-backend
+    environment:
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_HOST:  sbtph-leaderboard-db
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET} 
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      PORT: 8080
+    ports:
+      - "${HOST_BACKEND_PORT}:8080"  
+
+        
+    depends_on: 
+      - sbtph-leaderboard-db
+    networks:
+      - sbtph-leaderboard-network
+  sbtph-leaderboard-frontend:
+    build:
+      context: ./frontend/sbtph-sales-leaderboard-app
+      dockerfile: Dockerfile
+      args:
+        NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL}
+        NUXT_PUBLIC_SOCKET_IO_URL: ${NUXT_PUBLIC_SOCKET_IO_URL}
+        
+    image: robudex17/sbtph-leaderboard-frontend 
+    container_name: sbtph-leaderboard-frontend
+    ports:
+    - "${HOST_FRONTEND_PORT}:3000"
+    depends_on: 
+      - sbtph-leaderboard-backend
+    networks:
+      - sbtph-leaderboard-network
+
+volumes:
+  sbtph_leaderboard
+
+networks:
+  sbtph-leaderboard-network
