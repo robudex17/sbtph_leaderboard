@@ -19,7 +19,7 @@ To verify your server version, run:
 ```bash
 cat /etc/os-release
 ```
-### Output:
+**Output:**
 ```
   PRETTY_NAME="Ubuntu 24.04.1 LTS"
   NAME="Ubuntu"
