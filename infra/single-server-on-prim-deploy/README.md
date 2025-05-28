@@ -14,7 +14,7 @@ We are using:
 
 - **OS**: Ubuntu Server 24.04 LTS (Long Term Support)
 
-To verify your server version, run:
+1. To verify your server version, run:
 
 ```bash
 cat /etc/os-release
@@ -36,6 +36,20 @@ cat /etc/os-release
   LOGO=ubuntu-logo
 ```
 
+2. Update and Upgrade the System 
+
+```bash
+  sudo apt udpate -y
+  sudo apt upgrade -y
+```
+
+3. Install Mariadb-Server And enabling and Starting Service
+```bash
+  sudo apt install mariadb-server -y
+  sudo systemctl enable mariadb
+  sudo systemctl start  mariadb
+```
+4. Create
 
 
 
