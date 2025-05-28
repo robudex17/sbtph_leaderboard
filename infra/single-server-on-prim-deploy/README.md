@@ -1,4 +1,4 @@
-# Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
+d# Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
 
 ## 📦 Phase 1: Single Server Deployment (Monolithic-Style)
 
@@ -14,42 +14,70 @@ We are using:
 
 - **OS**: Ubuntu Server 24.04 LTS (Long Term Support)
 
-1. To verify your server version, run:
+  1. To verify your server version, run:
+  
+  ```bash
+  cat /etc/os-release
+  ```
+  **Output:**
+  ```
+    PRETTY_NAME="Ubuntu 24.04.1 LTS"
+    NAME="Ubuntu"
+    VERSION_ID="24.04"
+    VERSION="24.04.1 LTS (Noble Numbat)"
+    VERSION_CODENAME=noble
+    ID=ubuntu
+    ID_LIKE=debian
+    HOME_URL="https://www.ubuntu.com/"
+    SUPPORT_URL="https://help.ubuntu.com/"
+    BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+    PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+    UBUNTU_CODENAME=noble
+    LOGO=ubuntu-logo
+  ```
+  
+  2. Update and Upgrade the System 
+  
+  ```bash
+    sudo apt udpate -y
+    sudo apt upgrade -y
+  ```
+  
+  3. Install Mariadb-Server,  run neccessary script  and enabling and Starting Service
+  ```bash
+    sudo apt install mariadb-server -y
+    sudo mysql_secure_installation
+    sudo systemctl enable mariadb
+    sudo systemctl start  mariadb
+  ```
+  4. Install nodejs version 22
+  ```bash
+    sudo apt install -y curl
+    curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+    sudo apt install -y nodejs
+    node -v
+    npm -v
+  ``` 
+### 🖥️ Setup Database, Backend, Frontend
 
-```bash
-cat /etc/os-release
-```
-**Output:**
-```
-  PRETTY_NAME="Ubuntu 24.04.1 LTS"
-  NAME="Ubuntu"
-  VERSION_ID="24.04"
-  VERSION="24.04.1 LTS (Noble Numbat)"
-  VERSION_CODENAME=noble
-  ID=ubuntu
-  ID_LIKE=debian
-  HOME_URL="https://www.ubuntu.com/"
-  SUPPORT_URL="https://help.ubuntu.com/"
-  BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
-  PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
-  UBUNTU_CODENAME=noble
-  LOGO=ubuntu-logo
-```
+1. Clone Project Repository and cd to the project:
+  ```bash
+     git clone -b main https://github.com/robudex17/sbtph_leaderboard.git
+     cd sbtph_leaderboard
+  ```
+2. Run mariab.sh for creating , mysql user, leaderboard database, and restoring database from backup
+  ```bash
+     bash database/mariab.sh
+  ```
+3. Install PM2. PM2 is a production process manager for Node.js applications
+  ```bash
+    npm install -g pm2
+  ```
+4. Backend
+   
 
-2. Update and Upgrade the System 
 
-```bash
-  sudo apt udpate -y
-  sudo apt upgrade -y
-```
 
-3. Install Mariadb-Server And enabling and Starting Service
-```bash
-  sudo apt install mariadb-server -y
-  sudo systemctl enable mariadb
-  sudo systemctl start  mariadb
-```
-4. Create
 
 
 
