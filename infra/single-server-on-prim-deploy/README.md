@@ -1,4 +1,4 @@
-# Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
+  # Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
 
 ## 📦 Phase 1: Single Server Deployment (Monolithic-Style)
 
@@ -75,7 +75,7 @@ We are using:
   ```bash
     npm install -g pm2
   ```
-4. Configure and Setup Backend
+4. Configure and Setup Backend.
    
    a. Create **.env** on the backend folder
      ```bash
@@ -102,7 +102,79 @@ We are using:
         STANDARD_USER_LASTNAME=admin
         STANDARD_USER_DBNAME=admin
         STANDARD_USER_LOGIN_TYPE=standarduser
+     
      ```
+   c. Run **npm install** to install backend packages. (__It make take some quite amount of time to install__)
+   
+      ```bash
+         npm install
+      ```
+   d. Run **npm run start** to test if the backend is successfully running and can connect to the database 
+      successfully (Initial Test).
+
+     ```bash
+        npm run start
+
+        #THE OUTPUT SHOULD LOOK LIKE THIS:
+        
+        > backend@1.0.0 start
+        > node src/server.js
+        
+        ✅ DB connected
+        🚀 Server is running at http://localhost:8080
+
+     ```
+     Once confirmed, stop the app by pressing Ctrl + C in the terminal. This will terminate the Node.js process 
+     running in the foreground.
+   e. 🚀 Using PM2 to Manage the App.
+
+    Instead of running the app manually each time, we use PM2, a process manager that makes it easier to manage     
+    Node.js applications — especially in production environments.
+
+    PM2 helps by:
+    
+    ✅ Running your app in the background.
+    
+    🔄 Automatically restarting the app if it crashes.
+    
+    🔌 Keeping the app alive after server reboots.
+    
+    📊 Offering built-in monitoring and logging.
+    
+    ⚙️ Supporting cluster mode for multi-core performance.
+
+     ```bash
+         #PM2 Commands
+         # Start the app using PM2
+           pm2 start src/app.js
+          
+          # View running processes
+            pm2 list
+          
+          # View real-time logs
+             pm2 logs
+          
+          # Save the process list (for auto-restart on reboot)
+             pm2 save
+          
+          # Generate startup script (optional but recommended)
+             pm2 startup
+     ```
+     Verify And View running processes
+     ```bash
+        pm2 list
+
+        #THE STATUS SHOULD BE ONLINE
+        ┌────┬────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name       │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ backend    │ default     │ 1.0.0   │ fork    │ 3421     │ 2s     │ 44   │ online    │ 0%       │ 71.5mb   │ root     │ disabled │
+└────┴────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+     
+     ```
+
+     
    
 
 
