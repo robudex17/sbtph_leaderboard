@@ -75,7 +75,7 @@ We are using:
   ```bash
     npm install -g pm2
   ```
-4. Configure and Setup Backend.
+4. Configure and Setup Backend
    a. Create **.env** on the backend folder
     ```bash
        cd backend
