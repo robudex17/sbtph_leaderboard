@@ -1,4 +1,4 @@
-d# Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
+# Project DevOps Journey: From App Creation to On-Premise and Cloud Deployment
 
 ## 📦 Phase 1: Single Server Deployment (Monolithic-Style)
 
