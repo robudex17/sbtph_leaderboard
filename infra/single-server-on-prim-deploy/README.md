@@ -76,11 +76,12 @@ We are using:
     npm install -g pm2
   ```
 4. Configure and Setup Backend
+   
    a. Create **.env** on the backend folder
-    ```bash
+     ```bash
        cd backend
        touch .env
-    ```
+     ```
    b. Open **.env** file and environment variables. (Edit the update the variables values if neccessary)
      ```bash
         nano .env
