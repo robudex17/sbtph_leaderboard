@@ -46,7 +46,7 @@
             
                </p> 
               <img 
-                    :src="currentUser.image_link" 
+                    :src="updateImageLink(currentUser.image_link)" 
                     alt="User Profile" 
                     class="w-10 h-10 rounded-full border-2 border-gray-300"
                 />
@@ -95,6 +95,12 @@
     authStore.fetchTokenFromLocalStore()
 
     const currentUser = authStore.state.user 
+
+    const config = useRuntimeConfig()
+
+    const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+      }
 
     const searchQuery = ref("");
     const notifications = [

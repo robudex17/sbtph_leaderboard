@@ -110,7 +110,8 @@ exports.updateStandardUser= async( req, res, next) => {
 
    
     if (req.file) {
-        imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+        // imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+        imageLink = `/images/${req.file.filename}`;
     }
 
     try {
