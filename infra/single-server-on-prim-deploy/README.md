@@ -146,7 +146,7 @@ We are using:
      ```bash
          #PM2 Commands
          # Start the app using PM2
-           pm2 start src/app.js
+           pm2 start src/server.js --name backend
           
           # View running processes
             pm2 list
@@ -164,15 +164,80 @@ We are using:
      ```bash
         pm2 list
 
-        #THE STATUS SHOULD BE ONLINE
-        ┌────┬────────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
-│ id │ name       │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
-├────┼────────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
-│ 0  │ backend    │ default     │ 1.0.0   │ fork    │ 3421     │ 2s     │ 44   │ online    │ 0%       │ 71.5mb   │ root     │ disabled │
-└────┴────────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
-
-     
      ```
+     The Status  of the backend should be online.
+     ![App Running Backend](./screenshots/pm2-running-backend-process.png)
+
+
+5.  Configure and Setup Frontend.
+
+    a. Create **.env** on the frontend/sbtph-sales-leaderboard-app folder
+
+      ```bash
+       cd frontend/sbtph-sales-leaderboard-app
+       touch .env
+       
+      ```
+    b. Open **.env** file and environment variables. (Edit the update the variables values if neccessary)
+
+       ```bash
+            nano .env
+    
+            #Update  env variables below and copy it to the .env file
+     
+            NUXT_PUBLIC_API_URL=<ADDRESS AND PORT OF BACKEND>          #SAMPLE FORMAT: http://localhost:8080/api
+            NUXT_PUBLIC_SOCKET_IO_URL=<ADDRESS AND PORT OF BACKEND>    #SAMPLE FORMAT: http://localhost:8080  
+            NUXT_IMAGE_BASE_URL=http:<ADDRESS AND PORT OF BACKEND>     #SAMPLE FORMAT: http://localhost:8080
+         
+       ```
+
+    c. Run **npm install** to install backend packages. (__It make take some quite amount of time to install__)
+   
+       ```bash
+         npm install
+       ```
+   d. Our Frontend APP need to build to deploy it in production. Before building the app you can preview it
+
+     ```bash
+        npm run preview
+     ```   
+   e. Test the application by visiting the browser
+
+   f. After testing, its time to build it for production ready app
+
+     ```bash
+        npm run build
+    ```
+   g. Our production ready code is located in .output folder
+
+   h. Now its time to use PM2 to manage our production Frontend app
+
+    ```bash
+         #PM2 Commands
+         # Start the app using PM2
+           pm2 start .output/server/index.mjs --name "frontend"
+          
+          # View running processes
+            pm2 list
+          
+          # View real-time logs
+             pm2 logs
+          
+          # Save the process list (for auto-restart on reboot)
+             pm2 save
+          
+          # Generate startup script (optional but recommended)
+             pm2 startup
+     ```
+     Verify And View running processes
+     ```bash
+        pm2 list
+
+     ```
+        The Status  of the backend and frontend  should be online.
+     ![App Running Backend and Frontend](./screenshots/pm2-running-backend-frontend-process.png)
+     
+
 
      
    
