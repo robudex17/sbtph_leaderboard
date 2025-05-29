@@ -67,13 +67,41 @@ We are using:
   ```
 2. Run mariab.sh for creating , mysql user, leaderboard database, and restoring database from backup
   ```bash
+     cd database
      bash database/mariab.sh
+     cd ..
   ```
 3. Install PM2. PM2 is a production process manager for Node.js applications
   ```bash
     npm install -g pm2
   ```
-4. Backend
+4. Configure and Setup Backend.
+   a. Create **.env** on the backend folder
+    ```bash
+       cd backend
+       touch .env
+    ```
+   b. Open **.env** file and environment variables. (Edit the update the variables values if neccessary)
+     ```bash
+        nano .env
+
+        #Update  env variables below and copy it to the .env file
+        PORT=8080
+        DB_HOST= <Server IP Address>
+        DB_NAME=leaderboard
+        DB_USER=admin
+        DB_PASSWORD=admin@2025
+        JWT_SECRET=  <JWT_SECRET HERE>
+        JWT_REFRESH_SECRET= <JWT_REFRESH_SECRET HERE>
+        
+        STANDARD_USER_LOGIN_ID=9999
+        STANDARD_USER_ROLE=admin
+        STANDARD_USER_USERNAME=admin
+        STANDARD_USER_FIRSTNAME=admin
+        STANDARD_USER_LASTNAME=admin
+        STANDARD_USER_DBNAME=admin
+        STANDARD_USER_LOGIN_TYPE=standarduser
+     ```
    
 
 
