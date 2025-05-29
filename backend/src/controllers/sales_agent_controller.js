@@ -281,7 +281,8 @@ exports.addNewSalesAgent = async( req, res, next) => {
         imageLink = null
     }else {
          // Construct the URL for the uploaded image
-       imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+    //    imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+          imageLink = `/images/${req.file.filename}`;
     }
 
     try {

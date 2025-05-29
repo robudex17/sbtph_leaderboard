@@ -31,7 +31,7 @@
               <td class="py-2 px-4 text-sm text-green-800">{{ agent.market_name }}</td>
               <td class="py-2 px-4 text-sm text-green-800">
                 <div class="agent-photo">
-                  <img v-if="agent.image_link" :src="agent.image_link" alt="Agent Photo" class="rounded-full w-12 h-12 object-cover">
+                  <img v-if="agent.image_link" :src="updateImageLink(agent.image_link)" alt="Agent Photo" class="rounded-full w-12 h-12 object-cover">
                   <span v-else class="text-sm text-gray-500">No Photo</span>
                 </div>
               </td>
@@ -53,6 +53,12 @@
         }
 
       });
+
+      const config = useRuntimeConfig()
+
+      const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+      }
   </script>
   
   <style scoped>

@@ -123,7 +123,7 @@
             />
             <div v-if="imagePreview" class="mt-2">
               <img
-                :src="imagePreview"
+                :src="updateImageLink(imagePreview)"
                 alt="Agent Image"
                 class="w-24 h-24 rounded-full border border-blue-200 mx-auto"
               />
@@ -319,7 +319,7 @@
             </td>
             <td class="py-4 px-6 border text-center">
               <img
-                :src="agent.image_link"
+                :src="updateImageLink(agent.image_link)"
                 alt="Agent Image"
                 class="h-12 w-12 rounded-full mx-auto border border-blue-200"
               />
@@ -388,6 +388,12 @@ definePageMeta({
 import { ref, computed } from 'vue';
 import { useManageSalesAgentStore } from '../../../stores/manage_sales_agents';
 import { onMounted } from 'vue';
+
+const config = useRuntimeConfig()
+
+const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+}
 
 //get the current user
 const authStore = useAuthStore()

@@ -21,7 +21,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiUrl: process.env.NUXT_PUBLIC_API_URL,
-      socketUrl: process.env.NUXT_PUBLIC_SOCKET_IO_URL
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_IO_URL,
+      imageBaseUrl: process.env.NUXT_IMAGE_BASE_URL,
     },
    
   }

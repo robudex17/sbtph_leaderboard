@@ -39,7 +39,7 @@
             <div class="flex flex-col items-center p-4">
               <img
                 v-if="agent.image_link"
-                :src="agent.image_link"
+                :src="updateImageLink(agent.image_link)"
                 alt="Agent Image"
                 class="w-20 h-20 rounded-full object-cover mb-4"
               />
@@ -100,7 +100,7 @@
         <div class="flex flex-col items-center">
           <img
             v-if="selectedAgent && selectedAgent.image_link"
-            :src="selectedAgent.image_link"
+            :src="updateImageLink(selectedAgent.image_link)"
             alt="Agent Image"
             class="w-40 h-40 rounded-full object-cover mb-4"
           />
@@ -232,6 +232,12 @@
   const isCardView = ref(true)
   const token = authStore.state.token
   const query = ref({})
+
+  const config = useRuntimeConfig()
+
+  const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+  }
 
     // Months for the dropdown
     const months = [
