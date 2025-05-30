@@ -148,7 +148,7 @@ pm2 startup
 
 ✅ Backend should show **online** in `pm2 list`.
 
-![App Running Backend](./screenshots/pm2-running-backend-process.png)
+![App Running Backend](./screenshots/pm2-running-backend-process.png.png)
 
 ---
 
@@ -214,7 +214,7 @@ pm2 startup
 
 ✅ Both backend and frontend should show **online**.
 
-![App Running Backend and Frontend](./screenshots/pm2-running-backend-frontend-process.png)
+![App Running Backend and Frontend](./screenshots/pm2-running-backend-frontend-process.png.png)
 
 ---
 
