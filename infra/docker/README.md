@@ -272,4 +272,208 @@ login as: Standard User
 
 
 
-## ⚙️ Part Two: Docker Compose.
+## ⚙️ Part Two: Docker Compose
+
+Docker Compose is a tool for defining and managing multi-container Docker applications using a simple YAML file (`docker-compose.yml`). Instead of running multiple complex `docker run` commands, Docker Compose lets you declare all services, networks, and volumes in one place.
+
+**Advantages over command line:**
+- Simplifies container orchestration with a single config file.
+- Makes multi-container setups easy to start, stop, and manage.
+- Reduces human error by avoiding repetitive manual commands.
+- Enables easy environment replication across different machines.
+
+**How to use it:**
+1. Define your services, networks, and volumes in `docker-compose.yml`.
+2. Run `docker-compose up` to build and start all containers.
+3. Use `docker-compose down` to stop and remove containers and networks.
+
+This approach streamlines managing complex Docker apps and improves consistency and maintainability.
+
+## Deploying the Leaderboard App with Docker Compose
+
+This guide will help you **stop and clean up existing Docker containers, networks, volumes, and images** before rebuilding and deploying the app using Docker Compose.
+
+---
+
+### 1. Stop and Delete Existing Docker Resources
+
+Before rebuilding, stop and remove all related containers, network, volume, and images to avoid conflicts:
+
+```bash
+# Stopping containers
+docker stop leaderboard-db
+docker stop leaderboard-backend
+docker stop leaderboard-frontend
+
+# Removing containers
+docker rm leaderboard-db
+docker rm leaderboard-backend
+docker rm leaderboard-frontend
+
+# Removing network and volume
+docker network rm leaderboard-network
+docker volume rm leaderboard_db
+
+# Removing Docker images
+docker rmi mariadb
+docker rmi robudex17/leaderboard-backend
+docker rmi robudex17/leaderboard-frontend
+```
+
+> **Explanation:**  
+> We first stop all running containers related to the app, then remove them. Next, we delete the custom Docker network and named volume to ensure no leftover resources remain. Finally, we remove the Docker images so that they can be freshly rebuilt.
+
+---
+
+### 2. Create and Deploy the App Using Docker Compose
+
+Docker Compose uses a `docker-compose.yaml` file to declare all your app’s services and configurations in one place.
+
+The `docker-compose.yaml` file for this app is located in the `infra/docker` directory.
+
+### Sample `docker-compose.yaml`
+
+```yaml
+version: "3.8"
+
+services: 
+  sbtph-leaderboard-db:
+    container_name: leaderboard-db
+    image: mariadb:latest
+    restart: unless-stopped
+    networks:
+      - leaderboard-network
+    ports:
+      - "3306:3306"
+    volumes:
+      - leaderboard_db:/var/lib/mysql
+      - /home/sbtphadmin/sbtph_leaderboard/database:/docker-entrypoint-initdb.d
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  sbtph-leaderboard-backend:
+    build: 
+      context: ../../backend 
+      dockerfile: Dockerfile
+    image: robudex17/leaderboard-backend 
+    container_name: leaderboard-backend
+    environment:
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_HOST: leaderboard-db
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET} 
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      PORT: ${CONTAINER_BACKEND_PORT}
+    ports:
+      - "${HOST_BACKEND_PORT}:${CONTAINER_BACKEND_PORT}"  
+    depends_on: 
+      - sbtph-leaderboard-db
+    networks:
+      - leaderboard-network
+
+  sbtph-leaderboard-frontend:
+    build:
+      context: ../../frontend/sbtph-sales-leaderboard-app
+      dockerfile: Dockerfile
+      args:
+        NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL}
+        NUXT_PUBLIC_SOCKET_IO_URL: ${NUXT_PUBLIC_SOCKET_IO_URL}
+    image: robudex17/leaderboard-frontend 
+    container_name: leaderboard-frontend
+    ports:
+      - "${HOST_FRONTEND_PORT}:3000"
+    depends_on: 
+      - leaderboard-backend
+    networks:
+      - leaderboard-network
+
+volumes:
+  leaderboard_db:
+
+networks:
+  leaderboard-network:
+```
+
+> **Explanation:**  
+> This YAML file defines 3 services — database, backend, and frontend — each with their respective configurations like images, ports, volumes, environment variables, and dependencies. The environment variables are referenced using `${VARIABLE_NAME}`, which will be loaded from a `.env` file.
+
+---
+
+### 3. Create the `.env` File for Environment Variables
+
+Because the `docker-compose.yaml` file references environment variables, create a `.env` file inside the `infra/docker` directory to define these values.
+
+```bash
+cd infra/docker
+touch .env
+```
+
+Add the following content to your `.env` file (adjust values as needed):
+
+```env
+MARIADB_ROOT_PASSWORD=<MARIADB_ROOT_PASSWORD>
+MYSQL_DATABASE=leaderboard
+MYSQL_USER=<YOUR_MYSQL_USER>
+MYSQL_PASSWORD=<YOUR_MYSQL_PASSWORD>
+JWT_SECRET=<YOUR_JWT_SECRET>
+JWT_REFRESH_SECRET=<YOUR_JWT_REFRESH_SECRET>
+CONTAINER_BACKEND_PORT=<YOUR_CONTAINER_BACKEND_PORT>
+HOST_BACKEND_PORT=<YOUR_HOST_BACKEND_PORT>
+
+NUXT_PUBLIC_API_URL=<YOUR_SERVER_IP>:<YOUR_HOST_BACKEND_PORT>/api 
+NUXT_PUBLIC_SOCKET_IO_URL=<YOUR_SERVER_IP>:<YOUR_HOST_BACKEND_PORT>
+HOST_FRONTEND_PORT=<YOUR_HOST_FRONTEND_PORT>
+```
+
+> **Explanation:**  
+> This file sets sensitive and environment-specific values outside your Compose file for better security and flexibility.
+
+---
+
+### 4. Build Docker Images
+
+Run this command to build the Docker images for your app based on the Dockerfiles and Compose definitions:
+
+```bash
+docker compose build
+```
+
+---
+
+### 5. Start the Containers
+
+To start your app containers in the background (detached mode), run:
+
+```bash
+docker compose up -d
+```
+
+---
+
+### 6. Stop and Remove Containers
+
+When you want to stop and remove all containers, networks, and volumes created by Docker Compose, simply run:
+
+```bash
+docker compose down
+```
+
+---
+
+### Summary
+
+- Stop and clean up old containers, networks, volumes, and images manually.
+- Use a `docker-compose.yaml` file to declare your app services.
+- Manage environment variables securely in a `.env` file.
+- Use `docker compose build` and `docker compose up -d` to build and start your app.
+- Use `docker compose down` to stop and remove all related resources.
+
+---
+
+## End 
+
+
