@@ -1,0 +1,91 @@
+services: 
+  leaderboard-db:
+    container_name: leaderboard-db
+    image: mariadb:latest
+    restart: unless-stopped
+    networks:
+      - leaderboard-network
+    ports:
+      - target: 3306
+        published:  3306 
+        protocol: tcp 
+        mode: host
+    volumes:
+      - leaderboard_db:/var/lib/mysql
+      - /root/sbtph_leaderboard/database:/docker-entrypoint-initdb.d
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+    deploy:
+      placement:
+        constraints:
+          - node.labels.database == yes  
+
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+
+
+  leaderboard-backend:
+    build: 
+      context: ../../../../backend 
+      dockerfile: Dockerfile
+    image: <DOCKERHUB-USERNAME-HERE>/leaderboard-backend 
+    container_name: leaderboard-backend
+    environment:
+      DB_NAME: ${MYSQL_DATABASE}
+      DB_USER: ${MYSQL_USER}
+      DB_HOST:  leaderboard-db
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET} 
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      PORT: ${CONTAINER_BACKEND_PORT}
+    ports:
+      - target: ${CONTAINER_BACKEND_PORT}
+        published: ${HOST_BACKEND_PORT}
+        protocol: tcp
+        mode: ingress
+        
+    depends_on: 
+      - leaderboard-db
+    networks:
+      - leaderboard-network
+    
+    deploy:
+      replicas: 3
+      restart_policy: 
+        condition: on-failure
+    
+  leaderboard-frontend:
+    build:
+      context: ../../../../frontend/sbtph-sales-leaderboard-app
+      dockerfile: Dockerfile
+      args:
+        NUXT_PUBLIC_API_URL: ${NUXT_PUBLIC_API_URL}
+        NUXT_PUBLIC_SOCKET_IO_URL: ${NUXT_PUBLIC_SOCKET_IO_URL}
+        
+    image: <DOCKERHUB-USERNAME-HERE>/leaderboard-frontend 
+    container_name: leaderboard-frontend
+    ports:
+      - target: 3000
+        published: ${HOST_FRONTEND_PORT}
+        protocol: tcp 
+        mode: ingress
+
+    depends_on: 
+      - leaderboard-backend
+    networks:
+      - leaderboard-network
+    deploy:
+      replicas: 3
+      restart_policy: 
+        condition: on-failure
+
+
+
+networks:
+  leaderboard-network:
+    driver: overlay

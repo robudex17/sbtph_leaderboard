@@ -1,0 +1,83 @@
+services:
+  leaderboard-backend:
+    build:
+      context: /root/backend
+      dockerfile: Dockerfile
+
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    environment:
+      DB_HOST: leaderboard-db
+      DB_NAME: leaderboard
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_USER: ${MYSQL_USER}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 8080
+    image: <DOCKERHUB-USERNAME-HERE>/leaderboard-backend
+    networks:
+      leaderboard-network: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: 8080
+        protocol: tcp
+  leaderboard-db:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.database == yes
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MYSQL_DATABASE: leaderboard
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_USER:  ${MYSQL_USER}
+    image: mariadb:latest
+    networks:
+      leaderboard-network: null
+    ports:
+      - mode: host
+        target: 3306
+        published: 3306
+        protocol: tcp
+    restart: on-failure
+    volumes:
+      - type: bind
+        source: /root/mariadb
+        target: /var/lib/mysql
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /root/sbtph_leaderboard/database
+        target: /docker-entrypoint-initdb.d
+        bind:
+          create_host_path: true
+  leaderboard-frontend:
+    build:
+      context: /root/frontend/sbtph-sales-leaderboard-app
+      dockerfile: Dockerfile
+      args:
+        NUXT_PUBLIC_API_URL: 34.8.215.154/api
+        NUXT_PUBLIC_SOCKET_IO_URL: 34.8.215.154
+
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    image: <DOCKERHUB-USERNAME-HERE>/leaderboard-frontend
+    networks:
+      leaderboard-network: null
+    ports:
+      - mode: ingress
+        target: 3000
+        published: 3000
+        protocol: tcp
+networks:
+  leaderboard-network:
+    name: docker_swarm_leaderboard-network
+    driver: overlay
