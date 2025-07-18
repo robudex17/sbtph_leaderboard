@@ -402,6 +402,8 @@ validator.validateAgentId = [
 
 
 
+
+
 validator.validateAddAndUpdateLmFeedback = [
     check('manager_id')
     .notEmpty().withMessage('Manager ID is required')
@@ -493,6 +495,12 @@ validator.validateQaId = [
     .notEmpty().withMessage('QA ID is required')
     .isNumeric().withMessage('QA ID must be a number')
     .isLength({min:4, max:10}).withMessage('QA ID must atleast 4 digits'),
+]
+
+validator.validateDashboardOption = [
+    check('dashboardoption')
+    .notEmpty().withMessage("dashboardoption is required")
+     .isIn(['individual', 'team', 'overall']).withMessage("dashboardoption must be one of 'individual', 'team', or 'overall'")
 ]
 
 

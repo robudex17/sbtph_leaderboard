@@ -76,13 +76,14 @@
 
       if (currentUser.role === 'admin'){
           menuItems = [
-            { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
-              subMenu: [
-                { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
-              ]
-            },
+            // { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+            //   subMenu: [
+            //     { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+            //     { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+            //     { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+            //   ]
+            // },
+            { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
 
             { 
@@ -143,14 +144,15 @@
           ];
       }else if (currentUser.role === 'manager' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 2){
         menuItems = [
-            { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
-              subMenu: [
-                { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
-              ]
+            // { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+            //   subMenu: [
+            //     { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+            //     { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+            //     { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+            //   ]
 
-            },
+            // },
+            { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
             { 
               name: 'Feedback', 
@@ -209,14 +211,15 @@
       }
       else if (currentUser.role === 'manager' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 1){
         menuItems = [
-          { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
-              subMenu: [
-                { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
-                { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
-              ]
+          // { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
+          //     subMenu: [
+          //       { name: 'month', route: '/dashboard/dashboard_month_view', icon: ['fas', 'tachometer-alt']  },
+          //       { name: 'year', route: '/dashboard/dashboard_year_view', icon: ['fas', 'tachometer-alt']  },
+          //       { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
+          //     ]
 
-            },
+          //   },
+           { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
             { 
               name: 'Feedback', 
@@ -232,7 +235,7 @@
 
           
             { 
-              name: 'Agent Performance', 
+              name: 'Individual Performance', 
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [
@@ -267,6 +270,7 @@
       else if( currentUser.role == 'user' && currentUser.login_type == 'salesagentuser'  && currentUser.agent_type == 0){
       activeMenu.value = "Agent Performance"
         menuItems = [
+            { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { 
               name: 'Feedback', 
               route: null, icon: ['fas', 'poll'],
@@ -279,7 +283,7 @@
             
             },
             { 
-              name: 'Agent Performance', 
+              name: 'Individual Performance', 
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [

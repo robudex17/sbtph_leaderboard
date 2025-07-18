@@ -68,7 +68,7 @@
               
               <td class="py-2 px-4 text-sm text-green-800">
                 <div class="agent-photo">
-                  <img v-if="agents[0].image_link" :src="agents[0].image_link" alt="Agent Photo" class="rounded-full w-12 h-12 object-cover">
+                  <img v-if="agents[0].image_link" :src="updateImageLink(agents[0].image_link)" alt="Agent Photo" class="rounded-full w-12 h-12 object-cover">
                   <span v-else class="text-sm text-gray-500">No Photo</span>
                 </div>
               </td>
@@ -122,6 +122,14 @@
       
       
       });
+
+       //get image url from the .env file
+       const config = useRuntimeConfig()
+
+      const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+      }
+
   </script>
   
   <style scoped>

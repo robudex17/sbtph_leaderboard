@@ -1,0 +1,5 @@
+#Update images query
+
+UPDATE standard_users
+SET image_link = REPLACE(image_link, 'http://103.5.6.3:8080', '')
+WHERE image_link LIKE 'http://103.5.6.3:8080%';

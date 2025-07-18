@@ -5,8 +5,26 @@
           <div class="flex items-center gap-10">
               <div class="text-lg font-bold">SBTPH SALES APP</div>
 
+              <!-- Dropdown for Dashboard -->
+              <div v-if="route.path =='/dashboard'" class="flex items-center gap-2">
+         
+                <select 
+                  class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  v-model="dashboardOption"
+                >
+              
+                <option v-for="dashboardoption in ['individual', 'team', 'overall']" :key="dashboardoption" :value="dashboardoption ">{{ dashboardoption.toUpperCase()  }}</option>
+
+                </select>
+                <button  
+                  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  @click="submitDateSelection"
+                >
+                  Submit
+                </button>
+              </div>                 
               <!-- Dropdown for Month and Year -->
-              <div class="flex items-center gap-2">
+              <div v-else class="flex items-center gap-2">
                 <select v-if="hasMonthOption"
                   v-model="selectedMonth"
                   class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -113,6 +131,12 @@
     const selectedMonth = ref("");
     const selectedYear = ref("");
     const truckOption = ref(true) //default is  include the truck 
+
+    // Dashboard values
+    // const individual = 'individual'
+    // const team = 'team'
+    // const overall = 'overall'
+    const dashboardOption = ref("individual")
 
     const months = [
       "January", "February", "March", "April", "May", "June",
@@ -257,7 +281,25 @@
 
 
     const submitDateSelection = () => {
-      if (route.path == '/analytics/agents' || 
+
+      if(route.path == '/dashboard'){
+        
+        const currentRoute = router.currentRoute.value;
+        
+        if (!['individual', 'team', 'overall'].includes(dashboardOption.value)  ) {
+          alert("Dashboard option is invalid")
+          return
+        }
+
+    
+        router.push({
+                path: currentRoute.path,
+                query: { ...currentRoute.query, dashboardoption: dashboardOption.value },
+        });        
+      
+        return
+      }
+      else if (route.path == '/analytics/agents' || 
           route.path == '/analytics/market' || 
           route.path == '/analytics/overall' || 
           route.path == '/agent_performance/year' || 
@@ -312,6 +354,7 @@
         if (Object.keys(newRoute.query).length == 0) {
             selectedMonth.value = ""
             selectedYear.value =  ""
+            dashboardOption.value = "individual"
         }
       
     })

@@ -56,6 +56,8 @@ export const useDashBoardStore = defineStore('dashboard', () => {
 
             const data = await response.json()
             state.dashboard = data
+
+          
            
         } catch (error) {
             console.error('Failed to fetch dashboard:', error)
