@@ -47,6 +47,14 @@
                   <option :value="true">With Trucks</option>
                   <option :value="false">Without Trucks</option>
                 </select>
+                <select v-if="route.path == '/'"
+                  class="p-2 border rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  v-model="leaderboardOption"
+                >
+              
+                <option v-for="leaderboardOptions in ['agent', 'lm', 'team']" :key="leaderboardOptions" :value="leaderboardOptions">{{ leaderboardOptions.toUpperCase()  }}</option>
+
+                </select>
                 <button  v-if="hasYearOption" 
                   class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   @click="submitDateSelection"
@@ -137,6 +145,7 @@
     // const team = 'team'
     // const overall = 'overall'
     const dashboardOption = ref("individual")
+    const leaderboardOption = ref('agent')
 
     const months = [
       "January", "February", "March", "April", "May", "June",
@@ -191,7 +200,8 @@
       '/agent_performance/month',
       '/agent_performance/year',
        '/admin/upload_target_shipok_data',
-      '/admin/upload_new_deposit_data'
+      '/admin/upload_new_deposit_data',
+      '/'
 
     ])
 
@@ -294,7 +304,7 @@
     
         router.push({
                 path: currentRoute.path,
-                query: { ...currentRoute.query, dashboardoption: dashboardOption.value },
+                query: {dashboardoption: dashboardOption.value },
         });        
       
         return
@@ -332,12 +342,17 @@
           }
           if (selectedMonth.value && selectedYear.value) {
             const currentRoute = router.currentRoute.value;
-
-            router.push({
+            if(route.path == '/'){
+              router.push({
               path: currentRoute.path,
-              query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value, withTrucks:truckOption.value },
+              query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value, withTrucks:truckOption.value, leaderboardOption: leaderboardOption.value },
             });
-
+            }else {
+              router.push({
+                path: currentRoute.path,
+                query: { ...currentRoute.query, month: selectedMonth.value, year: selectedYear.value, withTrucks:truckOption.value },
+              });
+            }
             console.log(`Redirecting to: ${currentRoute.path} with Month: ${selectedMonth.value}, Year: ${selectedYear.value}`);
           } else {
             alert("Please select both a month and a year.");
@@ -347,15 +362,17 @@
     };
 
       //If Click I to other menu  selectedMonth and selectedYear will be empty
-    watch(route, (newRoute)=> {
-        console.log(newRoute.query)
-        urlPath.value = newRoute.fullPath
-
-        if (Object.keys(newRoute.query).length == 0) {
+    watch(route, (newRoute, oldRoute)=> {
+         urlPath.value = newRoute.fullPath
+         
+        if (Object.keys(newRoute.query).length == 0  ) {
             selectedMonth.value = ""
             selectedYear.value =  ""
             dashboardOption.value = "individual"
+            leaderboardOption.value = "agent"
+            
         }
+        console.log('navigation query is',newRoute.query)
       
     })
 

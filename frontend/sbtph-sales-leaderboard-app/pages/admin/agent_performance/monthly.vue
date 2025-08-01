@@ -112,14 +112,16 @@
   const router = useRouter()
   const route = useRoute()
   const query = route.query
+
+  const year_summary = false
   
   
   const leaderBoardStore = useLeaderBoardStore()
   
 
   // Method to fetch leaderboard data
-const leaderBoardData = (query) => {
-  leaderBoardStore.fetchLeaderboard(query);
+const leaderBoardData = (query, year_summary) => {
+  leaderBoardStore.fetchLeaderboard(query, year_summary);
 };
 
   const itemsPerPage = 10;
@@ -194,7 +196,7 @@ const setRatingColor = (agent) => {
 
   onMounted(() => {
 
-    leaderBoardData(query)
+    leaderBoardData(query, year_summary)
 
   });
 
@@ -202,7 +204,7 @@ const setRatingColor = (agent) => {
   watch(route, (newRoute) => {
   console.log('The route is change. we should react to the change..')
   router.push(newRoute.fullPath)
-  leaderBoardData(newRoute.query)
+  leaderBoardData(newRoute.query, year_summary)
   
 })
   

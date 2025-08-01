@@ -347,54 +347,54 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 //       return result;
 // }
 
-// let sales_agents = []
-// let agentYearlyMetrics = []
-// if (withTrucks === "true" || withTrucks === true){
-//   const [sales_agents_result] = await pool.execute(
-//     'SELECT * FROM  `sales_agents`'  
-//   )
+let sales_agents = []
+let agentYearlyMetrics = []
+if (withTrucks === "true" || withTrucks === true){
+  const [sales_agents_result] = await pool.execute(
+    'SELECT * FROM  `sales_agents`'  
+  )
   
-//   sales_agents = sales_agents_result
-// }else {
+  sales_agents = sales_agents_result
+}else {
   
-//   const [sales_agents_result] = await pool.execute(
-//     'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
-// )
-// sales_agents = sales_agents_result
-// }
+  const [sales_agents_result] = await pool.execute(
+    'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
+)
+sales_agents = sales_agents_result
+}
 
-// for (const sales_agent of sales_agents){
-//       const queries = monthNames.map(month => 
-//         getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks).then(data => {
-//             if (data) {
-//                 return data[0]
-//             }
-//             return null; // Skip null values
-//         })
-//     );
+for (const sales_agent of sales_agents){
+      const queries = monthNames.map(month => 
+        getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks).then(data => {
+            if (data) {
+                return data[0]
+            }
+            return null; // Skip null values
+        })
+    );
 
-//     const results = await Promise.all(queries);
-//     const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
-//     const yearAverage = calculateAverages(agentMetircsFullYear)
-//     if(yearAverage.final_ratings){
-//         const [year_ratings] = await pool.execute(
-//       'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[yearAverage.final_ratings]
-//     )
-//     yearAverage['ratings_name'] = year_ratings[0].ratings_name
-//     }else {
-//       yearAverage['ratings_name'] = "NO_RATING"
-//         yearAverage['final_ratings'] = "NO_RATING"
-//     }
+    const results = await Promise.all(queries);
+    const agentMetircsFullYear= results.filter(item => item !== undefined); // Remove null values
+    const yearAverage = calculateAverages(agentMetircsFullYear)
+    if(yearAverage.final_ratings){
+        const [year_ratings] = await pool.execute(
+      'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[yearAverage.final_ratings]
+    )
+    yearAverage['ratings_name'] = year_ratings[0].ratings_name
+    }else {
+      yearAverage['ratings_name'] = "NO_RATING"
+        yearAverage['final_ratings'] = "NO_RATING"
+    }
 
-//     yearAverage['id'] =sales_agent.id
-//     yearAverage['db_name'] =  sales_agent.db_name
-//     yearAverage['image_link'] = sales_agent.image_link
-//     yearAverage['year'] = givenYear
+    yearAverage['id'] =sales_agent.id
+    yearAverage['db_name'] =  sales_agent.db_name
+    yearAverage['image_link'] = sales_agent.image_link
+    yearAverage['year'] = givenYear
 
-//     agentYearlyMetrics.push(yearAverage)
+    agentYearlyMetrics.push(yearAverage)
 
   
-// }
+}
 
 // const ratingsCountYear = {
 //   EXCEPTIONAL: 0,

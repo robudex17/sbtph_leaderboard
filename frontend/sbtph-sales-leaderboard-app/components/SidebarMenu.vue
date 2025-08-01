@@ -83,6 +83,8 @@
             //     { name: 'chart-view', route: '/dashboard/dashboard_chart_view', icon: ['fas', 'tachometer-alt']},
             //   ]
             // },
+            //?dashboardoption=individual
+            //?leaderboardOption=agent
             { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
 
@@ -271,6 +273,7 @@
       activeMenu.value = "Agent Performance"
         menuItems = [
             { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
+             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
             { 
               name: 'Feedback', 
               route: null, icon: ['fas', 'poll'],

@@ -1,8 +1,9 @@
+const { agent } = require('supertest');
 const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
 
-exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks) => {
+exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, leaderboardOption) => {
     //CHECK FIRST IF THERE ARE AVAILABLE MONTH AND YEAR ON target_shipok if not return empty array Imediately
 
   
@@ -46,11 +47,51 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks) =
   iF withTrucks is true , all agents
   if withTrucks is false , remove the market_id of 10 because it is trucks market
  */
+let queryAgentBy
+let targetShipokQueryForAgent = `SELECT target, ship_ok FROM target_shipok WHERE agent_id=? AND month=? AND year=?`
+let targetShipokQueryForLM =`SELECT 
+           SUM(target_shipok.target) AS target,
+           SUM(target_shipok.ship_ok) AS ship_ok
+        FROM sales_agents 
+        JOIN target_shipok ON sales_agents.id = target_shipok.agent_id
+        WHERE sales_agents.team_id = ?
+            AND target_shipok.month = ?
+             AND target_shipok.year = ?
+             AND sales_agents.status = 'active'` 
+
+if (leaderboardOption == 'lm'){
+  queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+                  FROM  sales_agents
+                  LEFT JOIN
+                      market ON sales_agents.market_id = market.id
+                  LEFT JOIN
+                      team ON sales_agents.team_id = team.id
+                  WHERE agent_type=1 AND status='active'`
+
+}else if(leaderboardOption == 'agent'){
+  queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+                  FROM  sales_agents
+                  LEFT JOIN
+                      market ON sales_agents.market_id = market.id
+                  LEFT JOIN
+                      team ON sales_agents.team_id = team.id
+                  WHERE agent_type=0 AND status='active'`
+  
+}else if(leaderboardOption == 'team'){
+    queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+                  FROM  sales_agents
+                  LEFT JOIN
+                      market ON sales_agents.market_id = market.id
+                  LEFT JOIN
+                      team ON sales_agents.team_id = team.id
+                  WHERE agent_type!=2 AND status='active'`
+  
+}
 
 let sales_agents
 if (agent_id != ""){
   const [sales_agents_result] = await pool.execute(
-    'SELECT * FROM  `sales_agents` WHERE id=?',[agent_id]  
+    `SELECT * FROM  sales_agents WHERE id=? AND agent_type!=2  AND status='active'`,[agent_id]  
   )
   
   sales_agents = sales_agents_result
@@ -58,21 +99,21 @@ if (agent_id != ""){
 
   if (withTrucks === "true" || withTrucks === true){
     const [sales_agents_result] = await pool.execute(
-      'SELECT * FROM  `sales_agents`'  
+      queryAgentBy  
     )
     
     sales_agents = sales_agents_result
   }else {
     
     const [sales_agents_result] = await pool.execute(
-      'SELECT * FROM  `sales_agents` WHERE market_id !=?', [10]  
+      `${queryAgentBy} AND market_id !=?`, [10]  
   )
   sales_agents = sales_agents_result
   }
 }
 
-   
 
+   
    //fetch  evaluation_criteria value and save it to evalulation_criteria 
    const [evaluation_criteria_array] = await pool.execute(
       'SELECT * FROM `evaluation_criteria`'
@@ -84,16 +125,56 @@ if (agent_id != ""){
      //add given month and year
      agent['month'] = givenMonth
      agent['year'] = givenYear
-      /*fetch target and shipok of each agent for the given month and year and get the percentage
+
+
+      /*fetch target and shipok of each agent for the given month and year and get the percentage 
            with  performance_percent = shipok/target * 100
       */
-      const [agentTargetShipOk] = await pool.execute(
-       'SELECt target, ship_ok FROM `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agent.id, givenMonth, givenYear]
-      )
+      let targetShipok
+
+      if (leaderboardOption == 'lm'){
+          const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
+          targetShipok = lmTargetShipOk
+      }else if(leaderboardOption == 'team') {
+        if(agent.agent_type == 1){
+           const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
+          targetShipok = lmTargetShipOk
+         
+        }else if(agent.agent_type == 0){
+           const [agentTargetShipOk] = await pool.execute(
+           targetShipokQueryForAgent,[agent.id, givenMonth, givenYear]
+
+         )
+         targetShipok = agentTargetShipOk
+       
+        }
+      }
+      else if(leaderboardOption == 'agent'){
+          const [agentTargetShipOk] = await pool.execute(
+           targetShipokQueryForAgent,[agent.id, givenMonth, givenYear]
+
+         )
+         targetShipok = agentTargetShipOk
+        
+         
+      }else {
+        if(agent.agent_type == 1){
+          const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
+          targetShipok = lmTargetShipOk
+        }else {
+          const [agentTargetShipOk] = await pool.execute(
+           targetShipokQueryForAgent,[agent.id, givenMonth, givenYear]
+
+         )
+         targetShipok = agentTargetShipOk
+        }
+      }
       
-      if(agentTargetShipOk.length > 0) {
-       const target = agentTargetShipOk[0].target
-       const shipok = agentTargetShipOk[0].ship_ok
+     
+
+      if(targetShipok.length > 0) {
+       const target = Number(targetShipok[0].target)
+       const shipok = Number(targetShipok[0].ship_ok)
        const percentShipOk = Math.round(Number(shipok)/Number(target) * 100)
        
        //get the agent score performance
@@ -112,6 +193,8 @@ if (agent_id != ""){
        agent['shipok_score'] = 0
      }
 
+    
+
      //get agent total absences for the given month and year
      const [absences] = await pool.execute(
        'SELECT Count(*) as absences FROM absences WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
@@ -125,7 +208,7 @@ if (agent_id != ""){
          'SELECT score FROM absences_score WHERE absence_count=?', [absences[0].absences]
        )
        if (absenceScore.length == 0){
-          agentAbsenceScore = 1
+          agentAbsenceScore = 0
        }else{
          agentAbsenceScore = absenceScore[0].score
        }
@@ -152,7 +235,7 @@ if (agent_id != ""){
          'SELECT score FROM tardiness_score WHERE tardiness_count=?', [tardiness[0].tardiness]
        )
        if (tardinessScore.length == 0){
-          agentTardinessScore = 1
+          agentTardinessScore = 0
        }else{
          agentTardinessScore = tardinessScore[0].score
        }
@@ -363,6 +446,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     let fullyear = req.query.fullyear
     let yearSummary = req.query.year_summary
     let exportToExcel = req.export_to_excel
+    let leaderboardOption 
+   
     
     if( fullyear == 'true'){
       fullyear = true
@@ -384,13 +469,13 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     const currentDate = new Date()
     if (!req.query.month ||  req.query.month ==="") {
         
-        givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
+        givenMonth =  "June" //monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
     }
     
     if(!req.query.year || req.query.year ===""){
-        givenYear = currentDate.getFullYear()
+        givenYear =  2025//currentDate.getFullYear()
     }else {
         givenYear = req.query.year
     }
@@ -399,6 +484,14 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
       withTrucks = true      
     }else{
       withTrucks = req.query.withTrucks
+    }
+
+
+    
+    if(!req.query.leaderboardOption  || req.query.leaderboardOption  == ''){
+       leaderboardOption = 'agent'
+    }else{
+        leaderboardOption  = req.query.leaderboardOption
     }
 
  
@@ -501,14 +594,133 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
   else{
       // get only the given month and year (for leaderboard )
       if(!yearSummary){  
-        agentMetircs = await this.getAgentsMetrics( agentId, givenMonth, givenYear, withTrucks)
+        agentMetircs = await this.getAgentsMetrics( agentId, givenMonth, givenYear, withTrucks, leaderboardOption)
        
         if(exportToExcel){
           req.performance = agentMetircs 
           req.params.agent_id = agentId //manually place agentId in the
           next()
         }else{
-          res.status(200).json(agentMetircs)
+          
+          if(leaderboardOption == 'team'){
+            //   const groupedByTeam = agentMetircs.reduce((result, agent) => {
+            //   const team_name = agent.team_name;
+
+            //   if (!result[team_name]) {
+            //     result[team_name] = [];
+            //   }
+
+            //   result[team_name].push(agent);
+            //   return result;
+            // }, {});
+            // console.log(groupedByTeam)
+           // Math.round(Number(shipok)/Number(target) * 100)
+            const groupedByTeam = {}
+           
+            agentMetircs.forEach(agent => {
+              const team_name = agent.team_name
+              let team_image 
+
+  
+              if(!groupedByTeam[team_name]){
+              
+                  groupedByTeam[team_name] = {
+                    team_name: team_name,
+                    target: 0,
+                    shipok: 0,
+                    total_rating: 0,
+                    rating_count: 0,
+                    month: agent.month ,
+                    year: agent.year,
+                    teams: []
+
+                  }
+               } 
+
+                if(agent.agent_type == 1){
+                  team_image = agent.image_link
+                  groupedByTeam[team_name].team_image = team_image
+                  groupedByTeam[team_name].target  = agent.target
+                  groupedByTeam[team_name].shipok  = agent.shipok 
+                  groupedByTeam[team_name].shipok_percent = agent.shipok_percent
+                }
+
+
+                // groupedByTeam[team_name].target +=agent.target 
+                // groupedByTeam[team_name].shipok +=agent.shipok 
+                groupedByTeam[team_name].total_rating += agent.final_ratings
+                groupedByTeam[team_name].rating_count += 1 
+                groupedByTeam[team_name].teams.push(agent)
+
+            })
+
+            //compute the average and clean up
+
+            for (const team in groupedByTeam){
+              groupedByTeam[team].final_ratings = parseFloat( (groupedByTeam[team].total_rating / groupedByTeam[team].rating_count).toFixed(2))
+              // groupedByTeam[team].shipok_percent = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
+              delete groupedByTeam[team].total_rating
+              delete groupedByTeam[team].rating_count
+              
+              const [ratings] = await pool.execute(
+                'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[groupedByTeam[team].final_ratings]
+              )
+
+             
+              groupedByTeam[team].ratings_name  = ratings[0].ratings_name
+
+            }
+
+            //final transform 
+
+            const groupedByTeamArray = []
+
+            for (const team in groupedByTeam){
+               groupedByTeamArray.push(groupedByTeam[team])
+            }
+
+            console.log(groupedByTeamArray)
+
+              // Step 1: Get the top final_ratings
+              const topRating = Math.max(...groupedByTeamArray.map(team => team.final_ratings))
+              
+              // Step 2: Add the tag conditionally based on final_ratings and agent_type
+              const groupedByTeamArrayWithRating = groupedByTeamArray.map(team => ({
+                ...team,
+                tag:
+                  team.final_ratings === topRating ? 'BEST TEAM' : ''    
+              })) 
+
+            groupedByTeamArrayWithRating.sort((a, b) => b.final_ratings - a.final_ratings)
+
+            for (const team of groupedByTeamArrayWithRating){
+               team.teams.sort((a,b) => b.agent_type - a.agent_type)
+            
+            }
+
+           
+
+            res.status(200).json(groupedByTeamArrayWithRating)
+          }else{
+              // Step 1: Get the top final_ratings
+              const topRating = Math.max(...agentMetircs.map(agent => agent.final_ratings))
+
+              // Step 2: Add the tag conditionally based on final_ratings and agent_type
+              const agentMetircsWithRating = agentMetircs.map(agent => ({
+                ...agent,
+                tag:
+                  agent.final_ratings === topRating
+                    ? agent.agent_type === 0
+                      ? 'TOP AGENT'
+                      : agent.agent_type === 1
+                      ? 'TOP LM'
+                      : ''
+                    : ''
+              }))
+              console.log(agentMetircsWithRating)
+              res.status(200).json(agentMetircsWithRating)
+          }
+
         }
       
       }else {
@@ -532,7 +744,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
         for (const sales_agent of sales_agents){
           const queries = monthNames.map(month => 
-            this.getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks).then(data => {
+            this.getAgentsMetrics(sales_agent.id, month, givenYear, withTrucks, "").then(data => {
                 if (data) {
                     return data[0]
                 }

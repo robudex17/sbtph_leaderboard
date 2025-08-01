@@ -18,7 +18,7 @@
             <tr class="bg-green-500 text-white">
               <th class="border border-gray-300 px-4 py-2">Year</th>
               <th class="border border-gray-300 px-4 py-2">Month</th>
-              <th class="border border-gray-300 px-4 py-2">Employee Name</th>
+              <th class="border border-gray-300 px-20 py-2">Employee Name</th>
               <th class="border border-gray-300 px-4 py-2">Score</th>
               <th class="border border-gray-300 px-4 py-2">Total</th>
               <th class="border border-gray-300 px-4 py-2">Absences</th>
@@ -37,7 +37,7 @@
             <tr class="odd:bg-green-50 even:bg-white" v-for="agent in agents" :key="agent.id">
               <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.year }}</td>
               <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.month }}</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.db_name }}</td>
+              <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.db_name }} <span v-if="agent.tag">- (<span class="font-bold text-purple-500">{{ agent.tag }}</span>)</span></td>
               <td class="border border-gray-300 px-4 py-2">{{ agent.shipok_score }}</td>
               <td class="border border-gray-300 px-4 py-2">{{ agent.performance_rating }}</td>
               <td class="border border-gray-300 px-4 py-2">{{ agent.absence_score }}</td>

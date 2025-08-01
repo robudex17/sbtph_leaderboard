@@ -5,7 +5,7 @@
     </div>
     <div v-else>
         <div v-if="dashboardoption =='individual'">
-                <p class="text-gray-800 font-bold text-7xl mb-10">Per Agent Performance</p>
+                <p class="text-gray-800 font-bold text-5xl mb-10">Individual Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.market_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.db_name }} - {{ target_shipok.market_name }}</h2>
@@ -32,11 +32,12 @@
                 </div>                
         </div>
           <div v-else-if="dashboardoption =='team'">
-                <p class="text-gray-800 font-bold text-7xl mb-10">Per Market Performance</p>
+                <!-- <div>{{  data }}</div> -->
+                <p class="text-gray-800 font-bold text-5xl mb-10">Team Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 
-                <div v-for="target_shipok in data" :key="target_shipok.market_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                    <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.market_name }}</h2>
+                <div v-for="target_shipok in data" :key="target_shipok.team_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
+                    <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.team_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_target }}</p>
@@ -58,25 +59,25 @@
                         </div>
                     </div>
                     <button
-                    @click="toggleTable(target_shipok.market_id)"
+                    @click="toggleTable(target_shipok.team_id)"
                       :class="[
                             'mb-1 mt-2 px-2 py-1 text-white rounded text-xs font-bold transition-colors duration-200',
-                            activeMarketId === target_shipok.market_id ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
+                            activeMarketId === target_shipok.team_id ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
                         ]"
                     >
-                    {{ activeMarketId === target_shipok.market_id ? 'Hide Breakdown' : 'Show Breakdown' }}
+                    {{ activeMarketId === target_shipok.team_id ? 'Hide Breakdown' : 'Show Breakdown' }}
                     </button>
 
-                    <div v-if="activeMarketId === target_shipok.market_id" class="overflow-x-auto">
-                    <h1 class="text-2xl font-bold mt-2 mb-3 text-center">AGENTS CONTRIBUTIONS</h1>
+                    <div v-if="activeMarketId === target_shipok.team_id" class="overflow-x-auto">
+                    <h1 class="text-2xl font-bold mt-2 mb-3 text-center">INDIVIDUAL RESULTS</h1>
                     <table class="min-w-full border border-green-500 rounded-lg">
                         <thead class="bg-green-300">
                         <tr>
                             <th class="py-2 px-4 text-left text-sm font-bold text-green-900">AGENT</th>
-                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET CONTRIBUTION</th>
-                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET CONTRIBUTION PERCENTAGE (%)</th>
-                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK CONTRIBUTION</th>
-                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK CONTRIBUTION PERCENTAGE (%)</th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">MARKET</th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET </th>                         
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK </th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SPERCENTAGE (%)</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -86,13 +87,12 @@
                             :class="rowClass(agent, index)"
                         >
                             <td class="py-2 px-4 text-md uppercase">{{ agent.db_name }}</td>
+                             <td class="py-2 px-4 text-md uppercase">{{ agent.market_name }}</td>
                             <td class="py-2 px-4 text-md uppercase">{{ agent.total_target }}</td>
-                            <td class="py-2 px-4 text-md">
-                            {{ agent.total_target > 0 ? ((agent.total_target / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }}
-                            </td>
+                  
                             <td class="py-2 px-4 text-md">{{ agent.total_ship_ok }}</td>
                             <td class="py-2 px-4 text-md">
-                            {{ agent.total_ship_ok > 0 ? ((agent.total_ship_ok / target_shipok.total_ship_ok) * 100).toFixed(2) + '%' : '0%' }}
+                            {{ agent.total_ship_ok > 0 ? ((agent.total_ship_ok / agent.total_target ) * 100).toFixed(2) + '%' : '0%' }}
                             </td>
                         </tr>
                         </tbody>
@@ -115,7 +115,7 @@
                 </div>
             </div>     -->
             <div v-else-if="dashboardoption=='overall'">
-                <p class="text-gray-800 font-bold text-7xl mb-10 ">Overall Market Performance</p>
+                <p class="text-gray-800 font-bold text-5xl mb-10 ">Overall PH Office Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
@@ -152,15 +152,15 @@
 
                 <transition name="fade">
                 <div v-if="activeOverallBreakdown" class="overflow-x-auto">
-                    <h1 class="text-2xl font-bold mt-1 mb- text-center">MARKET TEAM CONTRIBUTIONS</h1>
+                    <h1 class="text-2xl font-bold mt-1 mb- text-center">PER MARKET RESULTS</h1>
                     <table class="min-w-full border border-green-500 rounded-lg mb-3">
                     <thead class="bg-green-300">
                         <tr>
                         <th class="py-2 px-4 text-left text-sm font-bold text-green-900">MARKET</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET CONTRIBUTION</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET CONTRIBUTION PERCENTAGE (%)</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK CONTRIBUTION</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK CONTRIBUTION PERCENTAGE (%)</th>
+                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET </th>
+                    
+                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK</th>
+                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">PERCENTAGE (%)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -171,12 +171,10 @@
                         >
                         <td class="py-2 px-4 text-md uppercase">{{ market.market_name }}</td>
                         <td class="py-2 px-4 text-md uppercase">{{ market.total_target }}</td>
-                        <td class="py-2 px-4 text-md">
-                            {{ market.total_target > 0 ? ((market.total_target / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }}
-                        </td>
+                
                         <td class="py-2 px-4 text-md">{{ market.total_ship_ok }}</td>
                         <td class="py-2 px-4 text-md">
-                            {{ market.total_ship_ok > 0 ? ((market.total_ship_ok / data.total_shipok) * 100).toFixed(2) + '%' : '0%' }}
+                            {{ market.total_ship_ok > 0 ? ((market.total_ship_ok / market.total_target) * 100).toFixed(2) + '%' : '0%' }}
                         </td>
                         </tr>
                     </tbody>
@@ -218,15 +216,24 @@ authStore.fetchTokenFromLocalStore()
 const router = useRouter()
 const route = useRoute()
 
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
 
-const month = ref(months[new Date().getMonth()])
-const year = ref(new Date().getFullYear())
 
-const dashboardoption = ref(route.query.dashboardoption || 'individual')
+// const months = [
+//   'January', 'February', 'March', 'April', 'May', 'June',
+//   'July', 'August', 'September', 'October', 'November', 'December'
+// ]
+
+// const month = ref(months[new Date().getMonth()])
+// const year = ref(new Date().getFullYear())
+
+//hard coded month and year for temporary usage only
+
+const month = "June"
+
+const year = 2025
+
+//const dashboardoption = ref(route.query.dashboardoption || 'individual')
+const dashboardoption = ref("individual")
 
 // Stores
 const dashBoardStore = useDashBoardStore()

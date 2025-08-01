@@ -6,8 +6,14 @@ const pool = require('./config/db')
 
 const PORT = process.env.PORT || 3000
 
+const importExportDataRoutes = require('./routes/import_export_data_routes')
+
 const server = http.createServer(app)
 const io = new Server(server, { cors: { origin: "*" } })
+
+
+app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed
+
 
 const startServer = async () => {
   try {

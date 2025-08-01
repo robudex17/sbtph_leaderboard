@@ -5,10 +5,10 @@ const { validationResult } = require('express-validator')
  const { getAgentsMetrics } = require('./sales_leaderboard_controllers')
 
 exports.fetchAgentDashboard = async (req,res,next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   return res.status(400).json({ errors: errors.array() });
+    // }
    
   
     const currentDate = new Date()
@@ -19,17 +19,24 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             "July", "August", "September", "October", "November", "December"
         ];
 
-    const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
-    const givenYear =   "2024" // currentDate.getFullYear()
+    //const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
+    const givenMonth = "June"
+    const givenYear =   "2025" // currentDate.getFullYear()
     const  withTrucks = true
-    const  dashboarOption = req.query.dashboardoption 
+    //const  dashboarOption = req.query.dashboardoption 
 
-    console.log(dashboarOption)
+    let dashboarOption ;
+    if(!req.query.dashboardoption || req.query.dashboardoption == ''){
+        dashboarOption= 'individual'
+    }else{
+        dashboarOption = req.query.dashboardoption
+    }
+
+
+  
     const loginUser = req.user
 
 
-
-   console.log(loginUser)
 
     try {
       // connection = await pool.getConnection()
@@ -42,7 +49,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       const  dashboardQueryForInvidualAgents = (filterBy,  operator, value, orderBy) => {
           
           const query = `
-                          WITH deposit_count AS (
+                 WITH deposit_count AS (
                     SELECT 
                         agent_id, 
                         month, 
@@ -54,6 +61,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 )
                 SELECT 
                     sales_agents.id AS agent_id,
+                    market.team_id,
                     sales_agents.db_name,
                     market.market_name,
                     target_shipok.month, 
@@ -75,7 +83,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                     ON sales_agents.id = deposit_count.agent_id
                 WHERE 
                     
-                    ${filterBy} ${operator} ${value}
+                    ${filterBy} ${operator} ${value} AND sales_agents.status = 'active'  AND market.team_id !=0
                 GROUP BY 
                     sales_agents.id, sales_agents.db_name, market.market_name, 
                     target_shipok.month, target_shipok.year, deposit_count.total_deposit
@@ -87,7 +95,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       }
 
-      const dashboardQueryForTeams = (filterBy, operator, value, orderBy) => {
+      const dashboardQueryForMarkets = (filterBy, operator, value, orderBy) => {
         const query = `
                   WITH deposit_count AS (
               SELECT 
@@ -101,6 +109,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
           )
           SELECT 
               market.id AS market_id,
+              market.team_id,
               market.market_name,
               target_shipok.month AS month,
               target_shipok.year AS year,
@@ -120,7 +129,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
               deposit_count 
               ON market.id = deposit_count.market_id
           WHERE 
-              ${filterBy} ${operator} ${value}
+              ${filterBy} ${operator} ${value}  AND market.team_id !=0
           GROUP BY 
               market.id, market.market_name, deposit_count.total_deposit
           ORDER BY 
@@ -129,6 +138,51 @@ exports.fetchAgentDashboard = async (req,res,next) => {
           return query
       }
 
+
+        const dashboardQueryForTeams = (filterBy, operator, value, orderBy) => {
+        const query = `
+                 WITH deposit_count AS (
+            SELECT 
+                market_id, 
+                month, 
+                year, 
+                COUNT(*) AS total_deposit
+            FROM new_deposit
+            WHERE month = ? AND year = ?
+            GROUP BY market_id, month, year
+        )
+        SELECT 
+            market.team_id,
+            GROUP_CONCAT(DISTINCT market.market_name ORDER BY market.market_name SEPARATOR '/') AS team_name,
+            target_shipok.month AS month,
+            target_shipok.year AS year,
+            COALESCE(SUM(target_shipok.target), 0) AS total_target,
+            COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+            COALESCE(SUM(deposit_count.total_deposit), 0) AS total_deposit
+        FROM 
+            market
+        LEFT JOIN 
+            sales_agents ON market.id = sales_agents.market_id
+        LEFT JOIN 
+            target_shipok 
+            ON sales_agents.id = target_shipok.agent_id
+            AND target_shipok.month = ?
+            AND target_shipok.year = ?
+        LEFT JOIN 
+            deposit_count 
+            ON market.id = deposit_count.market_id
+        WHERE 
+           ${filterBy} ${operator} ${value} AND sales_agents.status = 'active' AND market.team_id !=0
+        GROUP BY 
+            market.team_id, target_shipok.month, target_shipok.year
+        ORDER BY 
+            ${orderBy};
+
+          `
+          return query
+      }
+
+
       
 
        let queryIndividual;
@@ -136,15 +190,17 @@ exports.fetchAgentDashboard = async (req,res,next) => {
          if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
              queryIndividual =  dashboardQueryForInvidualAgents("sales_agents.id", "!=", 0, "market.market_name")
         
-
-         }else if(loginUser.role == 'manager' && loginUser.agent_type == 1){
-            queryIndividual = dashboardQueryForInvidualAgents("market.id", "=", loginUser.market_id, "sales_agents.id")
+         }else{
+            queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
+         }
+        //  }else if(loginUser.role == 'manager' && loginUser.agent_type == 1){
+        //     queryIndividual = dashboardQueryForInvidualAgents("market.id", "=", loginUser.market_id, "sales_agents.id")
   
 
-         }else if(loginUser.role == 'user' && loginUser.agent_type == 0) {
-             queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
+        //  }else if(loginUser.role == 'user' && loginUser.agent_type == 0) {
+        //      queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
 
-         }
+        //  }
 
          const [marketTargetShipok] = await pool.execute(
            queryIndividual,
@@ -166,17 +222,17 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
             
             //fetch the list of market
-            const [markets] = await pool.execute(
-            'SELECT id, market_name FROM `market`'
+            const [teams] = await pool.execute(
+            'SELECT  * FROM team'
             );
 
-            for (const market of markets) {
-            if (market.id == 0) {
+            for (const team of teams) {
+            if (team.id == 0 || team.id == 6) { // team is 6 is For the Develeper for testing only
                 continue;
             }
 
             // 1. Query and transform data for the market
-            const queryTeam = dashboardQueryForTeams("market.id", "=", market.id, "market.id");
+            const queryTeam = dashboardQueryForTeams( "market.team_id", "=", team.id, "market.team_id");
             const [marketTargetShipok] = await pool.execute(
                 queryTeam,
                 [givenMonth, givenYear, givenMonth, givenYear]
@@ -192,7 +248,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             }));
 
             // 2. Query and transform data for the individual agents (teammembers)
-            const queryTeammembers = dashboardQueryForInvidualAgents("market.id", "=", market.id, "sales_agents.id");
+            const queryTeammembers = dashboardQueryForInvidualAgents("market.team_id", "=", team.id, "sales_agents.id");
             const [teammembersRaw] = await pool.execute(
                 queryTeammembers,
                 [givenMonth, givenYear, givenMonth, givenYear]
@@ -207,8 +263,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 year: agent.year == null ? givenYear : agent.year,
             }));
 
-            console.log(teammembersTransformed)
-            
+          
             // 3. Attach to dashboard
             dashboard.data.push({
                 ...marketTransformed[0], // assuming only one row per market
@@ -219,7 +274,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         }else {
          
             // 1. Query and transform data for the specific market
-            const queryMarket = dashboardQueryForTeams("market.id", "=", loginUser.market_id, "market.id");
+            const queryMarket = dashboardQueryForMarkets("market.id", "=", loginUser.market_id, "market.id");
             const [marketTargetShipok] = await pool.execute(
             queryMarket,
             [givenMonth, givenYear, givenMonth, givenYear]
@@ -250,7 +305,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             year: agent.year == null ? givenYear : agent.year,
             }));
 
-            console.log(teammembersTransformed)
+            
 
             // 3. Build dashboard object for single market
             dashboard.data.push({
@@ -273,7 +328,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         }
 
          // 1. Query and transform data for the market
-        const queryTeam = dashboardQueryForTeams("market.id", "!=", 0 , "market.id");
+        const queryTeam = dashboardQueryForMarkets("market.id", "!=", 0 , "market.id");
         const [marketTargetShipok] = await pool.execute(
                 queryTeam,
                 [givenMonth, givenYear, givenMonth, givenYear]
@@ -289,7 +344,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             }));
         // console.log(marketTransformed)
         overallData.team = marketTransformed 
-         dashboard.data = overallData 
+        dashboard.data = overallData 
 
       }
      

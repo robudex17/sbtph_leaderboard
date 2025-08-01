@@ -101,7 +101,7 @@ const login = async () => {
   
   if (authStore.state.user?.role == 'user' && authStore.state.token){
     alert('Login is Successful for user')
-    router.push('/agent_performance/month')
+    router.push('/')
     return
   }
   if (authStore.state.error) {

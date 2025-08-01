@@ -17,7 +17,7 @@ const salesDashboardRoutes = require('./routes/sales_dashboard_routes')
 const salesAnalyticsRoutes = require('./routes/sales_analytics_route')
 const salesMarketRoutes = require('./routes/sales_market_route')
 const salesManagerRoutes = require('./routes/sales_managers_route')
-const importExportDataRoutes = require('./routes/import_export_data_routes')
+// const importExportDataRoutes = require('./routes/import_export_data_routes')
 const salesLoginRoutes = require('./routes/sales_login_routes')
 const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
@@ -44,7 +44,7 @@ app.use("/api", salesDashboardRoutes)
 app.use("/api", salesAnalyticsRoutes)
 app.use("/api", salesMarketRoutes)
 app.use("/api", salesManagerRoutes)
-app.use("/api", importExportDataRoutes())  // in test, we can pass fake io if needed
+// app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed
 
 // OPTIONAL: test-only route
 app.get('/api/ping', (req, res) => {

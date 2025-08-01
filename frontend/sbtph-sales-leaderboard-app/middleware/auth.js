@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
         return navigateTo('/')
       } else if (authStore.state.user?.role === 'user') {
         console.log('Redirecting user to /user-home')
-        return navigateTo('/agent_performance/month')
+        return navigateTo('/')
       } else {
         console.log('Redirecting to default home page')
         return navigateTo('/')

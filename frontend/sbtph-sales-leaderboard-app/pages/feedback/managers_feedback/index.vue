@@ -48,7 +48,7 @@
               </td>
               <td class="py-4 px-6 border text-center">
                 <img
-                  :src="agent.image_link"
+                  :src="updateImageLink(agent.image_link)"
                   alt="Agent Image"
                   class="h-12 w-12 rounded-full mx-auto border border-blue-200"
                 />
@@ -117,6 +117,11 @@
     manageSalesAgentStore.fetchSalesAgents(query);
   };
   
+  const config = useRuntimeConfig()
+  
+  const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+  }
  
  
   onMounted(() => {

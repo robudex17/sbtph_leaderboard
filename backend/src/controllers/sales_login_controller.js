@@ -129,6 +129,7 @@ exports.loginUser = async(req,res, next) => {
                 sales_agents.lastname,
                 sales_agents.db_name,
                 sales_agents.market_id,
+                sales_agents.team_id,
                 sales_agents.image_link
             FROM sales_agents_login
             INNER JOIN sales_agents ON sales_agents_login.login_id = sales_agents.id
