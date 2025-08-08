@@ -13,6 +13,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
   
     const currentDate = new Date()
 
+    const loginUser = req.user
+
            // Get the month name
     const monthNames = [
             "January", "February", "March", "April", "May", "June",
@@ -26,15 +28,19 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     //const  dashboarOption = req.query.dashboardoption 
 
     let dashboarOption ;
-    if(!req.query.dashboardoption || req.query.dashboardoption == ''){
-        dashboarOption= 'individual'
+    if((!req.query.dashboardoption || req.query.dashboardoption == '') ){
+        if(loginUser.agent_type == 2){
+            dashboarOption = 'team'
+        }else{
+            dashboarOption = 'individual'
+        }
     }else{
         dashboarOption = req.query.dashboardoption
     }
 
 
   
-    const loginUser = req.user
+ 
 
 
 
@@ -344,12 +350,34 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             }));
         // console.log(marketTransformed)
         overallData.team = marketTransformed 
-        dashboard.data = overallData 
+        dashboard.data.push(overallData)
+
+        //ALL TARGET/SHIPOK BUT TRUCKS MARKET EXCLUDED 
+
+        let queryTargetShipokWithoutTrucks = "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE market_id !=10  AND month=? AND year=? GROUP BY month,year"
+        const [overallResultWithoutTrucks] = await pool.execute(
+        queryTargetShipokWithoutTrucks,
+        [givenMonth, givenYear]
+        )
+            
+        const [overallDataWithoutTrucks] = overallResultWithoutTrucks
+
+        if ( overallResultWithoutTrucks == null || overallDataWithoutTrucks == ""){
+          overallDataWithoutTrucks = {month:givenMonth,year: givenYear,monthly_target:"0",total_shipok:"0"}
+        }
+      
+     
+      dashboard.data.push(overallDataWithoutTrucks)  
+    
 
       }
-     
+
+
       console.log(dashboard)
       res.status(200).json(dashboard)
+
+
+   
       
     }
     catch(error){

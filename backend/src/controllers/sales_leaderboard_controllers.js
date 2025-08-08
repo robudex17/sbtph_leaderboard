@@ -14,6 +14,8 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
    let count ;
  
    if(agent_id != ""){
+   
+     
       const [row] = await pool.execute(
         'SELECT COUNT(*) AS count FROM `target_shipok` WHERE month=? AND year=? AND agent_id=?',[givenMonth,givenYear,agent_id]
     )
@@ -66,7 +68,7 @@ if (leaderboardOption == 'lm'){
                       market ON sales_agents.market_id = market.id
                   LEFT JOIN
                       team ON sales_agents.team_id = team.id
-                  WHERE agent_type=1 AND status='active'`
+                  WHERE  sales_agents.agent_type=1 AND  sales_agents.status='active'`
 
 }else if(leaderboardOption == 'agent'){
   queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
@@ -75,7 +77,7 @@ if (leaderboardOption == 'lm'){
                       market ON sales_agents.market_id = market.id
                   LEFT JOIN
                       team ON sales_agents.team_id = team.id
-                  WHERE agent_type=0 AND status='active'`
+                  WHERE sales_agents.agent_type=0 AND sales_agents.status='active'`
   
 }else if(leaderboardOption == 'team'){
     queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
@@ -84,16 +86,18 @@ if (leaderboardOption == 'lm'){
                       market ON sales_agents.market_id = market.id
                   LEFT JOIN
                       team ON sales_agents.team_id = team.id
-                  WHERE agent_type!=2 AND status='active'`
+                  WHERE  sales_agents.agent_type!=2 AND  sales_agents.status='active'`
   
 }
 
 let sales_agents
 if (agent_id != ""){
+  
   const [sales_agents_result] = await pool.execute(
     `SELECT * FROM  sales_agents WHERE id=? AND agent_type!=2  AND status='active'`,[agent_id]  
   )
-  
+  // Set the leaderboardOption into into NONE if the agent_id has a value, for Performance Evaluation of specific agent or LM
+  leaderboardOption = ""
   sales_agents = sales_agents_result
 }else{
 
@@ -111,6 +115,7 @@ if (agent_id != ""){
   sales_agents = sales_agents_result
   }
 }
+
 
 
    
@@ -131,8 +136,9 @@ if (agent_id != ""){
            with  performance_percent = shipok/target * 100
       */
       let targetShipok
-
+    
       if (leaderboardOption == 'lm'){
+         
           const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
           targetShipok = lmTargetShipOk
       }else if(leaderboardOption == 'team') {
@@ -150,6 +156,7 @@ if (agent_id != ""){
         }
       }
       else if(leaderboardOption == 'agent'){
+        
           const [agentTargetShipOk] = await pool.execute(
            targetShipokQueryForAgent,[agent.id, givenMonth, givenYear]
 
@@ -158,10 +165,12 @@ if (agent_id != ""){
         
          
       }else {
+       
         if(agent.agent_type == 1){
           const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
           targetShipok = lmTargetShipOk
         }else {
+         
           const [agentTargetShipOk] = await pool.execute(
            targetShipokQueryForAgent,[agent.id, givenMonth, givenYear]
 
@@ -348,7 +357,7 @@ if (agent_id != ""){
    
 
       
-   agent['feedback_score'] = overallAverageFeedback
+   agent['feedback_score'] =   Number(overallAverageFeedback).toFixed(3)
 
    //get agent new deposit for the given and treat this as additional point
    
@@ -367,16 +376,44 @@ if (agent_id != ""){
    //calculate score ratings
 
  
-   agent['performance_rating'] = Math.round(( agent['shipok_score'] * evaluation_criteria.performance) * 100) /100
-   agent['absence_rating'] = Math.round((agent['absence_score'] * evaluation_criteria.absence) * 100) / 100 
-   agent['tardiness_rating'] = Math.round((agent['tardiness_score'] * evaluation_criteria.tardiness) * 100)/100 
-   agent['memo_rating'] = Math.round((agent['memo_score']  * evaluation_criteria.memorandum_recieved) * 100 ) /100
-   agent['feedback_rating'] = Math.round((agent['feedback_score'] * evaluation_criteria.feedback) * 100) /100 
-   agent['additional_points'] = Math.round((agent['deposit_score'] * evaluation_criteria.additional_points) * 100 ) /100
+  //  agent['performance_rating'] = Math.round(( agent['shipok_score'] * evaluation_criteria.performance) * 100) /100
+  //  agent['absence_rating'] = Math.round((agent['absence_score'] * evaluation_criteria.absence) * 100) / 100 
+  //  agent['tardiness_rating'] = Math.round((agent['tardiness_score'] * evaluation_criteria.tardiness) * 100)/100 
+  //  agent['memo_rating'] = Math.round((agent['memo_score']  * evaluation_criteria.memorandum_recieved) * 100 ) /100
+  //  agent['feedback_rating'] = Math.round((agent['feedback_score'] * evaluation_criteria.feedback) * 100) /100 
+  //  agent['additional_points'] = Math.round((agent['deposit_score'] * evaluation_criteria.additional_points) * 100 ) /100
 
-   agent['final_ratings'] = Math.round((agent['performance_rating'] + agent['absence_rating'] + agent['tardiness_rating'] +
-                           agent['memo_rating'] + agent['feedback_rating'] + agent['additional_points']
-                           ) * 100) / 100
+  
+
+
+  agent['performance_rating'] = parseFloat(( agent['shipok_score'] * evaluation_criteria.performance).toFixed(4))
+   agent['absence_rating'] = parseFloat((agent['absence_score'] * evaluation_criteria.absence).toFixed(4))
+  agent['tardiness_rating'] = parseFloat((agent['tardiness_score'] * evaluation_criteria.tardiness).toFixed(4))
+   agent['memo_rating'] =   parseFloat((agent['memo_score']  * evaluation_criteria.memorandum_recieved).toFixed(4)) 
+   agent['feedback_rating'] =  parseFloat((agent['feedback_score'] * evaluation_criteria.feedback).toFixed(4)) 
+   agent['additional_points'] = parseFloat((agent['deposit_score'] * evaluation_criteria.additional_points).toFixed(4))
+
+ 
+
+
+    //  agent['final_ratings'] = Math.round((agent['performance_rating'] + agent['absence_rating'] + agent['tardiness_rating'] +
+    //                        agent['memo_rating'] + agent['feedback_rating'] + agent['additional_points']
+    //                        ) * 1000) / 1000
+
+   
+
+    
+
+  agent['final_ratings'] = (
+  agent['performance_rating'] +
+  agent['absence_rating'] +
+  agent['tardiness_rating'] +
+  agent['memo_rating'] +
+  agent['feedback_rating'] +
+  agent['additional_points']
+).toFixed(4);
+
+
 
    // Get the result name base on the final_ratings
 
@@ -384,8 +421,12 @@ if (agent_id != ""){
      'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[agent['final_ratings']]
    )
 
-   agent['ratings_name'] = ratings[0].ratings_name
+  //  console.log( ratings[0].ratings_name || false)
 
+   agent['ratings_name'] = ratings[0].ratings_name 
+
+  
+  
  }
 
   //  connection.release()
@@ -538,7 +579,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
   
       // Calculate averages for the specified keys
       keysToAverage.forEach(key => {
-          result[key] = Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
+          // result[key] =  Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
+          result[key] = (sum[key]/count).toFixed(4)
       });
   
       // Store sums for "target" and "shipok"
@@ -553,7 +595,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     if(fullyear){
     
       const queries = monthNames.map(month => 
-        this.getAgentsMetrics(agentId, month, givenYear, withTrucks).then(data => {
+        this.getAgentsMetrics(agentId, month, givenYear, withTrucks, leaderboardOption).then(data => {
             if (data) {
                 return data[0]
             }
@@ -600,7 +642,12 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           req.performance = agentMetircs 
           req.params.agent_id = agentId //manually place agentId in the
           next()
-        }else{
+          //return the  agentMetrics immedaitely
+         } else if(agentId != ""){
+           console.log(agentMetircs)
+          res.status(200).json(agentMetircs)
+        }  
+        else{
           
           if(leaderboardOption == 'team'){
             //   const groupedByTeam = agentMetircs.reduce((result, agent) => {
@@ -648,7 +695,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
                 // groupedByTeam[team_name].target +=agent.target 
                 // groupedByTeam[team_name].shipok +=agent.shipok 
-                groupedByTeam[team_name].total_rating += agent.final_ratings
+                groupedByTeam[team_name].total_rating += parseFloat(agent.final_ratings)
                 groupedByTeam[team_name].rating_count += 1 
                 groupedByTeam[team_name].teams.push(agent)
 
@@ -657,7 +704,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
             //compute the average and clean up
 
             for (const team in groupedByTeam){
-              groupedByTeam[team].final_ratings = parseFloat( (groupedByTeam[team].total_rating / groupedByTeam[team].rating_count).toFixed(2))
+              groupedByTeam[team].final_ratings = parseFloat((groupedByTeam[team].total_rating / groupedByTeam[team].rating_count)).toFixed(4)
               // groupedByTeam[team].shipok_percent = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
               delete groupedByTeam[team].total_rating
               delete groupedByTeam[team].rating_count
@@ -682,16 +729,16 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
             console.log(groupedByTeamArray)
 
               // Step 1: Get the top final_ratings
-              const topRating = Math.max(...groupedByTeamArray.map(team => team.final_ratings))
+              const topRating = Math.max(...groupedByTeamArray.map(team => parseFloat(team.final_ratings)))
               
               // Step 2: Add the tag conditionally based on final_ratings and agent_type
               const groupedByTeamArrayWithRating = groupedByTeamArray.map(team => ({
                 ...team,
                 tag:
-                  team.final_ratings === topRating ? 'BEST TEAM' : ''    
+                  parseFloat(team.final_ratings) === topRating ? 'BEST TEAM' : ''    
               })) 
 
-            groupedByTeamArrayWithRating.sort((a, b) => b.final_ratings - a.final_ratings)
+            groupedByTeamArrayWithRating.sort((a, b) => parseFloat(b.final_ratings) - parseFloat(a.final_ratings))
 
             for (const team of groupedByTeamArrayWithRating){
                team.teams.sort((a,b) => b.agent_type - a.agent_type)
@@ -703,13 +750,13 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
             res.status(200).json(groupedByTeamArrayWithRating)
           }else{
               // Step 1: Get the top final_ratings
-              const topRating = Math.max(...agentMetircs.map(agent => agent.final_ratings))
+              const topRating = Math.max(...agentMetircs.map(agent => parseFloat(agent.final_ratings)))
 
               // Step 2: Add the tag conditionally based on final_ratings and agent_type
               const agentMetircsWithRating = agentMetircs.map(agent => ({
                 ...agent,
                 tag:
-                  agent.final_ratings === topRating
+                  parseFloat(agent.final_ratings) === topRating
                     ? agent.agent_type === 0
                       ? 'TOP AGENT'
                       : agent.agent_type === 1

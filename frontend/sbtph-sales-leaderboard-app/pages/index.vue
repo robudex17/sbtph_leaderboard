@@ -81,7 +81,7 @@
                   @click="showTeamDetails(team)"
                   class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
                 >
-                  Team Performance Details
+                  Performance Details
                 </button>
               </div>
             </div>            
@@ -136,7 +136,7 @@
                   @click="showAgentDetails(agent)"
                   class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
                 >
-                  Agent Performance Details
+                  Performance Details
                 </button>
               </div>
             </div>

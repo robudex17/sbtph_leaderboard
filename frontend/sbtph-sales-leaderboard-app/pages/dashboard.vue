@@ -20,7 +20,9 @@
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }}
+                            {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_ship_ok) }}
+                            <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
+                            <!-- {{ target_shipok.total_target > 0 ? Math.round((target_shipok.total_ship_ok / target_shipok.total_target) * 100 + Number.EPSILON) + '%' : '0%' }}   -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
@@ -35,7 +37,6 @@
                 <!-- <div>{{  data }}</div> -->
                 <p class="text-gray-800 font-bold text-5xl mb-10">Team Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
-                
                 <div v-for="target_shipok in data" :key="target_shipok.team_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.team_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
@@ -49,8 +50,13 @@
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }}
+                           {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_ship_ok) }}
+                            <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
+                            <!-- {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }}  -->
+                           <!-- {{ target_shipok.total_target  > 0 ? Math.round((target_shipok.total_target  * 100) / target_shipok.total_target) + '%' : '0%' }} -->
+                        
                         </p>
+                        
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
                         <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
@@ -77,7 +83,7 @@
                             <th class="py-2 px-4 text-left text-sm font-bold text-green-900">MARKET</th>
                             <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET </th>                         
                             <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK </th>
-                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SPERCENTAGE (%)</th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">PERCENTAGE (%)</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -121,66 +127,94 @@
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data.monthly_target }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].monthly_target }}</p>
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data.total_shipok }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }}
+                            {{ getWholeNumberPercentage(data[0].monthly_target, data[0].total_shipok) }}
+                            <!-- {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }} -->
+                           <!-- {{ data.monthly_target > 0 ? Math.round((data.total_shipok * 100) / data.monthly_target) + '%' : '0%' }} -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(data.monthly_target - data.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ data.monthly_target - data.total_shipok }}</p>
+                        <div :class="(data[0].monthly_target - data[0].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ data[0].monthly_target - data[0].total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
+                        </div>
+                    </div>
+                    <button
+                    @click="toggleOverallTable"
+                    :class="[
+                    'mb-1 mt-2 px-2 py-1 text-white rounded text-xs font-bold transition-colors duration-200',
+                    activeOverallBreakdown ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
+                    ]"
+                    >
+                    {{ activeOverallBreakdown ? 'Hide Breakdown' : 'Show Breakdown' }}
+                    </button>
+
+                    <transition name="fade">
+                    <div v-if="activeOverallBreakdown" class="overflow-x-auto">
+                        <h1 class="text-2xl font-bold mt-1 mb- text-center">PER MARKET RESULTS</h1>
+                        <table class="min-w-full border border-green-500 rounded-lg mb-3">
+                        <thead class="bg-green-300">
+                            <tr>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">MARKET</th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET </th>
+                        
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK</th>
+                            <th class="py-2 px-4 text-left text-sm font-bold text-green-900">PERCENTAGE (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                            v-for="(market, index) in data[0].team"
+                            :key="`market-${market.market_id}`"
+                            :class="rowClass(market, index)"
+                            >
+                            <td class="py-2 px-4 text-md uppercase">{{ market.market_name }}</td>
+                            <td class="py-2 px-4 text-md uppercase">{{ market.total_target }}</td>
+                    
+                            <td class="py-2 px-4 text-md">{{ market.total_ship_ok }}</td>
+                            <td class="py-2 px-4 text-md">
+                                {{ market.total_ship_ok > 0 ? ((market.total_ship_ok / market.total_target) * 100).toFixed(2) + '%' : '0%' }}
+                            </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                    </transition>                    
+                </div>
+                <div class="bg-white shadow-md rounded-lg p-4 mb-4 mt-1 border border-gray-200">
+                   <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">Trucks Excluded</h2>
+                      <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[1].monthly_target }}</p>
+                        <p class="text-gray-600 font-medium text-lg">Target(units)</p>
+                        </div>
+                        <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[1].total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
+                        </div>
+                        <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">
+                            {{ getWholeNumberPercentage(data[1].monthly_target, data[1].total_shipok) }}
+                            <!-- {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }} -->
+                           <!-- {{ data.monthly_target > 0 ? Math.round((data.total_shipok * 100) / data.monthly_target) + '%' : '0%' }} -->
+                        </p>
+                        <p class="text-gray-600 font-medium text-lg">Percentage</p>
+                        </div>
+                        <div :class="(data[1].monthly_target - data[1].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ data[1].monthly_target - data[1].total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>
                 </div>
-                <button
-                @click="toggleOverallTable"
-                :class="[
-                'mb-1 mt-2 px-2 py-1 text-white rounded text-xs font-bold transition-colors duration-200',
-                activeOverallBreakdown ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
-                ]"
-                >
-                {{ activeOverallBreakdown ? 'Hide Breakdown' : 'Show Breakdown' }}
-                </button>
 
-                <transition name="fade">
-                <div v-if="activeOverallBreakdown" class="overflow-x-auto">
-                    <h1 class="text-2xl font-bold mt-1 mb- text-center">PER MARKET RESULTS</h1>
-                    <table class="min-w-full border border-green-500 rounded-lg mb-3">
-                    <thead class="bg-green-300">
-                        <tr>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">MARKET</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">TARGET </th>
-                    
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">SHIPOK</th>
-                        <th class="py-2 px-4 text-left text-sm font-bold text-green-900">PERCENTAGE (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr
-                        v-for="(market, index) in data.team"
-                        :key="`market-${market.market_id}`"
-                        :class="rowClass(market, index)"
-                        >
-                        <td class="py-2 px-4 text-md uppercase">{{ market.market_name }}</td>
-                        <td class="py-2 px-4 text-md uppercase">{{ market.total_target }}</td>
-                
-                        <td class="py-2 px-4 text-md">{{ market.total_ship_ok }}</td>
-                        <td class="py-2 px-4 text-md">
-                            {{ market.total_ship_ok > 0 ? ((market.total_ship_ok / market.total_target) * 100).toFixed(2) + '%' : '0%' }}
-                        </td>
-                        </tr>
-                    </tbody>
-                    </table>
-                </div>
-                </transition>
            
             </div>
             <!-- <p class="text-gray-800 font-bold text-4xl mt-5 mb-5 pt-10">New Deposit <span class="text-red-600">({{ trucks }})</span> as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
@@ -265,6 +299,16 @@ const toggleTable = (id) => {
 
 const toggleOverallTable = () => {
   activeOverallBreakdown.value = !activeOverallBreakdown.value
+}
+
+const getWholeNumberPercentage = (target,shipok) => {
+  //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
+   if (target){
+     const percentage =((shipok / target) * 100).toFixed(2)
+     const roundOff = Math.round(percentage)
+     return roundOff + '%'
+   }
+   return '0%'
 }
 
 const rowClass = computed(() => {

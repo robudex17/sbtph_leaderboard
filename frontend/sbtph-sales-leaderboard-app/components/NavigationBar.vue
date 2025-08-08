@@ -13,7 +13,7 @@
                   v-model="dashboardOption"
                 >
               
-                <option v-for="dashboardoption in ['individual', 'team', 'overall']" :key="dashboardoption" :value="dashboardoption ">{{ dashboardoption.toUpperCase()  }}</option>
+                <option v-for="dashboardoption in dashboardListOfOptions " :key="dashboardoption" :value="dashboardoption ">{{ dashboardoption.toUpperCase()  }}</option>
 
                 </select>
                 <button  
@@ -144,8 +144,21 @@
     // const individual = 'individual'
     // const team = 'team'
     // const overall = 'overall'
-    const dashboardOption = ref("individual")
+    const dashboardOption = ref("")
+
+    //if rustan is login  set  dashboardOption default value as team
+    if( currentUser.agent_type == 2){
+      dashboardOption.value = "team"
+    }else{
+      dashboardOption.value = "individual"
+    }
+
+    
+
+
     const leaderboardOption = ref('agent')
+
+
 
     const months = [
       "January", "February", "March", "April", "May", "June",
@@ -230,6 +243,14 @@
         return true
       }else{
         return false
+      }
+    })
+
+    const dashboardListOfOptions  = computed(()  => {
+      if (currentUser.agent_type == 2) {
+        return [ 'team', 'overall']
+      }else{
+        return [ 'individual', 'team', 'overall']
       }
     })
 
@@ -368,7 +389,12 @@
         if (Object.keys(newRoute.query).length == 0  ) {
             selectedMonth.value = ""
             selectedYear.value =  ""
-            dashboardOption.value = "individual"
+            if (currentUser.agent_type == 2){
+                 dashboardOption.value = "team"
+            }else{
+                  dashboardOption.value = "individual"
+            }
+        
             leaderboardOption.value = "agent"
             
         }
