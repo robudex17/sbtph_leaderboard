@@ -26,7 +26,8 @@ export const feedbackStore = defineStore('feedback', () => {
     const fetchFeedback = async(id, queryString, feedbackType) => {
         let errorMessage ;
         let url;
-      
+        state.loading = true
+         
         switch(feedbackType){
            
             case "agents" :
@@ -94,11 +95,14 @@ export const feedbackStore = defineStore('feedback', () => {
             state[feedbackType] = data;
             console.log(state[feedbackType])
            
-
+            state.loading = false
         } catch (error) {
             const customError = new Error(`${errorMessage}: ${error.message}`);
             customError.originalError = error;  // Attach the original error
             throw customError;
+        }
+        finally{
+            state.loading = false
         }
     }
 

@@ -97,12 +97,14 @@ exports.loginUser = async(req,res, next) => {
 
     try{
        //find user
-       const { username, password } = req.body
+       const { username, password, loginas} = req.body
        
-      
+       console.log('the login body is ', req.body)
 
        const query = "SELECT * FROM sales_agents_login WHERE username=?"
        const [loginUser] = await pool.execute(query, [username])
+
+
     
        
        if(!loginUser || !(await bcyrpt.compare(password, loginUser[0].password_hash))){
@@ -137,8 +139,28 @@ exports.loginUser = async(req,res, next) => {
        `, [loginId]
         )
      
- 
+        
+       if(user[0].role == 'user' && loginas != 'salesagent'){
+           return res.status(401).json({message: `Your are not allowed to login as ${loginas}`})
+       }
+
+       if(user[0].role == 'manager' && user[0].agent_type == 1 && loginas != 'lm'){
+         return res.status(401).json({message: `Your are not allowed to login as ${loginas}`})
+       }
+
+       if(user[0].role == 'manager' && user[0].agent_type == 2 && loginas != 'unitmanager'){
+         return res.status(401).json({message: `Your are not allowed to login as ${loginas}`})
+       }
+
+    
+       console.log('the user is ', user[0])
+
+
        user[0].login_type = 'salesagentuser'
+
+
+
+
        const accessToken = generateAccessToken(user[0])
     //    const refreshToken = generateRefreshToken(user[0])
        

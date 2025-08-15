@@ -16,7 +16,7 @@
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market Name</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                   Actions
-                  <button :disabled="targetShipokDetails.length > 1 || currentUser.agent_type == 1 || currentUser.role == 'user'"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  <button :disabled="targetShipokDetails.length == 1 || currentUser.agent_type == 1 || currentUser.role == 'user'"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                     @click="openModal('add')" 
                     :class="hasTarget">
                     <font-awesome-icon icon="plus" />

@@ -588,7 +588,9 @@ const deleteAgent = async(id) => {
   try {
     await  manageSalesAgentStore.deleteSalesAgent(id);
   }catch(error){
+
     console.error(`Error in deleting sales agent id: ${id}`, error)
+   
   }
  
 };

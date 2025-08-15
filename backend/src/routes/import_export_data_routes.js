@@ -37,6 +37,10 @@ module.exports = (io) => {
     router.post('/upload_new_deposit_data', 
                 uploadData.single("file"), 
                 (req, res,) =>  importExportDataController.importNewDepositData(req, res, io) )
+
+    router.post('/upload_sales_evaluation_data',  authenticateToken, uploadData.single('file'),
+                (req, res,) =>  importExportDataController.importSalesEvaluationData(req, res, io)
+            )
     
 
     router.get('/sales_leaderboard_export', authenticateToken, authorizeRoles('admin'), (req, res, next) => {

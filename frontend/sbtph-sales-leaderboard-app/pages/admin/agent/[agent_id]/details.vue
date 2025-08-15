@@ -1,5 +1,6 @@
 <template>
     <div class="p-4 mt-20">
+      <div v-if="currentUser.login_type == 'standarduser'">
         <div class="p-4">
           <AgentBio :agents="salesAgentBio"></AgentBio>
         </div>
@@ -60,20 +61,22 @@
         </div>
         <div  class ="p-4 mt-5 mb-5">
             <Memo attendanceType="memo" attendanceTitle="Sales Agent Memo" 
-             :attendanceDetails="salesAgentMemo " 
+             :attendanceDetails="salesAgentMemo" 
               @passAttendance="addAttendanceType" @passUpdateAttendance="updateAttendanceType"
               @passDeleteAttendance="deleteAttendanceType" 
               />
         </div>
-       
-    
     </div>
-  </template>
+    <div v-else>
+        <sales-metrcis-summary></sales-metrcis-summary>
+    </div>
+  </div>
+</template>
   
   <script setup>
 
   definePageMeta({
-    middleware: 'auth'
+    middleware: ['auth']
   })
 
   import { onMounted, watch, computed } from 'vue';
@@ -113,16 +116,42 @@
          ];
 
 
-    month.value= route.query.month
-    year.value = route.query.year 
+    // month.value= route.query.month
+    // year.value = route.query.year 
 
-    if (month.value == null || month.value == ""){
-        month.value= months[new Date().getMonth()]
-     }
+    // if (month.value == null || month.value == ""){
+    //     month.value= months[new Date().getMonth()]
+    //  }
 
-    if (year.value == null || year.value == ""){
-        year.value = new Date().getFullYear()
+    // if (year.value == null || year.value == ""){
+    //     year.value = new Date().getFullYear()
+    // }
+
+    // if(!query.month || query.month == ""){
+    //   query.month = months[new Date().getMonth()]
+    // }
+
+    // if(!query.year || query.year == ""){
+    //   query.year = new Date().getFullYear()
+    // }
+
+    if(!query.month || query.month == ""){
+      query.month = months[new Date().getMonth()]
+      month.value =  months[new Date().getMonth()]
+    }else{
+      month.value = query.month
     }
+
+    if(!query.year || query.year == ""){
+      query.year = new Date().getFullYear()
+      year.value = new Date().getFullYear()
+    }else{
+      year.value = query.year
+    }
+
+    query.fullyear = props.fullyear
+
+
    
   
     const today = new Date()
@@ -136,8 +165,11 @@
 
   const currentUser = authStore.state.user 
 
-  const agentType = query.agent_type 
-  const agentRole = query.agent_role
+ const agentType = ref("")
+  const agentRole = ref("")
+
+  agentType.value = query.agent_type
+  agentRole.value = query.agent_role
 
 
   if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
@@ -157,6 +189,9 @@
       if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
         agentId = query.agent_id
         
+      }else{
+        agentId = currentUser.login_id
+        query.agent_id = agentId
       }
     }else {
       agentId = currentUser.login_id
@@ -164,7 +199,10 @@
     }
   }
 
-
+if(currentUser.login_type != 'standarduser' ){
+    query.agent_role = currentUser.agent_role
+    query.agent_type = currentUser.agent_type
+  }
 
   const useManageSalesStore = useManageSalesAgentStore();
 
@@ -328,99 +366,99 @@ const updateFeedback = async(agentId, query, feedback) => {
   "July", "August", "September", "October", "November", "December"
 ];
 const feedbackData = computed(() => {
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonthIndex = currentDate.getMonth(); // 0-based index
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonthIndex = currentDate.getMonth(); // 0-based index
 
-  const results = [];
+    const results = [];
 
-  const processMonth = (month, index) => {
-    // Skip future months in current year
-    if (parseInt(year.value) === currentYear && index > currentMonthIndex) return;
+    const processMonth = (month, index) => {
+      // Skip future months in current year
+      if (parseInt(year.value) === currentYear && index > currentMonthIndex) return;
 
-    // Filter feedbacks by month and year
-    const filterByMonthYear = (data) => {
+      // Filter feedbacks by month and year
+      const filterByMonthYear = (data) => {
+      
+        return data.filter(item => 
+          
+          item.month === month && item.year === parseInt(year.value)
+        );
+      };
+
+      const agentData = filterByMonthYear(agentFeedback.value || []);
+      const managerData = filterByMonthYear(managerFeedback.value || []);
+      const lmsData = filterByMonthYear(lmsFeedback.value || []);
+      const qaData = filterByMonthYear(feedbackByQa.value || []);
+      
     
-      return data.filter(item => 
-        
-        item.month === month && item.year === parseInt(year.value)
-      );
+      const calculateAverage = (data) => {
+        if (!Array.isArray(data) || data.length === 0) return null;
+        const total = data.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+        return (total / data.length).toFixed(4);
+      };
+
+      const avgAgent = calculateAverage(agentData);
+      const avgManager = calculateAverage(managerData);
+      const avgLms = calculateAverage(lmsData);
+      const avgQa = calculateAverage(qaData);
+
+      const overall = (() => {
+        const scores = [avgAgent, avgManager, avgLms, avgQa]
+          .filter(score => score !== null)
+          .map(parseFloat);
+        if (scores.length === 0) return null;
+        return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(4);
+      })();
+
+      results.push({
+        month: month,
+        year: year.value,
+        averageAgentFeedback: avgAgent,
+        averageManagerFeedback: avgManager,
+        averageLmsFeedback: avgLms,
+        averageFeedbackByQa: avgQa,
+        overallAverageFeedback: overall
+      });
     };
 
-    const agentData = filterByMonthYear(agentFeedback.value || []);
-    const managerData = filterByMonthYear(managerFeedback.value || []);
-    const lmsData = filterByMonthYear(lmsFeedback.value || []);
-    const qaData = filterByMonthYear(feedbackByQa.value || []);
+    if (props.fullyear) {
+      monthNames.forEach((month, index) => {
+        processMonth(month, index);
+      });
+    } else {
+      const selectedIndex = monthNames.findIndex(m => m === month.value);
     
-   
-    const calculateAverage = (data) => {
-      if (!Array.isArray(data) || data.length === 0) return null;
-      const total = data.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-      return (total / data.length).toFixed(2);
-    };
-
-    const avgAgent = calculateAverage(agentData);
-    const avgManager = calculateAverage(managerData);
-    const avgLms = calculateAverage(lmsData);
-    const avgQa = calculateAverage(qaData);
-
-    const overall = (() => {
-      const scores = [avgAgent, avgManager, avgLms, avgQa]
-        .filter(score => score !== null)
-        .map(parseFloat);
-      if (scores.length === 0) return null;
-      return (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2);
-    })();
-
-    results.push({
-      month,
-      year: year.value,
-      averageAgentFeedback: avgAgent,
-      averageManagerFeedback: avgManager,
-      averageLmsFeedback: avgLms,
-      averageFeedbackByQa: avgQa,
-      overallAverageFeedback: overall
-    });
-  };
-
-  if (props.fullyear) {
-    monthNames.forEach((month, index) => {
-      processMonth(month, index);
-    });
-  } else {
-    const selectedIndex = monthNames.findIndex(m => m === month.value);
-   
-    if (selectedIndex !== -1) {
-      processMonth(month.value, selectedIndex);
+      if (selectedIndex !== -1) {
+        processMonth(month.value, selectedIndex);
+      }
     }
-  }
 
-  return results;
+    return results;
 });
 
 
   const averageAgentFeedback = computed(() => {
   if (!Array.isArray(agentFeedback.value) || agentFeedback.value.length === 0) return null;
   const total = agentFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-  return (total / agentFeedback.value.length).toFixed(2);
+  return (total / agentFeedback.value.length).toFixed(4);
 });
 
 const averageManagerFeedback = computed(() => {
   if (!Array.isArray(managerFeedback.value) || managerFeedback.value.length === 0) return null;
   const total = managerFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-  return (total / managerFeedback.value.length).toFixed(2);
+  return (total / managerFeedback.value.length).toFixed(4);
 });
 
 const averageLmsFeedback = computed(() => {
   if (!Array.isArray(lmsFeedback.value) || lmsFeedback.value.length === 0) return null;
   const total = lmsFeedback.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-  return (total / lmsFeedback.value.length).toFixed(2);
+  return (total / lmsFeedback.value.length).toFixed(4);
 });
 
 const averageFeedbackByQa  = computed(() => {
   if (!Array.isArray(feedbackByQa.value) || feedbackByQa.value.length === 0) return null;
   const total = feedbackByQa.value.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-  return (total / feedbackByQa.value.length).toFixed(2);
+  return (total / feedbackByQa.value.length).toFixed(4);
 });
 
 
@@ -436,7 +474,7 @@ const overallAverageFeedback = computed(() => {
  
   if (scores.length === 0) return null; // Return null if there's no valid data
 
-  return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2);
+  return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(4);
 });
 
 //QA Feedback
@@ -478,18 +516,31 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
     useManageSalesStore.state.salesAgentTardiness = []
     useManageSalesStore.state.salesAgentFeedback = []
 
-    if (agentType == 0){
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'agents')
-      }else if(agentType == 1 ){
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'lms')
-     
-      }else if (agentType == 2){
+    // if (agentType.value == 0){
+    //     await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'agents')
+    //   }else if(agentType.value == 1 ){
+    //     await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
+    //     await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'lms')
 
-        await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
+    //   }else if (agentType.value == 0){
+
+    //     await useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'managers')
+    //   }
+
+    //   await  useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'qa')
+
+      if (agentType.value == 0){
+        await useFeedbackStore.fetchFeedback(agentId, query, 'agents')
+      }else if(agentType.value == 1 ){
+        await useFeedbackStore.fetchFeedback(agentId, query, 'managers')
+        await useFeedbackStore.fetchFeedback(agentId, query, 'lms')
+
+      }else if (agentType.value == 0){
+
+        await useFeedbackStore.fetchFeedback(agentId, query, 'managers')
       }
 
-      await  useFeedbackStore.fetchFeedback(agentId, {month:month.value, year: year.value, fullyear: props.fullyear}, 'qa')
+      await  useFeedbackStore.fetchFeedback(agentId, query, 'qa')
       await  useManageSalesStore.fetchSalesAgent(agentId)
 
       await   useManageSalesStore.fetchSalesAgentDetails(agentId,query, 'salesAgentTargetShipok')
@@ -515,31 +566,42 @@ const deleteQaFeedback = async(id, feedbackResponse, feedbackType, query, httpMe
   useManageSalesStore.state.salesAgentTardiness = []
   useManageSalesStore.state.salesAgentFeedback = []
 
+  agentType.value = newRoute.query.agent_type;
 
   const newAgentId = newRoute.params.agent_id;
   await useManageSalesStore.fetchSalesAgent(newAgentId);
 
-  if (agentType == 0 ) {
+  newRoute.query.fullyear = props.fullyear
+
+  month.value = newRoute.query.month 
+  year.value = newRoute.query.year
+
+
+  if (agentType.value == 0 ) {
     await useFeedbackStore.fetchFeedback(newAgentId, newRoute.query, 'agents');
-  } else if (agentType == 1 ) {
+  } else if (agentType.value == 1 ) {
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'lms');
-  } else if (agentType == 2) {
+  } else if (agentType.value == 2) {
     await useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'managers');
+  }else{
+    alert('no change')
   }
-  await  useFeedbackStore.fetchFeedback(agentId,  newRoute.query, 'qa')
+  await  useFeedbackStore.fetchFeedback(newAgentId,  newRoute.query, 'qa')
   router.push(newRoute.fullPath);
-  await  useManageSalesStore.fetchSalesAgent(agentId)
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentTargetShipok')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentNewDeposit')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentAbsences')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentMemo')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentTardiness')
-  await   useManageSalesStore.fetchSalesAgentDetails(agentId,newRoute.query, 'salesAgentFeedback')
+  await  useManageSalesStore.fetchSalesAgent(newAgentId)
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentTargetShipok')
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentNewDeposit')
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentAbsences')
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentMemo')
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentTardiness')
+  await   useManageSalesStore.fetchSalesAgentDetails(newAgentId,newRoute.query, 'salesAgentFeedback')
 });
 
 
   </script>
+  
+  
 
 
 

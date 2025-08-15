@@ -5,11 +5,11 @@
           <table class="min-w-full border border-green-500 rounded-lg">
             <thead class="bg-green-200">
               <tr>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th>
+                <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th> -->
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th>
+                <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th> -->
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                   Actions
@@ -27,12 +27,12 @@
                 v-for="(newDeposit, index) in newDepositDetails" 
                 :key="newDeposit.id + index" 
                 class="odd:bg-white even:bg-green-50">
-                <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.id }}</td>
+                <!-- <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.id }}</td> -->
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.agent_id }}</td>
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.month }}</td>
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.year }}</td>
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.date }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td>
+                <!-- <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td> -->
                 <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
                   <button   :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                     @click="openModal('edit', index)" 

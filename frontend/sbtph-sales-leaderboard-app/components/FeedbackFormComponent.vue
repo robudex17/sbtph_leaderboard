@@ -135,8 +135,8 @@
       }, 0);
     });
 
-    const percentage = computed(() => ((totalScore.value / maxPossibleScore.value) * 100).toFixed(2));
-    const feedbackScore =  computed(() => parseFloat(((totalScore.value / props.questions.length) ).toFixed(2)));
+    const percentage = computed(() => ((totalScore.value / maxPossibleScore.value) * 100).toFixed(4));
+    const feedbackScore =  computed(() => parseFloat(((totalScore.value / props.questions.length) ).toFixed(4)));
 
 
     const emit = defineEmits(['passFeedbackData'])

@@ -1035,4 +1035,350 @@ exports.importTargetShipokData  = async (req, res, io, next) => {
   }
 };
 
+exports.importSalesEvaluationData = async (req, res, io) => {
+
+    const loginUser = req.user
+
+    
+
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+
+    try {
+      const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+      const sheetName = workbook.SheetNames[0];
+
+      if (!/^evaluation$/i.test(sheetName)) {
+        return res.status(400).json({
+          error: `Invalid sheet name: "${sheetName}". Sheet name must be 'evaluation' (case-insensitive).`,
+          sheetName
+        });
+      }
+
+      const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      if (data.length === 0) {
+        return res.status(400).json({ error: "Sheet is empty", sheetName });
+      }
+
+        const requiredFields = [
+        'YEAR', 'MONTH', 'TARGET', 'SHIPOK', 'NEW DEPOSIT',
+        'ABSENCES', 'TARDINESS', 'MEMO', 'FEEDBACK ADMIN', 'FEEDBACK QA', 'AGENT_ID'
+      ];
+
+      const numericRegex = /^$|^\d+(\.\d+)?$/;
+      const monthList = [
+        'JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE',
+        'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'
+      ];
+
+      const currentYear = new Date().getFullYear();
+
+      // 🔹 STEP 1: Pre-check for missing fields & invalid values
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+
+          // 1️⃣ Check missing required fields
+          const missingFields = requiredFields.filter(f =>
+            !Object.keys(row).includes(f) 
+          
+          );
+          console.log(missingFields)
+          if (missingFields.length > 0) {
+            return res.status(404).json({
+              error: `Missing required fields in row ${i + 1} ${JSON.stringify(missingFields)}`,
+              missingFields,
+              row
+            });
+          }
+
+          // 2️⃣ Check invalid values
+          const invalidFields = [];
+
+          for (const field of requiredFields) {
+            const value = String(row[field]).trim();
+
+            if (field === 'MONTH') {
+              // Month must match one of the allowed names (case-insensitive)
+              if (!monthList.includes(value.toUpperCase())) {
+                invalidFields.push(field);
+              }
+            } else if (field == "YEAR") {
+              if(!numericRegex.test(value) ) {
+                invalidFields.push(field);
+              }
+              const yearInt = parseInt(value,10)
+              if(yearInt> currentYear) {
+                invalidFields.push(field);
+              }
+            } else if (field == 'FEEDBACK ADMIN' || field == 'FEEDBACK QA') {
+              if(value > 5) {
+                invalidFields.push(field);
+              }
+            } else if (!numericRegex.test(value)) {
+              // Numeric validation for all other fields
+              invalidFields.push(field);
+            }
+          }
+
+          if (invalidFields.length > 0) {
+            return res.status(404).json({
+              error: `Invalid value(s) in row ${i + 1} ${JSON.stringify(invalidFields)}`,
+              invalidFields,
+              row
+            });
+          }
+      }
+
+
+          // =========================
+        // 🔹 Stage 2: Upload
+        // =========================
+
+        let targetShipokStats = initStats(data.length);
+        let newDepositStats = initStats(data.length);
+        let absenceStats = initStats(data.length);
+        let tardinessStats = initStats(data.length);
+        let memoStats = initStats(data.length);
+        let feedbackStats = initStats(data.length);
+
+ 
+   
+        for (let i = 0; i < data.length; i++) {
+              const row = data[i];
+
+              // Check for missing fields
+              const missingFields = requiredFields.filter(f => !Object.keys(row).includes(f));
+              if (missingFields.length > 0) {
+                targetShipokStats.emptyValuesCount++;
+                newDepositStats.emptyValuesCount++;
+                continue;
+              }
+
+              // Check if agent exists
+              const [agentResult] = await pool.execute(
+                "SELECT market_id, db_name FROM sales_agents WHERE id = ?",
+                [row.AGENT_ID]
+              );
+              if (agentResult.length === 0) {
+                targetShipokStats.notRegisteredAgentCount++;
+                newDepositStats.notRegisteredAgentCount++;
+                
+                continue;
+              }
+
+              const marketId = agentResult[0].market_id;
+              const agentDbname = agentResult[0].db_name;
+              const qaId = loginUser.login_id 
+              const qaDbname = loginUser.db_name
+              const qaRole = loginUser.role
+
+              console.log(qaRole)
+            
+
+              const currentDate = getCurrentDate();
+
+              // ===============================
+              // Process TargetShipok part
+              // ===============================
+
+              await targetShipokImport (targetShipokStats,'target_shipok', row.TARGET, row.SHIPOK, row.AGENT_ID, marketId, row.MONTH, row.YEAR, currentDate)
+
+              //proccess new Deposit part
+              
+              await absenceTardinessMemoNewDepositImport(newDepositStats,'new_deposit',row['NEW DEPOSIT'], row.AGENT_ID, marketId, row.MONTH, row.YEAR, 'New Deposit')
+
+              //process absences part
+              await absenceTardinessMemoNewDepositImport(absenceStats,'absences',row.ABSENCES, row.AGENT_ID,  marketId,row.MONTH, row.YEAR, 'Absent')
+
+              //  //process tardiness part
+              await absenceTardinessMemoNewDepositImport(tardinessStats,'tardiness',row.TARDINESS, row.AGENT_ID,marketId, row.MONTH, row.YEAR, 'Tardiness')
+
+              // process memo part 
+              await absenceTardinessMemoNewDepositImport(memoStats,'memo',row.MEMO, row.AGENT_ID, marketId,row.MONTH, row.YEAR, 'Memo')
+
+              // process feedback
+
+            await  feedbackDataImport(feedbackStats, "feedback", "feedback_by_qa", row['FEEDBACK ADMIN'],  qaId, qaDbname,  row.AGENT_ID, agentDbname, qaRole, row['FEEDBACK QA'], currentDate, row.MONTH, row.YEAR)
+
+      
+              // Emit progress for frontend
+              emitProgress(io, i, data.length, { targetShipokStats, newDepositStats, absenceStats, tardinessStats, memoStats, feedbackStats  });
+        } 
+
+        res.json({
+          message: "Upload completed",
+          targetShipokStats,
+          newDepositStats,
+          absenceStats
+        });
+
+  } catch (err) {
+        console.error("Error processing file:", err);
+        res.status(500).send("Error processing file: " + err.message);
+  }
+};
+
+// ================= Utility Functions =================
+function initStats(total) {
+  return {
+    totalRecords: total,
+    insertedCount: 0,
+    updatedCount: 0,
+    replacedCount: 0,
+    skippedCount: 0,
+    notRegisteredAgentCount: 0,
+    emptyValuesCount: 0
+  };
+}
+
+function emitProgress(io, index, total, stats) {
+  const progress = Math.round(((index + 1) / total) * 100);
+  io.emit("uploadProgress", { progress, ...stats });
+}
+
+function getCurrentDate() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+async function targetShipokImport (tableStats,table, target, shipok, agent_id, marketId, month, year, currentDate){
+
+           const [targetCheck] = await pool.execute(
+            `SELECT COUNT(*) AS count FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
+            [agent_id, month, year]
+          );
+
+          //If target/shipok entry or count is equal 0 insert the new shipok and target 
+          if (targetCheck[0].count == 0){
+                  await pool.execute(
+                `INSERT INTO target_shipok (agent_id, month, year, date, target, ship_ok, market_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [agent_id, month, year, currentDate, target, shipok, marketId]
+                );
+               tableStats.insertedCount++;
+                
+          // delete the current target and replace by the new target came from file
+          }else  {
+               await pool.execute(
+                `DELETE FROM target_shipok WHERE agent_id = ? AND month = ? AND year = ?`,
+                [agent_id, month, year]
+                );
+                await pool.execute(
+                `INSERT INTO target_shipok (agent_id, month, year, date, target, ship_ok, market_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [agent_id, month, year, currentDate, target, shipok, marketId]
+                );
+                tableStats.replacedCount++;
+          }     
+
+}
+async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agent_id, marketId, month, year, description) {
+
+            const [check] = await pool.execute(
+              `SELECT COUNT(*) AS count FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
+              [agent_id, month, year]
+            );
+
+            //skip
+            if((check[0].count == 0 && parseFloat(type) == 0 ) || (check[0].count == parseFloat(type))) {
+               tableStats.skippedCount++;
+            }else {
+             
+              if( parseFloat(type) != check[0].count) {
+                   //remove the record first
+                    await pool.execute(
+                    `DELETE FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
+                    [agent_id, month, year]
+                    ); 
+              }   
+
+              for (let k = 0; k < type; k++) {
+                      // const absent = itterationArray[k];
+                      // exit the entire loop if the type is 0 (nothing to insert)
+                      if(parseFloat(type) == 0){
+                          tableStats.skippedCount++;
+                          break
+                      }
+                    
+                      let numberOfTimes ;
+                      if(k> 10){
+                        numberOfTimes = "N Number"
+                      }else{
+                        numberOfTimes = itterationArray[k];
+                      }
+                      
+                      if(table == 'new_deposit'){
+                        console.log('first new deposit')
+                        await pool.execute(
+                        `INSERT INTO new_deposit (agent_id, month, year, date,  market_id , new_deposit, description)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [agent_id, month, year,  `${year}-${month}-${k+1}` ,  marketId, 100000, `New Deposit For New Customer - ${month} ${year}`]
+                       )
+                      }else{
+                        await pool.execute(
+                            `INSERT INTO ${table} (agent_id, month, year, date,  description)
+                            VALUES (?, ?, ?, ?,? )`,
+                            [agent_id, month, year, `${year}-${month}-${k+1}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
+                        );
+                     }
+                      
+                      if(check[0].count > 0){
+                           tableStats.replacedCount++;
+                           console.log( "replaced", tableStats.replacedCount);
+                      }else{
+                        tableStats.insertedCount++;
+                        console.log( "inserted", tableStats.insertedCount);
+
+                      }                  
+               }
+               
+            }
+}
+
+async function  feedbackDataImport(tableStats, tableAdmin, tableQa, feedbackByAdmin,  qaId, qaDbname, agent_id, agent_dbname, qaRole, feedbackByQa, currentDate,month, year) {
+
+  //delete feedback on the admin and qa for initialization
+
+   await pool.execute(
+                `DELETE FROM ${tableAdmin} WHERE agent_id = ? AND month = ? AND year = ?`,
+                [agent_id, month, year]
+                );
+     
+   console.log('deleting...'
+   )
+   await pool.execute(
+                    `DELETE FROM ${tableQa} WHERE agent_id = ? AND month = ? AND year = ?`,
+                    [agent_id, month, year]
+   );
+    
+
+    
+    if(parseFloat(feedbackByAdmin) > 0){
+        await pool.execute(
+                `INSERT INTO ${tableAdmin} (agent_id, month, year, date, feedback)
+                VALUES ( ?, ?, ?, ?, ?)`,
+                [agent_id, month, year, currentDate, feedbackByAdmin]
+         );
+         tableStats.insertedCount++;
+    }
+    console.log("qaRole value is:", qaRole, "length:", qaRole?.length);
+    if(parseFloat(feedbackByQa) > 0){
+        await pool.execute(
+                `INSERT INTO ${tableQa} (qa_id, qa_dbname, agent_id, agent_dbname, qa_role, feedback_score, date, month, year)
+                VALUES ( ?, ?, ?, ?, ?, ? ,? ,? ,?)`,
+                [qaId, qaDbname, agent_id, agent_dbname, qaRole, feedbackByQa, currentDate, month, year]
+         );
+         tableStats.insertedCount++;
+    }
+
+}
+
+
+
+const itterationArray = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"];
+
+
+
+
 

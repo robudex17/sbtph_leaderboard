@@ -37,6 +37,14 @@ router.post('/feedback_by_qa/:agent_id',
      validateMonthYear,
      salesFeedbackController.addAgentsFeedbackByQa
 )
+
+router.get('/feedback_by_qa/all',
+     authenticateToken,
+     authorizeRoles('admin','manager', 'user'),
+     validateMonthYear,
+     salesFeedbackController.getAllAgentsFeedbackByQa
+)
+
 router.get('/feedback_by_qa/:agent_id',
      authenticateToken,
      authorizeRoles('admin','manager', 'user'),
@@ -44,6 +52,8 @@ router.get('/feedback_by_qa/:agent_id',
      validateMonthYear,
      salesFeedbackController.getAgentsFeedbackByQa
 )
+
+
 router.put('/feedback_by_qa/:agent_id',
      authenticateToken,
      authorizeRoles('admin'),
@@ -56,9 +66,9 @@ router.delete('/feedback_by_qa/:agent_id',
      authenticateToken,
      authorizeRoles('admin'),
      validateAgentId,
-     validateQaId,
-     validateFeedbackDate,
-     validateMonthYear,
+     // validateQaId,
+     // validateFeedbackDate,
+     // validateMonthYear,
      salesFeedbackController.removeAgentsFeedbackByQa
 )
 

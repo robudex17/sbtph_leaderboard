@@ -353,12 +353,14 @@ exports.deleteSalesAgent = async (req, res, next) => {
         
         const image_link = agentImageLink.image_link
         if(image_link != null || image_link != ""){
-            const filePath = new URL(image_link).pathname.substring(1)
+            // const filePath = new URL(image_link).pathname.substring(1)
             
+            // Remove leading slash to avoid path issues
+             const filePath = image_link.startsWith('/') ? image_link.substring(1) : image_link;
             //Construct absolute path
             const absolutePath = path.join(__dirname, '../', filePath)
 
-            //Delet the agent Image file
+            //Delete the agent Image file
 
             fs.unlink(absolutePath, (error) => {
                 console.log(`File ${filePath} deleted successfully`)

@@ -128,23 +128,24 @@ export const useAuthStore = defineStore('auth', () => {
        }
    }
      
-    const login = async (username, password,type) => {
+    const login = async (username, password,loginas) => {
         state.loading = true
         state.error = null
         let loginType ;
 
-        
-        if (type == 'salesagent'){
+
+        if (loginas == 'unitmanager' || loginas == 'lm' || loginas == 'salesagent'){
             loginType = "sales_login"
-        }else if (type = 'standarduser'){
+        // for now all standarduser is consider admin
+        }else if (loginas == 'standarduser'){
             loginType = 'standardusers_login'
         }
-        console.log(type)
+       
         try {
             const response = await fetch(`${API[loginType]}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({username,password})
+                body: JSON.stringify({username,password, loginas})
             }) 
          
         

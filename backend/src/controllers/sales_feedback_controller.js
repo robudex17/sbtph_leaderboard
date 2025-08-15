@@ -1,6 +1,7 @@
 const pool = require('../config/db')
 const { validationResult } = require('express-validator')
 
+// First Four controllers is for admin feedback
 exports.addNewFeedback = async (req, res, next) => {
     const errors = validationResult(req)
 
@@ -214,8 +215,8 @@ exports.addNewFeedback = async (req, res, next) => {
             
     try {
         const responsesJson = JSON.stringify(responses)
-        const query = "UPDATE agents_feedback SET  responses=?, feedback_score=?, total_score=?, percentage=? WHERE agent_id=? AND lm_id=? AND month=? AND year=? AND date=?"
-        
+        const query = "UPDATE agents_feedback SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE agent_id=? AND lm_id=? AND month=? AND year=? AND date=?"
+
         const [result]  = await pool.execute(query, [responsesJson, feedback_score, total_score, percentage,agent_id, lm_id, month, year,date])
         
         if (result.affectedRows === 0){
@@ -697,7 +698,7 @@ exports.addNewFeedback = async (req, res, next) => {
         try {
 
             
-            const query = "INSERT INTO feedback_by_qa (qa_id , qa_dbname, agent_id, agent_dbname, role, feedback_score, date, month,year) VALUES (?,?,?,?,?,?,?,?,?)"
+            const query = "INSERT INTO feedback_by_qa (qa_id , qa_dbname, agent_id, agent_dbname, qa_role, feedback_score, date, month,year) VALUES (?,?,?,?,?,?,?,?,?)"
             const [result]  = await pool.execute(query, [qa_id , qa_dbname, agentId, agent_dbname,role, feedback_score,  date, month,year])
 
             res.status(201).json({
@@ -721,13 +722,13 @@ exports.addNewFeedback = async (req, res, next) => {
 
     const { qa_id , qa_dbname, agent_id, agent_dbname, role, feedback_score,  date, month,year} = req.body
     const agentId = req.params.agent_id
-            
+         
     try {
         
-        const query = "UPDATE feedback_by_qa  SET  feedback_score=? WHERE agent_id=? AND qa_id=? AND month=? AND year=? AND date=?"
-        
-        const [result]  = await pool.execute(query, [ feedback_score ,agent_id, qa_id, month, year,date])
-        
+        const query = "UPDATE feedback_by_qa  SET  feedback_score=?, qa_id=?, qa_dbname=?, date=? WHERE agent_id=?  AND month=? AND year=? "
+
+        const [result]  = await pool.execute(query, [ feedback_score, qa_id, qa_dbname, date, agent_id, month, year])
+
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Agent Feedback Not Found..'})
         }
@@ -814,6 +815,47 @@ exports.addNewFeedback = async (req, res, next) => {
     
  }
 
+ exports.getAllAgentsFeedbackByQa = async (req, res, next) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+
+    const month = req.query.month
+    const year = req.query.year
+
+    try {
+        const [result] = await pool.execute(
+            `
+            SELECT 
+                sa.*, 
+                COALESCE(fbyqa.feedback_score, 'No Feedback') AS feedback,
+                COALESCE(fbyqa.month, ?) AS month,
+                COALESCE(fbyqa.year, ?) AS year,
+                fbyqa.qa_id, 
+                fbyqa.qa_dbname,
+                market.market_name 
+            FROM sales_agents AS sa
+            LEFT JOIN market 
+               ON sa.market_id = market.id
+            LEFT JOIN feedback_by_qa AS fbyqa
+                ON sa.id = fbyqa.agent_id
+            AND fbyqa.month = ?
+            AND fbyqa.year = ?;
+
+            `,
+            [ month, year, month, year]
+        )
+
+        res.json(result)
+    } catch (error) {
+        console.error('Error fetching agent feedback:', error)
+        res.status(500).json({ error: 'Database Error, Cannot Fetch Agent Feedback' })
+    }
+ }
+
  exports.removeAgentsFeedbackByQa = async(req,res, next) => {
 
     const errors = validationResult(req)
@@ -821,15 +863,16 @@ exports.addNewFeedback = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+
+
     const agentId = req.params.agent_id
-    const feedbackDate = req.body.date 
     const qaId = req.body.qa_id
     const month = req.body.month 
     const year = req.body.year
 
     try {
-        const query = "DELETE FROM feedback_by_qa WHERE agent_id=? AND qa_id=? AND date=? AND month=? AND year=?"
-        const [result] = await pool.execute(query, [agentId, qaId,  feedbackDate, month, year])
+        const query = "DELETE FROM feedback_by_qa WHERE agent_id=? AND qa_id=?  AND month=? AND year=?"
+        const [result] = await pool.execute(query, [agentId, qaId,  month, year])
 
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Agent Feedback Not found'})

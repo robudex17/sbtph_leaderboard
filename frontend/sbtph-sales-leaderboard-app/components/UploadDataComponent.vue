@@ -16,7 +16,7 @@
         />
   
         <!-- Duplicate action selection -->
-        <div class="mb-4 text-white">
+        <!-- <div class="mb-4 text-white">
           <label for="duplicateAction" class="block text-lg font-semibold mb-2">Handle Duplicates</label>
           <select
             id="duplicateAction"
@@ -27,7 +27,7 @@
             <option value="update">Update Duplicates</option>
             <option value="replace">Replace Duplicates</option>
           </select>
-        </div>
+        </div> -->
   
         <!-- Upload button -->
         <button
@@ -46,8 +46,8 @@
           </p>
   
           <progress :value="progress" max="100" class="w-full h-2 bg-gray-300 rounded-full"></progress>
-  
-          <p class="text-lg font-medium">
+          <!-- <div>
+            <p class="text-lg font-medium">
             Inserted: <span class="font-bold text-green-400">{{ insertedCount }}</span>
           </p>
           <p class="text-lg font-medium">
@@ -64,7 +64,9 @@
           </p>  
           <p class="text-lg font-medium">
             Empty Values: <span class="font-bold text-orange-400">{{ emptyValuesCount }}</span>
-          </p>                    
+          </p>     
+          </div> -->
+               
         </div>
       </div>
     </div>
@@ -146,16 +148,23 @@
     try {
       const response = await fetch(url, {
         method: 'POST',
-        // headers: {
-        //           'Content-Type': 'application/json',
-        //           'Authorization': `Bearer ${token}`,
-        //         },
+        headers: {
+                  // 'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
         body: formData
       })
       const result = await response.json()
-      alert(`Upload Complete! Inserted: ${result.insertedCount}, Duplicates Skipped: ${result.duplicateSkippedCount} , Updated: ${result.updatedCount}, replaced: ${result.replacedCount}, Not Register: ${result.notRegisteredAgentCount}, Empty Values: ${result.emptyValuesCount} `)
+      console.log('the result is', result)
+      // alert(`Upload Complete! Inserted: ${result.targetShipokStats.insertedCount}, Duplicates Skipped: ${result.targetShipokStats.duplicateSkippedCount} , Updated: ${result.targetShipokStats.updatedCount}, replaced: ${result.targetShipokStats.replacedCount}, Not Register: ${result.targetShipokStats.notRegisteredAgentCount}, Empty Values: ${result.targetShipokStats.emptyValuesCount} `)
+      if(progress.value >= 100){
+        alert('Upload Complete')
+      }else{
+        alert(result.error)
+      }
     } catch (error) {
       console.error('Error uploading file:', error)
+      
     } finally {
       uploading.value = false
     }
@@ -163,18 +172,20 @@
   
   onMounted(() => {
     const socket = io(socketUrl)
+
+
     socket.on('uploadProgress', (data) => {
+    
       progress.value = data.progress
-      insertedCount.value = data.insertedCount
-      updatedCount.value = data.updatedCount 
-      replacedCount.value = data.replacedCount 
-      duplicateSkippedCount.value = data.duplicateSkippedCount 
-      notRegisteredAgentCount.value = data.notRegisteredAgentCount 
-      emptyValuesCount.value = data.emptyValuesCount
+      // insertedCount.value = data.targetShipokStats.insertedCount
+      // updatedCount.value = data.targetShipokStats.updatedCount
+      // replacedCount.value = data.targetShipokStats.replacedCount
+      // duplicateSkippedCount.value = data.targetShipokStats.duplicateSkippedCount
+      // notRegisteredAgentCount.value = data.targetShipokStats.notRegisteredAgentCount
+      // emptyValuesCount.value = data.targetShipokStats.emptyValuesCount
     })
   })
   </script>
-  
   <style scoped>
   .upload-container {
     max-width: 400px;

@@ -5,11 +5,11 @@
         <table class="min-w-full border border-green-500 rounded-lg">
           <thead class="bg-green-200">
             <tr>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th>
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th> -->
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th>
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th> -->
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
@@ -27,11 +27,11 @@
               v-for="(attendance, index) in attendanceDetails" 
               :key="attendance.id + index" 
               class="odd:bg-white even:bg-green-50">
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.id }}</td>
+              <!-- <td class="py-2 px-4 text-sm text-green-800">{{ attendance.id }}</td> -->
               <td class="py-2 px-4 text-sm text-green-800">{{ attendance.agent_id }}</td>
               <td class="py-2 px-4 text-sm text-green-800">{{ attendance.month }}</td>
               <td class="py-2 px-4 text-sm text-green-800">{{ attendance.year }}</td>
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.date }}</td>
+              <!-- <td class="py-2 px-4 text-sm text-green-800">{{ attendance.date }}</td> -->
               <td class="py-2 px-4 text-sm text-green-800">{{ attendance.description }}</td>
               <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
                 <button  :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"

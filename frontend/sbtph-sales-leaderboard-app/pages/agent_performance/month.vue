@@ -208,7 +208,7 @@
   import { useLeaderBoardStore } from '../stores/sales_leaderboard';
   import { onMounted, reactive,ref, watch } from 'vue';
 
- import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
+
 
  import API from '~/utils/api'
 
@@ -223,7 +223,9 @@
   
   const currentUser = authStore.state.user 
   const token = authStore.state.token
-  const isAdmin = ref(false)
+  const isAdmin = ref(false) 
+
+   import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
 
   const config = useRuntimeConfig()
 
@@ -264,6 +266,9 @@
     if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
        agentId = query.value.agent_id
        
+    }else{
+       agentId = currentUser.login_id
+       query.value.agent_id = agentId
     }
   }else {
     agentId = currentUser.login_id
@@ -278,6 +283,8 @@
         return { target: 0}
     }
   })
+
+
 
 
  
@@ -311,6 +318,7 @@
     router.push(newRoute.fullPath)
     // newRoute.query.agent_id = agentId
     leaderBoardData(newRoute.query)
+   
     query.value = newRoute.query
   })
   

@@ -47,7 +47,10 @@
             id="role"
             class="mt-1 block w-full px-4 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="standuser">Standard User</option>
+           <!-- For now all standarduser is consider admin -->
+            <option value="standarduser">Admin</option>
+            <option value="unitmanager">Unit Manager</option>
+            <option value="lm">Local Manager</option>
             <option value="salesagent">Sales Agent</option>
           </select>
         </div>
@@ -86,7 +89,7 @@ definePageMeta({
 // Define reactive form data
 const username = ref('')
 const password = ref('')
-const loginType = ref('standuser') // Default role selection
+const loginType = ref('standarduser') // Default role selection
 const loginSuccess = ref(false)
 
 
@@ -98,25 +101,52 @@ const login = async () => {
 
   // Send role along with login
   await authStore.login(username.value, password.value, loginType.value)
+
+  if(authStore.state.user?.role == 'user' && loginType.value != 'salesagent' ){
+    alert(`You are not allowed to login as  ${loginType.value}`)
+    return
+  }
+
   
-  if (authStore.state.user?.role == 'user' && authStore.state.token){
-    alert('Login is Successful for user')
+  if(authStore.state.user?.role == 'manager' && authStore.state.user?.agent_type == 1 && loginType.value != 'lm'){
+    alert(`You are not allowed to login as  ${loginType.value}`)
+    return
+  }
+
+  if(authStore.state.user?.role == 'manager' && authStore.state.user?.agent_type == 2 && loginType.value != 'unitmanager'){
+    alert(`You are not allowed to login as  ${loginType.value}`)
+    return
+  }
+
+  
+  // if (authStore.state.user?.role == 'user' && authStore.state.token){
+  //   alert('Login is Successful for user')
+  //   router.push('/')
+  //   return
+  // }
+
+   if (authStore.state.token) {
+    alert("Login is Successful")
     router.push('/')
     return
   }
+
+
   if (authStore.state.error) {
     alert(authStore.state.error)
     return
   }
 
+
+
   loginSuccess.value = true
   authStore.fetchTokenFromLocalStore()
 
-  if (authStore.state.token) {
-    alert("Login is Successful")
-    router.push('/')
-    return
-  }
+  // if (authStore.state.token) {
+  //   alert("Login is Successful")
+  //   router.push('/')
+  //   return
+  // }
 }
 
 onMounted(() => {

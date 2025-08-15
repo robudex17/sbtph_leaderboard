@@ -88,15 +88,7 @@
             { name: "Dashboard", route: '/dashboard', icon: ['fas', 'tachometer-alt']},
             { name: 'Leaderboard', route: '/', icon: ['fas', 'list'] },
 
-            { 
-              name: 'Feedback', 
-              route: null, icon: ['fas', 'poll'],
-              subMenu:[
-                { name: 'BY QA', route: '/feedback/feedback_by_qa', icon: ['fas', 'users']  },
-                
-              ] 
-            
-            },
+
            { 
               name: 'Agent Performance', 
               route: null, 
@@ -130,14 +122,25 @@
             // { name: 'Reports', route: '/reports', icon: ['fas', 'file-alt'] },
 
             { 
+              name: 'Feedback', 
+              route: null, icon: ['fas', 'poll'],
+              subMenu:[
+                { name: 'BY QA', route: '/feedback/feedback_by_qa', icon: ['fas', 'users']  },
+                
+              ] 
+            
+            },            
+
+            { 
               name: 'Admin Panel',
               route: null,
               icon: ['fas', 'cog'],
               subMenu: [
                 { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
                 { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
-                { name: 'Upload Target/Shipok Sales Data', route: '/admin/upload_target_shipok_data', icon: ['fas', 'fa-upload'] },
-                { name: 'Upload New Deposit Sales Data', route: '/admin/upload_new_deposit_data', icon: ['fas', 'fa-upload'] },
+                // { name: 'Upload Target/Shipok Sales Data', route: '/admin/upload_target_shipok_data', icon: ['fas', 'fa-upload'] },
+                // { name: 'Upload New Deposit Sales Data', route: '/admin/upload_new_deposit_data', icon: ['fas', 'fa-upload'] },
+                { name: 'Upload Sales Evaluation Data', route: '/admin/upload_sales_evaluation_data', icon: ['fas', 'fa-upload'] },
                 // { name: 'export', route: '/admin/export_to_excel', icon: ['fas', 'fa-file-excel'] },
   
 

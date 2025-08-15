@@ -297,7 +297,7 @@ if (agent_id != ""){
         const getAverageFeedback = (feedback_result) => {
           if (!Array.isArray(feedback_result) || feedback_result.length === 0) return null;
           const total = feedback_result.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-          return (total / feedback_result.length).toFixed(2);
+          return (total / feedback_result.length).toFixed(4);
         }
         // for saleas agent
         if (agent.agent_type == 0){
@@ -344,7 +344,7 @@ if (agent_id != ""){
         
           if (scores.length === 0) return null; // Return null if there's no valid data
 
-          return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(2);
+          return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(4);
       };
 
 
@@ -357,7 +357,7 @@ if (agent_id != ""){
    
 
       
-   agent['feedback_score'] =   Number(overallAverageFeedback).toFixed(3)
+   agent['feedback_score'] =   Number(overallAverageFeedback).toFixed(4)
 
    //get agent new deposit for the given and treat this as additional point
    

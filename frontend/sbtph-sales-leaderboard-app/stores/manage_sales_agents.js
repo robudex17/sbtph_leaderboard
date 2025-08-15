@@ -340,6 +340,7 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
             }  
 
             if (!response.ok) {
+                 alert(`Failed to delete agent: ${agent_id} - ${response.status} ${response.statusText}`);
                 throw new Error(`Error: ${response.status} ${response.statusText}`);
             }
             if(response.ok && response.status == 204){

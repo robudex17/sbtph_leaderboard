@@ -178,7 +178,6 @@
       '/admin/manage_standard_users',
       '/agent_performance/year',
       '/team_performance/year',
-      '/feedback/feedback_by_qa',
       '/feedback/managers_feedback',
       '/feedback/agents_feedback',
       '/feedback/lm_feedback',
@@ -187,19 +186,21 @@
       '/team_performance/analytics',
       '/admin/agent_performance/yearly',
       '/admin/upload_target_shipok_data',
-       '/admin/upload_new_deposit_data'
+       '/admin/upload_new_deposit_data',
+       '/admin/upload_sales_evaluation_data'
 
     ])
 
     const pathWithoutYearOption = ref([
       '/admin/agent/manage_sales_agents',
       '/admin/manage_standard_users',
-      '/feedback/feedback_by_qa',
+    
       '/feedback/managers_feedback',
       '/feedback/agents_feedback',
       '/feedback/lm_feedback',
       '/admin/upload_target_shipok_data',
-      '/admin/upload_new_deposit_data'    
+      '/admin/upload_new_deposit_data' ,
+      '/admin/upload_sales_evaluation_data'   
     ])
 
     const pathWithoutTrucksOption = ref([
@@ -214,6 +215,7 @@
       '/agent_performance/year',
        '/admin/upload_target_shipok_data',
       '/admin/upload_new_deposit_data',
+      '/admin/upload_sales_evaluation_data',
       '/'
 
     ])

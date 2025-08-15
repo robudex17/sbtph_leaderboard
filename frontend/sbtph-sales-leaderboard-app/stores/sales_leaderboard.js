@@ -92,7 +92,7 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
     }
 
     const fetchAgentPerformance = async(agent_id, queryString) => {
-        state.loading = false
+        state.loading = true
         state.error = null 
 
         try {
