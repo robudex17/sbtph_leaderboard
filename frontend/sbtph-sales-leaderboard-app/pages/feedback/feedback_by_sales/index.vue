@@ -59,10 +59,10 @@
                     :to="{
                     //  path: `/feedback/agents_feedback/${agent.id}`,
 
-                     path: `/feedback/agents_feedback/${agent.id}` , 
+                     path: `/feedback/feedback_by_sales/${feedbackType}` , 
                      query: {who_receive_feedback_id: agent.id, who_receive_feedback_db_name: agent.db_name,
                              who_give_feedback_id: currentUser.login_id, 
-                             who_give_feedback_db_name: currentUser.db_name }
+                             who_give_feedback_db_name: currentUser.db_name, feedback_type: feedbackType }
 
                     }"
                     class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -110,14 +110,18 @@
   authStore.fetchTokenFromLocalStore()
   
   const currentUser = authStore.state.user 
-  
+  const route = useRoute()
+  const query = route.query
+  const feedbackType = ref('')
+
+  feedbackType.value = route.query.feedback_type
 
   const manageSalesAgentStore = useManageSalesAgentStore()
 
   
 
-  const fetchSalesAgents = () => {
-    manageSalesAgentStore.fetchSalesAgents();
+  const fetchSalesAgents = (query) => {
+    manageSalesAgentStore.fetchSalesAgents(query);
   };
 
   const config = useRuntimeConfig()
@@ -127,7 +131,7 @@
   }
  
   onMounted(() => {
-    fetchSalesAgents();
+    fetchSalesAgents(query);
     
   });
   
@@ -154,10 +158,11 @@
     const end = start + itemsPerPage;
     return agents.value.slice(start, end);
   });
-  
 
-
-
+  watch(route, (newroute) => {
+    fetchSalesAgents(newroute.query);
+    feedbackType.value = newroute.query.feedback_type;
+  });
 
   </script>
   

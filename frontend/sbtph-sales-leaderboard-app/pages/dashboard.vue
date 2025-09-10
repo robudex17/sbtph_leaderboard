@@ -1,6 +1,8 @@
 <template>
   <div class="grid grid-cols-1 gap-4 p-4 mt-20">
+
     <div v-if="dashBoardStore.state.loading">
+      
         <spinner></spinner>
     </div>
     <div v-else>
@@ -249,6 +251,7 @@ authStore.fetchTokenFromLocalStore()
 
 const router = useRouter()
 const route = useRoute()
+const currentUser = authStore.state.user
 
 
 
@@ -267,7 +270,26 @@ const month = "June"
 const year = 2025
 
 //const dashboardoption = ref(route.query.dashboardoption || 'individual')
-const dashboardoption = ref("individual")
+
+ 
+
+const dashboardoption = ref("")
+
+if( currentUser.agent_type == 2){
+      dashboardoption.value = "team"
+}else{
+      dashboardoption.value = "individual"
+}
+
+if(!route.query.dashboardoption && currentUser.agent_type != 2){
+  route.query.dashboardoption = 'individual'
+}
+
+if(!route.query.dashboardoption && currentUser.agent_type == 2){
+  route.query.dashboardoption = 'team'
+}
+
+
 
 // Stores
 const dashBoardStore = useDashBoardStore()
@@ -303,7 +325,7 @@ const toggleOverallTable = () => {
 
 const getWholeNumberPercentage = (target,shipok) => {
   //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
-   if (target){
+   if (Number(target) !=0 && Number(shipok) != 0){
      const percentage =((shipok / target) * 100).toFixed(2)
      const roundOff = Math.round(percentage)
      return roundOff + '%'

@@ -31,8 +31,7 @@
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.agent_id }}</td>
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.month }}</td>
                 <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.year }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.date }}</td>
-                <!-- <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td> -->
+                <td class="py-2 px-4 text-sm text-green-800">{{ newDeposit.description }}</td>
                 <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
                   <button   :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                     @click="openModal('edit', index)" 

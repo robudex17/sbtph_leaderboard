@@ -12,7 +12,7 @@ const API = {
     fetchSalesAgentAbsences:  `${HTTPADDR}/agent_absent`,
     fetchSalesAgentMemo: `${HTTPADDR}/agent_memo`,
     fetchSalesAgentTardiness: `${HTTPADDR}/agent_tardiness`,
-    fetchSalesAgentFeedback: `${HTTPADDR}/agent_feedback`,
+    fetchSalesAgentFeedbackByAdmin: `${HTTPADDR}/feedback_by_admin`,
     fetchAgentMarket:  `${HTTPADDR}/agent_market`,
     fetchManagers: `${HTTPADDR}/managers`,
 
@@ -34,13 +34,12 @@ const API = {
     },
 
     feedback: {
-        agent : `${HTTPADDR}/agents_feedback`,
-        lm : `${HTTPADDR}/lm_feedback`,
-        manager:  `${HTTPADDR}/managers_feedback`,
+        sales: `${HTTPADDR}/feedback_by_sales`,
         qa: `${HTTPADDR}/feedback_by_qa`,
     },
 
-    agentFeedback: `${HTTPADDR}/agent_feedback`,
+    agentFeedback: `${HTTPADDR}/feedback_by_admin`,
+    enableDisableDeleteSalesFeedback: `${HTTPADDR}/enable_disable_delete_feedback_by_admin`,
 
     sales_login: `${HTTPADDR}/sales_login`,
     sales_logout: `${HTTPADDR}/sales_logout`,

@@ -382,15 +382,6 @@
 
   
  watch(route, async (newRoute) => {
-  // console.log('this trigger when I click again?', newRoute.query)
-  // if(!newRoute.query.month){
-  //   newRoute.query.month = months[new Date().getMonth()]
-  // }
-  
-  // if(!newRoute.query.year){
-  //   newRoute.query.year = new Date().getFullYear()
-  // }
-
   router.push(newRoute.fullPath);
   await useFeedbackStore.fetchFeedback('all', newRoute.query, 'qa')
 

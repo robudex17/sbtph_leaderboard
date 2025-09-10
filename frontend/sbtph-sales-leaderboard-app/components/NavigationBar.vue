@@ -178,9 +178,7 @@
       '/admin/manage_standard_users',
       '/agent_performance/year',
       '/team_performance/year',
-      '/feedback/managers_feedback',
-      '/feedback/agents_feedback',
-      '/feedback/lm_feedback',
+      '/feedback/feedback_by_sales',
       '/dashboard/dashboard_year_view',
       '/agent_performance/analytics',
       '/team_performance/analytics',
@@ -194,10 +192,7 @@
     const pathWithoutYearOption = ref([
       '/admin/agent/manage_sales_agents',
       '/admin/manage_standard_users',
-    
-      '/feedback/managers_feedback',
-      '/feedback/agents_feedback',
-      '/feedback/lm_feedback',
+      '/feedback/feedback_by_sales',
       '/admin/upload_target_shipok_data',
       '/admin/upload_new_deposit_data' ,
       '/admin/upload_sales_evaluation_data'   
@@ -207,9 +202,7 @@
       '/admin/agent/manage_sales_agents',
       '/admin/manage_standard_users',
       '/feedback/feedback_by_qa',
-      '/feedback/managers_feedback',
-      '/feedback/agents_feedback',
-      '/feedback/lm_feedback',
+      '/feedback/feedback_by_sales',
       '/agent_performance/analytics',
       '/agent_performance/month',
       '/agent_performance/year',

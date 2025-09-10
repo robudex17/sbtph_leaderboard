@@ -80,12 +80,12 @@
         feedbackResponse.date = date 
         feedbackResponse.month = month.value 
         feedbackResponse.year = year.value
-        feedbackResponse.agent_id = agentId
+        feedbackResponse.agent_id = agentId //should replace with  who_receive_feedback_id
 
         console.log('the updated response is: ', feedbackResponse)
 
         try {
-            await useFeedbackStore.addUpdateDeleteFeedback(agentId, feedbackResponse, feedbackType.value, {month:month.value, year: year.value}, httpMethod)
+            await useFeedbackStore.addUpdateDeleteFeedback(agentId, feedbackResponse, feedbackType.value, query, httpMethod)
             if (feedbackType.value == 'agents') {
                 router.push('/feedback/agents_feedback')
             }else if (feedbackType == 'lms'){

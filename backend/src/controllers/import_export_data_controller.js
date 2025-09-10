@@ -1274,7 +1274,7 @@ async function targetShipokImport (tableStats,table, target, shipok, agent_id, m
 
 }
 async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agent_id, marketId, month, year, description) {
-
+         
             const [check] = await pool.execute(
               `SELECT COUNT(*) AS count FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
               [agent_id, month, year]
@@ -1285,13 +1285,21 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                tableStats.skippedCount++;
             }else {
              
-              if( parseFloat(type) != check[0].count) {
-                   //remove the record first
-                    await pool.execute(
+              // if( parseFloat(type) != check[0].count) {
+              //      //remove the record first
+              //       await pool.execute(
+              //       `DELETE FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
+              //       [agent_id, month, year]
+              //       ); 
+              // }  
+
+              //remove the record first
+
+              console.log('Delete the record first')
+              await pool.execute(
                     `DELETE FROM ${table} WHERE agent_id = ? AND month = ? AND year = ?`,
                     [agent_id, month, year]
                     ); 
-              }   
 
               for (let k = 0; k < type; k++) {
                       // const absent = itterationArray[k];
@@ -1313,13 +1321,13 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                         await pool.execute(
                         `INSERT INTO new_deposit (agent_id, month, year, date,  market_id , new_deposit, description)
                         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                        [agent_id, month, year,  `${year}-${month}-${k+1}` ,  marketId, 100000, `New Deposit For New Customer - ${month} ${year}`]
+                        [agent_id, toCapitalized(month), year,  `${year}-${month}-${k+1}` ,  marketId, 100000, `New Deposit For New Customer - ${month} ${year}`]
                        )
                       }else{
                         await pool.execute(
                             `INSERT INTO ${table} (agent_id, month, year, date,  description)
                             VALUES (?, ?, ?, ?,? )`,
-                            [agent_id, month, year, `${year}-${month}-${k+1}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
+                            [agent_id, toCapitalized(month), year, `${year}-${month}-${k+1}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
                         );
                      }
                       
@@ -1358,7 +1366,7 @@ async function  feedbackDataImport(tableStats, tableAdmin, tableQa, feedbackByAd
         await pool.execute(
                 `INSERT INTO ${tableAdmin} (agent_id, month, year, date, feedback)
                 VALUES ( ?, ?, ?, ?, ?)`,
-                [agent_id, month, year, currentDate, feedbackByAdmin]
+                [agent_id, toCapitalized(month), year, currentDate, feedbackByAdmin]
          );
          tableStats.insertedCount++;
     }
@@ -1367,7 +1375,7 @@ async function  feedbackDataImport(tableStats, tableAdmin, tableQa, feedbackByAd
         await pool.execute(
                 `INSERT INTO ${tableQa} (qa_id, qa_dbname, agent_id, agent_dbname, qa_role, feedback_score, date, month, year)
                 VALUES ( ?, ?, ?, ?, ?, ? ,? ,? ,?)`,
-                [qaId, qaDbname, agent_id, agent_dbname, qaRole, feedbackByQa, currentDate, month, year]
+                [qaId, qaDbname, agent_id, agent_dbname, qaRole, feedbackByQa, currentDate, toCapitalized(month), year]
          );
          tableStats.insertedCount++;
     }
@@ -1379,6 +1387,10 @@ async function  feedbackDataImport(tableStats, tableAdmin, tableQa, feedbackByAd
 const itterationArray = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"];
 
 
+function toCapitalized(str) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
 
 

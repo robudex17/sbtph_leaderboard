@@ -8,7 +8,7 @@
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th>
+                <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th> -->
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">TARGET</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">SHIPOK</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">PERCENTAGE</th>
@@ -16,7 +16,7 @@
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market Name</th>
                 <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                   Actions
-                  <button :disabled="targetShipokDetails.length == 1 || currentUser.agent_type == 1 || currentUser.role == 'user'"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  <button :disabled="targetShipokDetails.length == 1 || currentUser.agent_type == 1 || currentUser.role == 'user' || currentUser.agent_type == 2"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                     @click="openModal('add')" 
                     :class="hasTarget">
                     <font-awesome-icon icon="plus" />
@@ -33,7 +33,7 @@
                   <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.agent_id }}</td>
                   <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.month }}</td>
                   <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.year }}</td>
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.date }}</td>
+                  <!-- <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.date }}</td> -->
                   <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.target }}</td>
                   <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.ship_ok }}</td>
                   <td class="py-2 px-4 text-sm text-green-800 font-bold"
@@ -94,14 +94,15 @@
               
                     <div class="mb-4" >
                           <label class="block text-sm font-medium mb-2">Target</label>
-                          <input v-model="form.target" type="text" class="w-full border rounded-lg p-2"  />
+                          <input v-model="form.target" :disabled="currentUser.login_type != 'standarduser'" type="text" class="w-full border rounded-lg p-2"  />
                           <p v-if="errorTarget" class="text-red-500 text-sm mt-2">{{ errorTarget }}</p>
                     </div>
                     <div class="mb-4"  >
                           <label class="block text-sm font-medium mb-2">ShipOk</label>
-                          <input v-model="form.ship_ok" type="text" class="w-full border rounded-lg p-2"  />
+                          <input v-if="currentUser.login_type == 'standarduser'" v-model="form.ship_ok" type="text" class="w-full border rounded-lg p-2"  />
+                          <input v-else v-model="shipOKEntry" type="text" class="w-full border rounded-lg p-2"  />
                           <p v-if="errorShipOk" class="text-red-500 text-sm mt-2">{{ errorShipOk }}</p>
-                    </div>
+                    </div>                
                     <div class="flex justify-end gap-2">
                         <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
                         <button  :disabled="currentUser.role == 'user'"   type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"  >
@@ -151,6 +152,8 @@
     const month = ref(null)
     const year = ref(null)
 
+    const shipOKEntry = ref("")
+
 
     // Months for the dropdown
       const months = [
@@ -196,12 +199,22 @@
 
         // Validate Ship OK input on every keystroke
     const validateShipOk  = () => {
+         if(currentUser.login_type == 'standarduser'){
           if (form.value.ship_ok === "" || !/^\d+$/.test(form.value.ship_ok)) {
             errorShipOk.value = "Please enter a valid whole number.";
           } else {
             errorShipOk.value = "";
           }
+        }else{
+          if (shipOKEntry.value === "" || !/^[+-]?\d+$/.test(shipOKEntry)) {
+            errorShipOk.value = "Please enter a valid whole number (positive or negative).";
+          } else {
+            errorShipOk.value = "";
+          }
+        }
+        
      }
+
 
     const openModal = (type, index = null) => {
         modalType.value = type;
@@ -232,6 +245,7 @@
         showModal.value = false
         errorShipOk.value = ""
         errorTarget.value = ""
+        shipOKEntry.value = ""
       }
       
     const percentage = ((data) => {
@@ -252,8 +266,17 @@
           emit('passNewTarget', agent_id,{month:month.value, year:year.value}, form.value )
 
           } else if (modalType.value === 'edit') {
-
-            emit('passUpdatedTarget', agent_id,{month:month.value, year:year.value}, form.value )
+            if (currentUser.login_type == 'standarduser') {
+              emit('passUpdatedTarget', agent_id,{month:month.value, year:year.value}, form.value )
+            }else{
+              // do some shipok manipulation before emitting
+              form.value.ship_ok =  Number(form.value.ship_ok) + Number(shipOKEntry.value)
+              if (form.value.ship_ok < 0) {
+                alert("Ship OK value cannot be negative.");
+                return
+              }
+              emit('passUpdatedTarget', agent_id,{month:month.value, year:year.value}, form.value )
+            }
             closeModal();
           }
           closeModal();
@@ -306,6 +329,18 @@
           }
         }
       );
+
+       watch(
+        () => shipOKEntry.value,
+        (newValue) => {
+          // If empty or not a whole number, set error
+          if (newValue === '' || !/^[+-]?\d+$/.test(newValue)) {
+            errorShipOk.value = 'Please enter a valid whole number (positive or negative).';
+          } else {
+            errorShipOk.value = '';
+          }
+        }
+      );   
 
   </script>
   

@@ -187,7 +187,8 @@
               route: null, icon: ['fas', 'poll'],
               subMenu:[
               
-                { name: 'LOCAL MANAGER', route: '/feedback/lm_feedback', icon: ['fas', 'users']},
+                // { name: 'LOCAL MANAGER', route: '/feedback/lm_feedback', icon: ['fas', 'users']},
+                { name: 'LOCAL MANAGER', route: '/feedback/feedback_by_sales?feedback_type=lm_by_um', icon: ['fas', 'users']},
               
               ] 
             },
@@ -255,8 +256,11 @@
               route: null, icon: ['fas', 'poll'],
               subMenu:[
               
-                { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
-                { name: 'AGENTS', route: '/feedback/agents_feedback', icon: ['fas', 'users']},
+                // { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
+                // { name: 'AGENTS', route: '/feedback/agents_feedback?feedback_type=agent_by_lm', icon: ['fas', 'users']},
+
+               { name: 'MANAGER', route: '/feedback/feedback_by_sales?feedback_type=um_by_lm', icon: ['fas', 'users']},
+              { name: 'AGENTS', route: '/feedback/feedback_by_sales?feedback_type=agent_by_lm', icon: ['fas', 'users']},
               
               ] 
             
@@ -306,9 +310,9 @@
               route: null, icon: ['fas', 'poll'],
               subMenu:[
               
-                { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
-              
-              
+                // { name: 'MANAGER', route: '/feedback/managers_feedback', icon: ['fas', 'users']},
+                { name: 'MANAGER', route: '/feedback/feedback_by_sales?feedback_type=lm_by_agent', icon: ['fas', 'users']},
+
               ] 
             
             },

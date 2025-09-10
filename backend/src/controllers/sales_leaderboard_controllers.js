@@ -62,31 +62,97 @@ let targetShipokQueryForLM =`SELECT
              AND sales_agents.status = 'active'` 
 
 if (leaderboardOption == 'lm'){
-  queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
-                  FROM  sales_agents
-                  LEFT JOIN
-                      market ON sales_agents.market_id = market.id
-                  LEFT JOIN
-                      team ON sales_agents.team_id = team.id
-                  WHERE  sales_agents.agent_type=1 AND  sales_agents.status='active'`
+  // queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+  //                 FROM  sales_agents
+  //                 LEFT JOIN
+  //                     market ON sales_agents.market_id = market.id
+  //                 LEFT JOIN
+  //                     team ON sales_agents.team_id = team.id
+  //                 WHERE  sales_agents.agent_type=1 AND  sales_agents.status='active'`
+
+  queryAgentBy = `
+              SELECT 
+                sa.*,
+                m.market_name,
+                t.team_name,
+                COALESCE(ses.month, '${givenMonth}') AS month,
+                COALESCE(ses.year, ${givenYear}) AS year,
+                COALESCE(ses.submitted, 0) AS submitted
+            FROM sales_agents sa
+            LEFT JOIN market m 
+                ON sa.market_id = m.id
+            LEFT JOIN team t 
+                ON sa.team_id = t.id
+            LEFT JOIN sales_evaluation_status ses
+                ON sa.id = ses.agent_id
+              AND ses.month = '${givenMonth}'
+              AND ses.year = ${givenYear}
+            WHERE sa.agent_type = 1
+              AND sa.status = 'active';
+  `
 
 }else if(leaderboardOption == 'agent'){
-  queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
-                  FROM  sales_agents
-                  LEFT JOIN
-                      market ON sales_agents.market_id = market.id
-                  LEFT JOIN
-                      team ON sales_agents.team_id = team.id
-                  WHERE sales_agents.agent_type=0 AND sales_agents.status='active'`
+  // queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+  //                 FROM  sales_agents
+  //                 LEFT JOIN
+  //                     market ON sales_agents.market_id = market.id
+  //                 LEFT JOIN
+  //                     team ON sales_agents.team_id = team.id
+  //                 WHERE sales_agents.agent_type=0 AND sales_agents.status='active'`
+
+  queryAgentBy = `
+  
+            SELECT 
+              sa.*,
+              m.market_name,
+              t.team_name,
+              COALESCE(ses.month, '${givenMonth}') AS month,
+              COALESCE(ses.year, ${givenYear}) AS year,
+              COALESCE(ses.submitted, 0) AS submitted
+          FROM sales_agents sa
+          LEFT JOIN market m 
+              ON sa.market_id = m.id
+          LEFT JOIN team t 
+              ON sa.team_id = t.id
+          LEFT JOIN sales_evaluation_status ses
+              ON sa.id = ses.agent_id
+            AND ses.month = '${givenMonth}'
+            AND ses.year = ${givenYear}
+          WHERE sa.agent_type = 0
+            AND sa.status = 'active';
+  `
   
 }else if(leaderboardOption == 'team'){
-    queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
-                  FROM  sales_agents
-                  LEFT JOIN
-                      market ON sales_agents.market_id = market.id
-                  LEFT JOIN
-                      team ON sales_agents.team_id = team.id
-                  WHERE  sales_agents.agent_type!=2 AND  sales_agents.status='active'`
+    // queryAgentBy = `SELECT sales_agents.*, market.market_name, team.team_name
+    //               FROM  sales_agents
+    //               LEFT JOIN
+    //                   market ON sales_agents.market_id = market.id
+    //               LEFT JOIN
+    //                   team ON sales_agents.team_id = team.id
+    //               WHERE  sales_agents.agent_type!=2 AND  sales_agents.status='active'`
+
+    queryAgentBy = `
+                SELECT 
+          sa.*,
+          m.market_name,
+          t.team_name,
+          COALESCE(ses.month, 'May') AS month,
+          COALESCE(ses.year, 2025) AS year,
+          COALESCE(ses.submitted, 0) AS submitted
+      FROM sales_agents sa
+      LEFT JOIN market m 
+          ON sa.market_id = m.id
+      LEFT JOIN team t 
+          ON sa.team_id = t.id
+      LEFT JOIN sales_evaluation_status ses
+          ON sa.id = ses.agent_id
+        AND ses.month = 'May'
+        AND ses.year = 2025
+      WHERE sa.agent_type != 2
+        AND sa.status = 'active';
+
+    
+    `
   
 }
 
@@ -94,7 +160,23 @@ let sales_agents
 if (agent_id != ""){
   
   const [sales_agents_result] = await pool.execute(
-    `SELECT * FROM  sales_agents WHERE id=? AND agent_type!=2  AND status='active'`,[agent_id]  
+    // `SELECT * FROM  sales_agents WHERE id=? AND agent_type!=2  AND status='active'`,[agent_id]  
+
+    `
+    SELECT 
+        sa.*,
+        COALESCE(ses.month, '${givenMonth}') AS month,
+        COALESCE(ses.year, ${givenYear}) AS year,
+        COALESCE(ses.submitted, 0) AS submitted
+    FROM sales_agents sa
+    LEFT JOIN sales_evaluation_status ses
+        ON sa.id = ses.agent_id
+      AND ses.month = '${givenMonth}'
+      AND ses.year = ${givenYear}
+    WHERE sa.id = ?
+      AND sa.agent_type != 2
+      AND sa.status = 'active'
+      `, [agent_id]
   )
   // Set the leaderboardOption into into NONE if the agent_id has a value, for Performance Evaluation of specific agent or LM
   leaderboardOption = ""
@@ -141,6 +223,8 @@ if (agent_id != ""){
          
           const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
           targetShipok = lmTargetShipOk
+          
+          
       }else if(leaderboardOption == 'team') {
         if(agent.agent_type == 1){
            const [lmTargetShipOk] = await pool.execute( targetShipokQueryForLM, [agent.team_id, givenMonth, givenYear])
@@ -181,7 +265,8 @@ if (agent_id != ""){
       
      
 
-      if(targetShipok.length > 0) {
+      if(targetShipok.length > 0 && targetShipok[0].target != null && targetShipok[0].ship_ok != null ) {
+
        const target = Number(targetShipok[0].target)
        const shipok = Number(targetShipok[0].ship_ok)
        const percentShipOk = Math.round(Number(shipok)/Number(target) * 100)
@@ -203,161 +288,176 @@ if (agent_id != ""){
      }
 
     
-
-     //get agent total absences for the given month and year
-     const [absences] = await pool.execute(
-       'SELECT Count(*) as absences FROM absences WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
-     )  
-     let agentAbsenceScore;
-     if (absences[0].absences === 0){
-        agentAbsenceScore = 5
-     }else {
-       
-       const [absenceScore] = await pool.execute(
-         'SELECT score FROM absences_score WHERE absence_count=?', [absences[0].absences]
-       )
-       if (absenceScore.length == 0){
-          agentAbsenceScore = 0
-       }else{
-         agentAbsenceScore = absenceScore[0].score
-       }
-
-     
-     }
-     
-     agent['absence_score'] = agentAbsenceScore
-
-    
-     //get total agent tardiness for the given month and year and corresding score
-     
-     const [tardiness] = await pool.execute(
-       'SELECT Count(*) as tardiness FROM tardiness WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
-     )
-
-         
-     let agentTardinessScore
-     if (tardiness[0].tardiness === 0){
-        agentTardinessScore = 5
-     }else {
-       
-       const [tardinessScore] = await pool.execute(
-         'SELECT score FROM tardiness_score WHERE tardiness_count=?', [tardiness[0].tardiness]
-       )
-       if (tardinessScore.length == 0){
-          agentTardinessScore = 0
-       }else{
-         agentTardinessScore = tardinessScore[0].score
-       }
-
-      
-     }
-
-     agent['tardiness_score'] = agentTardinessScore
-     
-    
-   //get agent total memo for the given month and year and corressponding memo score
-
-   const [memo] = await pool.execute(
-     'SELECT Count(*) as memo FROM memo WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
-   )
-
-   
-   let agentMemoScore
-   if (memo[0].memo === 0){
-      agentMemoScore = 5
-   }else {
-     
-     const [memoScore] = await pool.execute(
-       'SELECT score FROM memorandum_score WHERE memo_count=?', [memo[0].memo]
-     )
-     if (memoScore.length == 0){
-        agentMemoScore= 1
+     if(agent.submitted == 0){
+       agent['absences'] = 0
+       agent['absence_score'] = 0
+       agent['tardiness'] = 0 
+       agent['tardiness_score'] = 0
+       agent['memo'] = 0
+       agent['memo_score'] = 0
+      agent['feedback_score'] = 0
      }else{
-       agentMemoScore = memoScore[0].score
-     }
+                    //get agent total absences for the given month and year
+              const [absences] = await pool.execute(
+                'SELECT Count(*) as absences FROM absences WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
+              )  
+              let agentAbsenceScore;
+              if (absences[0].absences === 0){
+                  agentAbsenceScore = 5
+              }else {
+                
+                const [absenceScore] = await pool.execute(
+                  'SELECT score FROM absences_score WHERE absence_count=?', [absences[0].absences]
+                )
+                if (absenceScore.length == 0){
+                    agentAbsenceScore = 0
+                }else{
+                  agentAbsenceScore = absenceScore[0].score
+                }
 
-    
+              
+              }
+              agent['absences'] = absences[0].absences
+              agent['absence_score'] = agentAbsenceScore
+          
+      
+
+          //get total agent tardiness for the given month and year and corresding score
+          
+          const [tardiness] = await pool.execute(
+            'SELECT Count(*) as tardiness FROM tardiness WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
+          )
+
+              
+          let agentTardinessScore
+          if (tardiness[0].tardiness === 0){
+              agentTardinessScore = 5
+          }else {
+            
+            const [tardinessScore] = await pool.execute(
+              'SELECT score FROM tardiness_score WHERE tardiness_count=?', [tardiness[0].tardiness]
+            )
+            if (tardinessScore.length == 0){
+                agentTardinessScore = 0
+            }else{
+              agentTardinessScore = tardinessScore[0].score
+            }
+
+            
+          }
+          agent['tardiness'] = tardiness[0].tardiness
+          agent['tardiness_score'] = agentTardinessScore
+          
+          
+        //get agent total memo for the given month and year and corressponding memo score
+
+        const [memo] = await pool.execute(
+          'SELECT Count(*) as memo FROM memo WHERE agent_id=? and month=? and year=?', [agent.id, givenMonth, givenYear]
+        )
+
+        
+        let agentMemoScore
+        if (memo[0].memo === 0){
+            agentMemoScore = 5
+        }else {
+          
+          const [memoScore] = await pool.execute(
+            'SELECT score FROM memorandum_score WHERE memo_count=?', [memo[0].memo]
+          )
+          if (memoScore.length == 0){
+              agentMemoScore= 0
+          }else{
+            agentMemoScore = memoScore[0].score
+          }
+
+          
+        }
+
+        agent['memo'] = memo[0].memo
+        agent['memo_score'] = agentMemoScore
+
+
+
+        
+        const [feedback] = await pool.execute(
+          'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
+        )
+        let overallAverageFeedback
+        if (feedback.length == 0) {
+              let averageAgentFeedbackByLm = null
+              let averageLmFeedbackByAgent = null
+              let averageLmFeedbackByUm = null
+              let averageUmFeedbackByLm = null
+              let averageFeedbackByQa = null
+
+              const getAverageFeedback = (feedback_result) => {
+                if (!Array.isArray(feedback_result) || feedback_result.length === 0) return null;
+                const total = feedback_result.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
+                return (total / feedback_result.length).toFixed(4);
+              }
+              // for saleas agent
+              if (agent.agent_type == 0){
+      
+                  const [agents_feedback_result] = await pool.execute(
+                  'SELECT * FROM  `feedback_agents_by_lm` WHERE agent_id=?  AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+                )
+                averageAgentFeedbackByLm  = getAverageFeedback(agents_feedback_result)
+              }
+            // for local manager
+            if(agent.agent_type == 1){
+                const [lm_feedback_by_agent_result] = await pool.execute(
+                  'SELECT * FROM  `feedback_lm_by_agents` WHERE lm_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+                ) 
+              
+                const [lm_feedback_by_um_result] = await pool.execute(
+                  'SELECT * FROM  `feedback_lm_by_um` WHERE lm_id=?  AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+              )
+              averageLmFeedbackByAgent = getAverageFeedback(lm_feedback_by_agent_result)
+              averageLmFeedbackByUm = getAverageFeedback(lm_feedback_by_um_result)
+            }
+            // for senior manager.
+            if (agent.agent_type == 2){
+                const [managers_feedback_result] = await pool.execute(
+                  'SELECT * FROM  `feedback_um_by_lm` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
+                )
+                averageUmFeedbackByLm = getAverageFeedback(managers_feedback_result)
+            }
+
+            const [feedback_by_qa_result] = await pool.execute(
+              'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
+            )
+
+        
+            averageFeedbackByQa = getAverageFeedback(feedback_by_qa_result)
+          
+              // Compute the overall average, excluding empty feedback categories
+            const getOverallAverageFeedback = () => {
+                const scores = [];
+
+                if (averageAgentFeedbackByLm !== null) scores.push(parseFloat(averageAgentFeedbackByLm));
+                if (averageLmFeedbackByAgent !== null) scores.push(parseFloat(averageLmFeedbackByAgent));
+                if (averageLmFeedbackByUm !== null) scores.push(parseFloat(averageLmFeedbackByUm));
+                if (averageUmFeedbackByLm !== null) scores.push(parseFloat(averageUmFeedbackByLm));
+                if (averageFeedbackByQa !== null) scores.push(parseFloat(averageFeedbackByQa));
+              
+                if (scores.length === 0) return null; // Return null if there's no valid data
+
+                return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(4);
+            };
+
+
+          overallAverageFeedback = getOverallAverageFeedback()
+
+            
+        }else{
+          overallAverageFeedback = feedback[0].feedback
+        }
+        
+
+            
+        agent['feedback_score'] =   Number(overallAverageFeedback).toFixed(4)
+
    }
-
-   agent['memo_score'] = agentMemoScore
-
-
-
-   
-   const [feedback] = await pool.execute(
-    'SELECT feedback FROM feedback WHERE agent_id=? AND month=? AND year=?', [agent.id, givenMonth, givenYear]
-  )
-  let overallAverageFeedback
-  if (feedback.length == 0) {
-        let averageAgentFeedback = null
-        let averageManagerFeedback = null
-        let averageLmsFeedback = null
-        let averageFeedbackByQa = null
-
-        const getAverageFeedback = (feedback_result) => {
-          if (!Array.isArray(feedback_result) || feedback_result.length === 0) return null;
-          const total = feedback_result.reduce((sum, item) => sum + parseFloat(item.feedback_score || 0), 0);
-          return (total / feedback_result.length).toFixed(4);
-        }
-        // for saleas agent
-        if (agent.agent_type == 0){
-          const [agents_feedback_result] = await pool.execute(
-            'SELECT feedback_score FROM  `agents_feedback` WHERE agent_id=?  AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
-          )
-          averageAgentFeedback  = getAverageFeedback(agents_feedback_result)
-        }
-       // for local manager
-       if(agent.agent_type == 1){
-          const [lm_feedback_result] = await pool.execute(
-            'SELECT feedback_score FROM  `lm_feedback` WHERE lm_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
-          ) 
-        
-          const [managers_feedback_result] = await pool.execute(
-            'SELECT feedback_score FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
-         )
-         averageLmsFeedback = getAverageFeedback(lm_feedback_result )
-         averageManagerFeedback  = getAverageFeedback(managers_feedback_result)
-      }
-      // for senior manager.
-      if (agent.agent_type == 2){
-          const [managers_feedback_result] = await pool.execute(
-            'SELECT feedback_score FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
-          )
-          averageManagerFeedback = getAverageFeedback(managers_feedback_result)
-      }
-
-      const [feedback_by_qa_result] = await pool.execute(
-        'SELECT * FROM  `feedback_by_qa` WHERE agent_id=? AND month=? AND year=?',[agent.id,givenMonth,givenYear]  
-      )
-
-  
-       averageFeedbackByQa = getAverageFeedback(feedback_by_qa_result)
-    
-        // Compute the overall average, excluding empty feedback categories
-       const getOverallAverageFeedback = () => {
-          const scores = [];
-
-          if (averageAgentFeedback !== null) scores.push(parseFloat(averageAgentFeedback));
-          if (averageManagerFeedback !== null) scores.push(parseFloat(averageManagerFeedback));
-          if (averageLmsFeedback !== null) scores.push(parseFloat(averageLmsFeedback));
-          if (averageFeedbackByQa !== null) scores.push(parseFloat(averageFeedbackByQa));
-        
-          if (scores.length === 0) return null; // Return null if there's no valid data
-
-          return (scores.reduce((sum, score) => sum + score, 0) / scores.length).toFixed(4);
-      };
-
-
-    overallAverageFeedback = getOverallAverageFeedback()
-
-      
-  }else{
-    overallAverageFeedback = feedback[0].feedback
-  }
-   
-
-      
-   agent['feedback_score'] =   Number(overallAverageFeedback).toFixed(4)
 
    //get agent new deposit for the given and treat this as additional point
    
@@ -389,7 +489,7 @@ if (agent_id != ""){
   agent['performance_rating'] = parseFloat(( agent['shipok_score'] * evaluation_criteria.performance).toFixed(4))
    agent['absence_rating'] = parseFloat((agent['absence_score'] * evaluation_criteria.absence).toFixed(4))
   agent['tardiness_rating'] = parseFloat((agent['tardiness_score'] * evaluation_criteria.tardiness).toFixed(4))
-   agent['memo_rating'] =   parseFloat((agent['memo_score']  * evaluation_criteria.memorandum_recieved).toFixed(4)) 
+  agent['memo_rating'] =   parseFloat((agent['memo_score']  * evaluation_criteria.memorandum_recieved).toFixed(4)) 
    agent['feedback_rating'] =  parseFloat((agent['feedback_score'] * evaluation_criteria.feedback).toFixed(4)) 
    agent['additional_points'] = parseFloat((agent['deposit_score'] * evaluation_criteria.additional_points).toFixed(4))
 

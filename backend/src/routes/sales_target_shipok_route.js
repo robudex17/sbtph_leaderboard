@@ -8,14 +8,15 @@ const salesTargetShipokController = require('../controllers/sales_target_shipok_
 
 const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
+// I remove the validateTarget because it is not needed for now
 
-router.post('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), validateTarget, salesTargetShipokController.addAgentNewTarget)
+router.post('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.addAgentNewTarget)
 
 
 router.get('/agent_target_shipok/:agent_id', authenticateToken,validateMonthYear,salesTargetShipokController.fetchAgentTarget)
 
 
-router.put('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), validateTarget, salesTargetShipokController.updateAgentTarget)
+router.put('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.updateAgentTarget)
 
 
 router.delete('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), salesTargetShipokController.deleteAgentTarget)

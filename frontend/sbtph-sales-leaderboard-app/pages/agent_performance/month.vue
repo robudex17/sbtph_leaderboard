@@ -84,7 +84,10 @@
           <!-- <h1 class="text-2xl font-bold mb-4 text-center">Performance Monthy Summary </h1> -->
           <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.month}} {{agent.year}} Monthly Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
           <leader-board-table-view :agents="[agent]"></leader-board-table-view>
-          <agentDetails class="p-4 mt-5" :fullyear="false"/>
+          <!-- <agentDetails class="p-4 mt-5" :fullyear="false"/> -->
+          <sales-metrcis-summary
+           :agents="[agent]"
+          ></sales-metrcis-summary>
       </div>
         </div>
       </div>
@@ -225,7 +228,7 @@
   const token = authStore.state.token
   const isAdmin = ref(false) 
 
-   import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
+  //  import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
 
   const config = useRuntimeConfig()
 

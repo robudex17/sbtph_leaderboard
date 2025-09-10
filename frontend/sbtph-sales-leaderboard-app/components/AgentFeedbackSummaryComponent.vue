@@ -1,58 +1,110 @@
 <template>
     <div>
       <h1 class="text-2xl font-bold mb-4 text-center">Agent Feedback Information</h1>    
+   
       <div class="overflow-x-auto">
-        
+      
         <table class="min-w-full border border-green-500 rounded-lg">
           <thead class="bg-green-200">
             <tr>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Name</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Status</th>
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Status</th> -->
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900" v-if="agents[0].agent_type == 1">Feedback From Agents</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900" v-if="agents[0].agent_type == 1 || agents[0].agent_type == 0">Feedback From Manager</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900" v-if="agents[0].agent_type == 2">Feedback From LM</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Feedback From QA</th>
+              <th v-if="agents[0].agent_type == 0" class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                   <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
+                   @click="openModal( agentFeedbackByLm, 'agent_by_lm' )"
+                    class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer">
+                      Feedback From LM
+                   </button>
+                   <span v-else>Feedback From LM</span>
+                    
+              </th>
+              <th v-if="agents[0].agent_type == 1" class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                  <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2 "
+                   class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                   @click="openModal( lmFeedbackByAgent, 'lm_by_agent' )"
+                  >
+                    Feedback From Agents
+                  </button>
+                  <span v-else>Feedback From Agents</span>
+              </th>
+              <th v-if="agents[0].agent_type == 1" class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                  <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2 "
+                   class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                    @click="openModal( lmFeedbackByUm, 'lm_by_um' )"
+                  >
+                    Feedback From Unit Manager
+                  </button>
+                  <span v-else>Feedback From Unit Manager</span>
+              </th>
+              <th v-if="agents[0].agent_type == 2" class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                  <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
+                   class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                   @click="openModal( umFeedbackByLm, 'um_by_lm' )"
+                  >
+                    Feedback From Local Managers
+                  </button>
+                  <span v-else>Feedback From Local Managers</span>
+              </th>
+     
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
+                 class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                 @click="openModal( feedbackByQa, 'qa' )"
+                >
+                  Feedback From Qa
+
+                </button>
+                <span v-else>Feedback From Qa</span>
+              </th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Overall Feedback</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Photo</th>
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center  disabled:bg-gray-400 disabled:cursor-not-allowed">
+                 <button :disabled=" currentUser.login_type != 'standarduser' || (props.overallAverageFeedback == null || props.overallAverageFeedback == '' )"
+                  @click="openModal('edit')" 
+                   :class="hasFeedback">
+                    <font-awesome-icon icon="plus" />
+                    Update
+                </button>
+              </th> -->
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="feedbackByAdmin.length  == 0">
             <tr 
               :key="feedback.id" 
               v-for="feedback in feedbackData" 
               :class="['odd:bg-white', 'even:bg-green-50']">
               <td class="py-2 px-4 text-sm text-green-800">{{ agents[0].id }}</td>
               <td class="py-2 px-4 text-sm text-green-800 font-bold">{{ agents[0].firstname }} {{ agents[0].lastname }}</td>
-              <td class="py-2 px-4 text-sm text-green-800">
+              <!-- <td class="py-2 px-4 text-sm text-green-800">
                 <span :class="['status', agents[0].status]">{{ agents[0].status }}</span>
-              </td>
+              </td> -->
               <td class="py-2 px-4 text-sm text-green-800">
                 {{ feedback.month }}
               </td>  
               <td class="py-2 px-4 text-sm text-green-800">
-                {{ feedback.year }}
+                {{ feedback.year }}   
               </td>  
               <td  class="py-2 px-4 text-sm  text-center font-bold"
-                  :class="feedback.averageManagerFeedback && feedback.averageManagerFeedback !== 0 ? 'text-green-800' : 'text-red-600'"
-                  v-if="agents[0].agent_type == 1 "> {{feedback.averageManagerFeedback ?  feedback.averageManagerFeedback : 'No Feedback'}}
+                  :class="feedback.averageAgentFeedbackByLm && feedback.averageAgentFeedbackByLm != 0 ? 'text-green-800' : 'text-red-600'"
+                  v-if="agents[0].agent_type == 0 "> {{feedback.averageAgentFeedbackByLm ?  feedback.averageAgentFeedbackByLm : 'No Feedback'}}
               </td>
 
               <td  class="py-2 px-4 text-sm text-center font-bold" 
-                :class=" feedback.averageLmsFeedback &&  feedbackData.averageLmsFeedback !== 0 ? 'text-green-800' : 'text-red-600'"
-                v-if="agents[0].agent_type == 1 ">{{ feedback.averageLmsFeedback ? feedback.averageLmsFeedback : 'No Feedback' }}
+                :class=" feedback.averageLmFeedbackByAgent &&  feedbackData.averageLmFeedbackByAgent !== 0 ? 'text-green-800' : 'text-red-600'"
+                v-if="agents[0].agent_type == 1 ">{{ feedback.averageLmFeedbackByAgent ? feedback.averageLmFeedbackByAgent : 'No Feedback' }}
               </td>
               <td  
               class="py-2 px-4 text-sm text-center font-bold" 
-              :class=" feedback.averageAgentFeedback &&  feedback.averageAgentFeedback !== 0 ? 'text-green-800' : 'text-red-600'"
-              v-if="agents[0].agent_type == 0 ">{{ feedback.averageAgentFeedback ?  feedback.averageAgentFeedback : 'No Feedback' }}
-              
+              :class=" feedback.averageLmFeedbackByUm &&  feedback.averageLmFeedbackByUm !== 0 ? 'text-green-800' : 'text-red-600'"
+              v-if="agents[0].agent_type == 1 ">{{ feedback.averageLmFeedbackByUm ?  feedback.averageLmFeedbackByUm : 'No Feedback' }}
+
               </td>
               <td  class="py-2 px-4 text-sm text-center font-bold"
-              :class=" feedback.averageAgentFeedback &&  feedback.averageAgentFeedback !== 0 ? 'text-green-800' : 'text-red-600'"
-              v-if="agents[0].agent_type == 2">{{ feedback.averageManagerFeedback ? feedback.averageManagerFeedback : 'No Feedback' }}</td>
+              :class=" feedback.averageUmFeedbackByLm &&  feedback.averageUmFeedbackByLm !== 0 ? 'text-green-800' : 'text-red-600'"
+              v-if="agents[0].agent_type == 2">{{ feedback.averageUmFeedbackByLm ? feedback.averageUmFeedbackByLm : 'No Feedback' }}</td>
 
               <td  class="py-2 px-4 text-sm text-center font-bold"
                 :class="feedback.averageFeedbackByQa &&  feedback.averageFeedbackByQa !== 0 ? 'text-green-800' : 'text-red-600'"
@@ -75,13 +127,225 @@
   
             </tr>
           </tbody>
+          <tbody v-else>
+            <tr 
+              :key="feedback.id" 
+              v-for="feedback in feedbackData" 
+              :class="['odd:bg-white', 'even:bg-green-50']">
+              <td class="py-2 px-4 text-sm text-green-800">{{ agents[0].id }}</td>
+              <td class="py-2 px-4 text-sm text-green-800 font-bold">{{ agents[0].firstname }} {{ agents[0].lastname }}</td>
+              <!-- <td class="py-2 px-4 text-sm text-green-800">
+                <span :class="['status', agents[0].status]">{{ agents[0].status }}</span>
+              </td> -->
+              <td class="py-2 px-4 text-sm text-green-800">
+                {{ feedback.month }}
+              </td>  
+              <td class="py-2 px-4 text-sm text-green-800">
+                {{ feedback.year }}   
+              </td>  
+              <td  class="py-2 px-4 text-sm  text-center font-bold text-red-600"
+                 
+                  v-if="agents[0].agent_type == 0 ">  No Feedback
+              </td>
+
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600" 
+               
+                v-if="agents[0].agent_type == 1 "> No Feedback
+              </td>
+              <td  
+              class="py-2 px-4 text-sm text-center font-bold text-red-600" 
+             
+              v-if="agents[0].agent_type == 1 ">No Feedback
+
+              </td>
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600"
+             
+              v-if="agents[0].agent_type == 2">No Feedback</td>
+
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600"
+               
+              >
+                No Feedback
+              </td>
+
+              
+              <td 
+                class="py-2 px-4  text-sm text-center font-bold text-purple-800"
+      
+              >{{ feedbackByAdmin[0].feedback }}</td>
+              
+              <td class="py-2 px-4 text-sm text-green-800">
+                <div class="agent-photo">
+                  <img v-if="agents[0].image_link" :src="updateImageLink(agents[0].image_link)" alt="Agent Photo" class="rounded-full w-12 h-12 object-cover">
+                  <span v-else class="text-sm text-gray-500">No Photo</span>
+                </div>
+              </td>
+  
+            </tr>
+          </tbody>
         </table>
       </div>
-   </div> 
+      <!-- Modal -->
+      <div 
+        v-if="showModal" 
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      >
+        <div class="bg-white rounded-2xl shadow-2xl w-11/12 md:w-3/4 lg:w-2/3 xl:w-3/4 overflow-hidden">
+          
+          <!-- Header -->
+          <div class="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
+            <h2 class="text-lg font-bold">
+              {{ modalType === 'qa' ? 'QA Feedback Details' : 'Update/Delete Feedback' }}
+            </h2>
+            <button 
+              @click="closeModal" 
+              class="text-white hover:text-gray-200 transition"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="bg-gray-50 p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden">
+            <table class="min-w-full table-fixed border-collapse">
+              <thead>
+                <tr class="bg-gray-200 text-gray-700" v-if="modalData.length > 0">
+                  <th class="w-1/4 px-4 py-2 text-left font-semibold">Feedback By</th>
+                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Month</th>
+                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Year</th>
+                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Feedback Score</th>
+                  <th class="w-1/4 px-4 py-2 text-left font-semibold" v-if="modalType !== 'qa'">Actions</th>
+                </tr>
+                <tr v-else>
+                   <th class="w-1/6 px-4 py-2 text-left font-semibold">Description</th>
+                </tr>
+              </thead>
+              <tbody v-if="modalData.length > 0">
+                <tr 
+                  v-for="data in modalData" 
+                  :key="data.who_give_feedback_id" 
+                  class="border-b hover:bg-gray-100 transition"
+                >
+                  <!-- Feedback By -->
+                  <td class="px-4 py-3 flex items-center space-x-3">
+                    <img
+                      v-if="data && data.image_link"
+                      :src="updateImageLink(data.image_link)"
+                      alt="Agent Image"
+                      class="w-10 h-10 rounded-full object-cover border"
+                    />
+                    <span class="font-medium text-gray-800">
+                      {{ data.who_give_feedback_name }}
+                    </span>
+                  </td>
+
+                  <!-- Month -->
+                  <td class="px-4 py-3 font-semibold">{{ data.month }}</td>
+
+                  <!-- Year -->
+                  <td class="px-4 py-3 font-semibold">{{ data.year }}</td>
+
+                  <!-- Score -->
+                <td class="border px-4 py-2 text-center">
+                  <span
+                    v-if="parseFloat(data.feedback_score) > 0"
+                    class="text-gray-800 font-medium"
+                  >
+                    {{ data.feedback_score }}
+                  </span>
+                  <span
+                    v-else
+                    class="text-gray-400 italic font-semibold"
+                  >
+                    No Feedback Yet
+                  </span>
+                </td>
+
+                <td class="border px-4 py-2 text-center space-x-2" v-if="Number(data.feedback_score) && modalType !== 'qa'">
+                  <!-- Toggle Enable/Disable Update -->
+                  <button
+                    v-if="data.can_update === 0"
+                    @click="toggleUpdate(data)"
+                    :disabled="disabledRows[data.who_give_feedback_id]"
+                    class="text-white px-3 py-1 rounded-lg shadow-md transition duration-300"
+                    :class="disabledRows[data.who_give_feedback_id]
+                      ?  'bg-gray-400 cursor-not-allowed'
+                      :  'bg-yellow-500 hover:bg-yellow-600 '"
+                  >
+                     Update is Disabled
+                  </button>
+                  <button
+                    v-else
+                    @click="toggleUpdate(data)"
+                    :disabled="disabledRows[data.who_give_feedback_id]"
+                    class="text-white px-3 py-1 rounded-lg shadow-md transition duration-300"
+                    :class="disabledRows[data.who_give_feedback_id]
+                      ?  'bg-gray-400 cursor-not-allowed'
+                      : ' bg-green-500 hover:bg-green-600 '"
+                  >
+                    Update Enabled
+                  </button>
+
+                  <!-- Delete Button -->
+                  <button 
+                    @click="deleteAgentFeedback(data)"
+                    :disabled="disabledRows[data.who_give_feedback_id]"
+                    class="px-3 py-1 rounded-lg shadow-md transition duration-300 text-white"
+                    :class="disabledRows[data.who_give_feedback_id]
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-red-500 hover:bg-red-600'"
+                  >
+                    <span v-if="disabledRows[data.who_give_feedback_id]">Deleted</span>
+                    <span v-else>Delete</span>
+                  </button>
+                </td>
+      
+                </tr>
+              </tbody>
+              <tbody v-else>
+                <tr  :key="feedback.id" 
+                    v-for="feedback in feedbackData"  >
+                  <td class="border px-4 py-2  space-x-2 text-red-500 font-bold">
+                    No Feedback Yet for {{ agents[0].firstname }} {{ agents[0].lastname }} for  {{ feedback.month }}  {{ feedback.year }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div class="px-6 py-4 bg-gray-100 text-right">
+            <button
+              @click="closeModal"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 hover:scale-105 transition duration-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+   </div>
   </template>
   
   <script setup>
-        import { ref,defineProps } from 'vue';
+        import { ref,defineProps, defineEmits } from 'vue';
+
+        //get the current user
+          const authStore = useAuthStore()
+          authStore.fetchTokenFromLocalStore()
+
+                   
+
+          const currentUser = authStore.state.user 
+                    
+          const showModal = ref(false);
+          const modalType = ref('add');
+          const router = useRouter();
+        
+          const modalData = ref(null);
+          const disabledRows = ref({}) // object: { [id]: true/false }
 
         const props = defineProps({
 
@@ -90,38 +354,100 @@
               required: true,
           },
 
-          averageAgentFeedback: {
-              type: Number,
+          averageAgentFeedbackByLm: {
+              type: String,
+              required: true,
+          },
+          averageLmFeedbackByAgent: {
+              type: String,
               required: true,
           },
 
-          averageManagerFeedback: {
-              type: Number,
+          averageLmFeedbackByUm: {
+              type: String,
               required: true,
           },
 
-          averageLmsFeedback: {
-              type: Number,
+          averageUmFeedbackByLm: {
+              type: String,
               required: true,
           },
 
           averageFeedbackByQa: {
-            type: Number,
+            type: String,
             required: true,
           },
 
           overallAverageFeedback: {
-              type: Number,
+              type: String,
               required: true,
           },
 
           feedbackData: {
             type: Array ,
             required: true,
-          }
-      
-      
+          },
+          agentFeedbackByLm: {
+            type: Array,
+            required: true,
+          },
+           lmFeedbackByAgent: {
+            type: Array,
+            required: true,
+           },
+           lmFeedbackByUm: {
+            type: Array,
+            required: true,
+           },
+
+           umFeedbackByLm: {
+             type: Array,
+             required: true,
+           },
+           feedbackByQa: {
+             type: Array,
+             required: true,
+           },
+           feedbackByAdmin: {
+            type: Array ,
+            required: true
+           }
+
       });
+
+      const test = () => {
+        alert('I click')
+        router.replace({ path: '/feedback/feedback_by_qa' })
+        
+      };
+
+
+       const emit = defineEmits(['passSalesEnableDisableFeedback', 'passSalesDeleteFeedback'])
+
+      const openModal = ( data, feedbackType) => {
+        modalType.value = feedbackType;
+        showModal.value = true;
+
+        if(feedbackType == 'qa'){
+          data.forEach(item => {
+            item.who_give_feedback_name = item.qa_dbname;
+            item.who_give_feedback_id = item.qa_id;
+          })
+        }
+
+        data.forEach(item => {
+          item.feedback_type = feedbackType; // Add feedback_type property
+        });
+
+        console.log(data)
+
+        modalData.value = data;
+      };
+      
+      const closeModal = () => {
+        showModal.value = false;
+        modalType.value = null
+      };      
 
        //get image url from the .env file
        const config = useRuntimeConfig()
@@ -129,6 +455,42 @@
       const updateImageLink = (imageLink) => {
         return `${config.public.imageBaseUrl}${imageLink}`
       }
+
+
+      const toggleUpdate = (data) => {
+
+         if(currentUser.login_type != 'standarduser'){
+          alert('User is not allowed to enable or disable update feedback')
+          return
+         }
+         data.can_update = data.can_update === 0 ? 1 : 0; // Toggle between 0 and 1
+          emit('passSalesEnableDisableFeedback', data)
+      }
+
+      // const deleteAgentFeedback = (data) => {
+      //   emit('passSalesDeleteFeedback', data)
+
+      //     deleteFlag.value = true
+      // }
+
+      const deleteAgentFeedback = (data) => {
+
+       if(currentUser.login_type != 'standarduser'){
+          alert('User is not allowed to delete feedback')
+          return
+         }
+      disabledRows.value[data.who_give_feedback_id] = true
+
+
+      emit('passSalesDeleteFeedback', data)
+    }
+
+    //   const hasFeedback = computed(() => {
+    //   return  currentUser.login_type != 'standarduser' || (props.overallAverageFeedback == null || props.overallAverageFeedback == "" ) //if already has feedback
+    //     ? 'ml-2 bg-gray-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 cursor-not-allowed' // Disabled styles
+    //     : 'ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600'; // Enabled styles
+    // });
+
 
   </script>
   
@@ -163,4 +525,3 @@
     }
 
   </style>
-  

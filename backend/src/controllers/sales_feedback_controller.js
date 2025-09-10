@@ -1,7 +1,7 @@
 const pool = require('../config/db')
 const { validationResult } = require('express-validator')
 
-// First Four controllers is for admin feedback
+// First Four controllers are for admin feedback
 exports.addNewFeedback = async (req, res, next) => {
     const errors = validationResult(req)
 
@@ -9,7 +9,7 @@ exports.addNewFeedback = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
    
-    console.log(req.body)
+  
     const feedback = req.body.feedback 
     const feedbackDate = req.body.date
     const feedbackMonth = req.body.month 
@@ -17,7 +17,7 @@ exports.addNewFeedback = async (req, res, next) => {
 
     const agentId = req.params.agent_id
 
-  
+   
         
     try {
         const query = "INSERT INTO feedback ( agent_id, month,year,date,feedback) VALUES (?,?,?,?,?)"
@@ -167,7 +167,106 @@ exports.addNewFeedback = async (req, res, next) => {
  }
 
 
- exports.addAgentsFeedback = async (req, res, next) => {
+
+exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
+
+    const errors = validationResult(req)
+
+    console.log('it came to this controller')
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+       
+       const {
+          who_give_feedback_id,
+          who_receive_feedback_id,
+          can_update,
+          month,year,
+          feedback_type,
+          } = req.body
+   
+    console.log(req.method)
+    let feedback_table
+    let success_message
+    let error_message
+    let query
+    if(feedback_type === "agent_by_lm"){
+        feedback_table = 'feedback_agents_by_lm' 
+
+        if(req.method === "PUT"){
+            query = `UPDATE ${feedback_table} SET  can_update=${can_update} WHERE lm_id=? AND agent_id=? AND month=? AND year=?`
+            success_message = `Sales Agent Feedback is updated`
+            error_message = 'Agent Feedback Not Found..Cannot Update Agent Feedback'
+        }else if(req.method === "DELETE"){
+            query = `DELETE FROM ${feedback_table} WHERE lm_id=? AND agent_id=? AND month=? AND year=?`
+            success_message = `Sales Agent Feedback is deleted`
+            error_message = 'Agent Feedback Not Found..Cannot Delete Agent Feedback'
+        }   
+
+    }else if(feedback_type === "lm_by_agent"){
+
+        feedback_table = 'feedback_lm_by_agents' 
+        if(req.method === "PUT"){
+            query = `UPDATE ${feedback_table} SET  can_update=${can_update}  WHERE agent_id=? AND lm_id=? AND month=? AND year=?`
+            success_message = `Local Manager Feedback is updated`
+            error_message = 'Local Manager Feedback Not Found..Cannot Update Local Manager Feedback'
+        }else if(req.method === "DELETE"){
+            query = `DELETE FROM ${feedback_table} WHERE agent_id=? AND lm_id=? AND month=? AND year=?`
+            success_message = `Local Manager Feedback is deleted`
+            error_message = 'Local Manager Feedback Not Found..Cannot Delete Local Manager Feedback'
+        }
+
+    }else if(feedback_type === "lm_by_um"){
+        feedback_table = 'feedback_lm_by_um' 
+        if(req.method === "PUT"){
+            query = `UPDATE ${feedback_table} SET  can_update=${can_update} WHERE manager_id=? AND lm_id=? AND month=? AND year=?`
+            success_message = `Local Manager Feedback is updated`
+            error_message = 'Local Manager Feedback Not Found..Cannot Update Local Manager Feedback'
+        }else if(req.method === "DELETE"){
+            query = `DELETE FROM ${feedback_table} WHERE manager_id=? AND lm_id=? AND month=? AND year=?`
+            success_message = `Local Manager Feedback is deleted`
+            error_message = 'Local Manager Feedback Not Found..Cannot Delete Local Manager Feedback'
+        }
+       
+    }else if(feedback_type === "um_by_lm"){
+        feedback_table = 'feedback_um_by_lm' 
+        if(req.method === "PUT"){
+            query = `UPDATE ${feedback_table} SET  can_update=${can_update} WHERE lm_id=? AND um_id=? AND month=? AND year=?`
+        success_message = `Unit Manager Feedback is updated`
+            error_message = 'Unit Manager Feedback Not Found..Cannot Update Unit Manager Feedback'
+        }else if(req.method === "DELETE"){
+            query = `DELETE FROM ${feedback_table} WHERE lm_id=? AND um_id=? AND month=? AND year=?`
+            success_message = `Unit Manager Feedback is deleted`
+            error_message = 'Unit Manager Feedback Not Found..Cannot Delete Unit Manager Feedback'
+        }
+    }
+
+
+
+    try {
+       
+
+        const [result]  = await pool.execute(query, [who_give_feedback_id, who_receive_feedback_id, month, year])
+
+        if (result.affectedRows === 0){
+            return res.status(400).json({message: error_message})
+        }
+
+
+        res.status(201).json({
+            message: success_message
+        })
+        
+    }catch(error){
+        console.error(error_message, error)
+        res.status(500).json({error: 'Database Error' ,error_message})
+    }
+ }
+
+
+ // Second Four Controllers are for Sales (Agents, LM and UM)
+ exports.addSalesFeedback = async (req, res, next) => {
     
     const errors = validationResult(req)
 
@@ -175,26 +274,55 @@ exports.addNewFeedback = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
    
-    const { lm_id , lm_dbname, agent_id, agent_dbname, responses, feedback_score, total_score, percentage, date, month,year} = req.body
-    const agentId = req.params.agent_id
+    const { who_give_feedback_id,
+          who_give_feedback_db_name,
+          who_receive_feedback_id,
+          who_receive_feedback_db_name, 
+          responses,
+          feedback_score,
+          total_score, 
+          percentage, date, month,year,
+          feedback_type
+          } = req.body
+    // const agentId = req.params.agent_id
+    let success_message
+    let error_message
+    let query
+    if(feedback_type === "agent_by_lm"){
+        query = `INSERT INTO feedback_agents_by_lm (lm_id , lm_dbname, agent_id, agent_dbname, responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        success_message = `New Feedback for agent_id: ${who_receive_feedback_id} are created or recorded`
+        error_message = 'Database Error, Cannot create Agent Feedback'
+    }else if(feedback_type === "lm_by_agent"){     
+        query = `INSERT INTO feedback_lm_by_agents ( agent_id, agent_dbname, lm_id , lm_dbname,responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        success_message = `New Feedback for local manager with id : ${who_receive_feedback_id} are created or recorded`
+        error_message = 'Database Error, Cannot create Local Manager Feedback'
+    }else if(feedback_type === "lm_by_um"){     
+        query = `INSERT INTO feedback_lm_by_um (manager_id, manager_dbname, lm_id , lm_dbname,responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        success_message = `New Feedback for local manager with id : ${who_receive_feedback_id} are created or recorded`
+        error_message = 'Database Error, Cannot create Local Manager Feedback'
+    }else if(feedback_type === "um_by_lm"){     
+        query = `INSERT INTO feedback_um_by_lm ( lm_id , lm_dbname, um_id, um_dbname,responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        success_message = `New Feedback for unit manager with id : ${who_receive_feedback_id} are created or recorded`
+        error_message = 'Database Error, Cannot create Unit Manager Feedback'
+    }
         try {
 
             const responsesJson = JSON.stringify(responses)
-            const query = "INSERT INTO agents_feedback (lm_id , lm_dbname, agent_id, agent_dbname, responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-            const [result]  = await pool.execute(query, [lm_id , lm_dbname, agentId, agent_dbname, responsesJson, feedback_score, total_score, percentage, date, month,year])
+            // const query = `INSERT INTO ${feedback_table} (lm_id , lm_dbname, agent_id, agent_dbname, responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+            const [result]  = await pool.execute(query, [who_give_feedback_id, who_give_feedback_db_name, who_receive_feedback_id, who_receive_feedback_db_name, responsesJson, feedback_score, total_score, percentage, date, month,year])
 
             res.status(201).json({
-                message: `New Feedback  for agent_id: ${agent_id} are created or recorded`
+                message: success_message
             })
             
         }catch(error){
             console.error('Error inserting new feedback records', error)
-            res.status(500).json({error: 'Database Error, Cannot create Agent Feedback'})
+            res.status(500).json({error: error_message})
         }  
 
  }
 
- exports.updateAgentsFeedback = async (req, res, next) => {
+ exports.updateSalesFeedback = async (req, res, next) => {
 
     const errors = validationResult(req)
 
@@ -202,11 +330,55 @@ exports.addNewFeedback = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { lm_id , lm_dbname, agent_id, agent_dbname, responses, feedback_score, total_score, percentage, month,year,date} = req.body
-    const agentId = req.params.agent_id
+  
+    
+
+       const { who_give_feedback_id,
+          who_give_feedback_db_name,
+          who_receive_feedback_id,
+          who_receive_feedback_db_name, 
+          responses,
+          feedback_score,
+          total_score, 
+          percentage,  month,year,
+          feedback_type
+          } = req.body
+   
+    let feedback_table
+    let success_message
+    let error_message
+    let query
+    let canUpdateQuery
+    if(feedback_type === "agent_by_lm"){
+        feedback_table = 'feedback_agents_by_lm' 
+        query = `UPDATE ${feedback_table} SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE lm_id=? AND agent_id=? AND month=? AND year=?`
+        canUpdateQuery = `SELECT can_update FROM  ${feedback_table} WHERE lm_id=? AND agent_id=? AND month=? AND year=?`
+        success_message = `Sales Agent Feedback is updated`
+        error_message = 'Agent Feedback Not Found..Cannot Update Agent Feedback'
+    }else if(feedback_type === "lm_by_agent"){
+        feedback_table = 'feedback_lm_by_agents' 
+        query = `UPDATE ${feedback_table} SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE agent_id=? AND lm_id=? AND month=? AND year=?`
+        canUpdateQuery = `SELECT can_update FROM  ${feedback_table} WHERE agent_id=? AND lm_id=? AND month=? AND year=?`        
+        success_message = `Local Manager Feedback is updated`
+        error_message = 'Local Manager Feedback Not Found..Cannot Update Local Manager Feedback'
+    }else if(feedback_type === "lm_by_um"){
+        feedback_table = 'feedback_lm_by_um' 
+        query = `UPDATE ${feedback_table} SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE manager_id=? AND lm_id=? AND month=? AND year=?`
+        canUpdateQuery = `SELECT can_update FROM  ${feedback_table} WHERE manager_id=? AND lm_id=? AND month=? AND year=?`        
+        success_message = `Local Manager Feedback is updated`
+        error_message = 'Local Manager Feedback Not Found..Cannot Update Local Manager Feedback'
+    }else if(feedback_type === "um_by_lm"){
+        feedback_table = 'feedback_um_by_lm' 
+        query = `UPDATE ${feedback_table} SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE lm_id=? AND um_id=? AND month=? AND year=?`
+        canUpdateQuery = `SELECT can_update FROM  ${feedback_table} WHERE lm_id=? AND um_id=? AND month=? AND year=?`        
+        success_message = `Unit Manager Feedback is updated`
+        error_message = 'Unit Manager Feedback Not Found..Cannot Update Unit Manager Feedback'
+    }
+    
+    // const agentId = req.params.agent_id
     //check if can_update is true then the edit can processed else throw and error
     const [canUpdate] = await pool.execute(
-        'SELECT can_update FROM  `agents_feedback` WHERE agent_id=? AND lm_id=? AND month=? AND year=?',[agentId, lm_id, month,year]  
+        `${canUpdateQuery}`,[who_give_feedback_id, who_receive_feedback_id, month,year]
     )
 
     if (!canUpdate[0].can_update) {
@@ -215,30 +387,33 @@ exports.addNewFeedback = async (req, res, next) => {
             
     try {
         const responsesJson = JSON.stringify(responses)
-        const query = "UPDATE agents_feedback SET  responses=?, feedback_score=?, total_score=?, percentage=?, can_update=0 WHERE agent_id=? AND lm_id=? AND month=? AND year=? AND date=?"
 
-        const [result]  = await pool.execute(query, [responsesJson, feedback_score, total_score, percentage,agent_id, lm_id, month, year,date])
-        
+        const [result]  = await pool.execute(query, [responsesJson, feedback_score, total_score, percentage,who_give_feedback_id, who_receive_feedback_id, month, year])
+
         if (result.affectedRows === 0){
-            return res.status(400).json({message: 'Agent Feedback Not Found..'})
+            return res.status(400).json({message: error_message})
         }
 
 
         res.status(201).json({
-            message: `Sales Agent Feedback is updated`
+            message: success_message
         })
         
     }catch(error){
         console.error('Error Updating Agent Feedback records', error)
-        res.status(500).json({error: 'Database Error, Cannot Update Agent Feedback '})
+        res.status(500).json({error: 'Database Error' ,error_message})
     }
  }
 
- exports.getAgentsFeedback = async (req, res, next) => {
+ exports.getSalesFeedback = async (req, res, next) => {
     let givenMonth
     let givenYear 
     let fullyear = req.query.fullyear
-    console.log(fullyear)
+    
+
+  
+    
+
     const export_to_excel = req.export_to_excel
     const currentDate = new Date()
 
@@ -264,424 +439,428 @@ exports.addNewFeedback = async (req, res, next) => {
     
     // const agentId = req.params.agent_id
     let agentId 
+    let  who_receive_feedback_id
+    let who_give_feedback_id
+    let feedback_type = req.query.feedback_type
 
-    if(req.params.agent_id){
-        agentId = req.params.agent_id
+
+    if(req.params.id){
+         who_receive_feedback_id  = req.params.id
     }else{
-        agentId = req.query.agent_id
+        if (req.query.agent_id || req.query.agent_id != '') {
+            who_receive_feedback_id  = req.query.agent_id
+        }else if (req.query.lm_id || req.query.lm_id != '') {
+           who_receive_feedback_id  = req.query.lm_id
+        }else if(req.query.manager_id || req.query.manager_id != ''){
+            who_receive_feedback_id = req.query.manager_id
+        }else if(req.query.who_give_feedback_id || req.query.who_give_feedback_id != ''){
+            who_receive_feedback_id = req.query.who_give_feedback_id
+        }
     }
 
-    // const connection =  await pool.getConnection()
-    if(fullyear == 'true' || fullyear == true){
-        const [result] = await pool.execute(
-            'SELECT * FROM  `agents_feedback` WHERE agent_id=?  AND year=?',[agentId,givenYear]  
-        )
-        // connection.release()
-        result.sort((a,b) => {
-            return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
-            monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
-        })
-        if(export_to_excel){
-            return result
-        }else{
-          
-            res.json(result)  
-        }
-              
-    }else {
-        const [result] = await pool.execute(
-            'SELECT * FROM  `agents_feedback` WHERE agent_id=?  AND month=? AND year=?',[agentId,givenMonth,givenYear]  
-        )
-        // connection.release()
-        if(export_to_excel){
-            return result
-        }else{
-            
-            res.json(result)
-        }
-      
+
+    if(req.query.who_give_feedback_id || req.query.who_give_feedback_id != '') {
+        who_give_feedback_id = req.query.who_give_feedback_id
     }
+
+
+       
+
+    let feedback_table
+    let success_message
+    let error_message
+    let  who_receive_feedback_table_id 
+    let who_give_feedback_table_id
+    // let who_give_feedback_id
+    let query_feedback_month
+    let query_feedback_year
+    if(feedback_type === "agent_by_lm"){
+        feedback_table = 'feedback_agents_by_lm' 
+        success_message = ``
+        error_message = 'Error fetching Agent Feedback records'
+        who_receive_feedback_table_id = 'agent_id' 
+        who_give_feedback_table_id = 'lm_id'
+    
+        
+        // get his or her manager 
+        const [manager] = await pool.execute(
+            'SELECT manager_id FROM sales_agents WHERE id=?', [who_receive_feedback_id]
+        )
+        if (manager.length > 0) {
+            who_give_feedback_id = manager[0].manager_id
+        }
+
+        
+
+        query_feedback_month =  `
+        SELECT 
+            sa.id AS  who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_give_feedback_name,
+            sa.manager_id,
+            COALESCE(fbalm.feedback_score, 0) AS feedback_score,
+            COALESCE(fbalm.responses, "{}") AS responses,
+            COALESCE(fbalm.month, ?) AS month,
+            COALESCE(fbalm.year, ?)  AS year,
+            fbalm.agent_id AS who_receive_feedback_id,
+            fbalm.agent_dbname,
+            fbalm.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_agents_by_lm fbalm
+            ON sa.id = fbalm.lm_id
+        AND fbalm.month =  ?
+        AND fbalm.year =  ?
+        AND fbalm.agent_id = ?
+       WHERE sa.id = ${who_give_feedback_id}
+       
+      `
+
+        query_feedback_year  = `
+        SELECT 
+            sa.id AS who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_give_feedback_name,
+            sa.manager_id,
+            COALESCE(fbalm.feedback_score, 0) AS feedback_score,
+             COALESCE(fbalm.responses, "{}") AS responses,
+            fbalm.month,
+            COALESCE(fbalm.year, ?)  AS year,
+             fbalm.agent_id AS who_receive_feedback_id,
+            fbalm.agent_dbname,
+            fbalm.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_agents_by_lm fbalm
+            ON sa.id = fbalm.lm_id
+        AND fbalm.year =  ?
+        AND fbalm.agent_id = ?
+        WHERE sa.id = ${who_give_feedback_id}
+       
+      `
+
+      
+
+    }else if(feedback_type === "lm_by_agent"){
+        feedback_table = 'feedback_lm_by_agents' 
+        success_message = ``
+        error_message = 'Error fetching Local Manager Feedback records'
+        who_receive_feedback_table_id = 'lm_id'
+        who_give_feedback_table_id = 'agent_id'
+
+        query_feedback_month = `
+        SELECT 
+            sa.id AS who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_give_feedback_name,
+            sa.manager_id AS lm_id,
+            COALESCE(fba.feedback_score, 0) AS feedback_score,
+            COALESCE(fba.responses, "{}") AS responses,
+            COALESCE(fba.month, ?)  AS month,
+            COALESCE(fba.year,  ?)  AS year,
+             fba.percentage,
+            fba.total_score,
+            fba.lm_id AS who_receive_feedback_id,
+            fba.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_lm_by_agents fba 
+            ON sa.id = fba.agent_id
+        AND sa.manager_id = fba.lm_id
+        AND fba.month = ?
+        AND fba.year = ?
+        WHERE sa.manager_id = ?
+        
+        `
+
+        query_feedback_year = `
+         SELECT 
+            sa.id AS who_receive_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_receive_feedback_name,
+            sa.manager_id AS lm_id,
+            COALESCE(fba.feedback_score, 0) AS feedback_score,
+             COALESCE(fba.responses, "{}") AS responses,
+            fba.month, 
+            fba.percentage,
+            fba.total_score,
+            COALESCE(fba.year,  ?)  AS year,
+            fba.lm_id AS who_receive_feedback_id,
+            fba.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_lm_by_agents fba 
+            ON sa.id = fba.agent_id
+        AND sa.manager_id = fba.lm_id
+        AND fba.year = ?
+        WHERE sa.manager_id = ?
+        `
+
+    }else if(feedback_type === "lm_by_um"){
+        feedback_table = 'feedback_lm_by_um' 
+        success_message = ``
+        error_message = 'Error fetching Local Manager Feedback records'
+
+        who_receive_feedback_table_id = 'lm_id'
+        who_give_feedback_table_id = 'manager_id'
+       
+        
+                // get his or her manager 
+        const [manager] = await pool.execute(
+            'SELECT manager_id FROM sales_agents WHERE id=?', [who_receive_feedback_id]
+        )
+        if (manager.length > 0) {
+            who_give_feedback_id = manager[0].manager_id
+        }
+        
+        query_feedback_month = `
+        SELECT 
+            sa.id AS who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_give_feedback_name,
+            sa.manager_id,
+            COALESCE(fblmum.feedback_score, 0) AS feedback_score,
+            COALESCE(fblmum.responses, "{}") AS responses,
+            COALESCE(fblmum.month, ?)  AS month,
+            COALESCE(fblmum.year, ?)  AS year,
+            fblmum.total_score,
+            fblmum.percentage,
+            fblmum.lm_id AS who_receive_feedback_id,
+            fblmum.lm_dbname,
+            fblmum.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_lm_by_um fblmum
+            ON sa.id = fblmum.manager_id
+        AND fblmum.month = ?
+        AND fblmum.year = ?
+        AND fblmum.lm_id = ?
+        WHERE sa.id = ${who_give_feedback_id}
+
+        `
+       
+       query_feedback_year = `
+        SELECT 
+            sa.id AS who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name AS who_give_feedback_name,
+            COALESCE(fblmum.feedback_score, 0) AS feedback_score,
+            COALESCE(fblmum.responses, "{}") AS responses,
+            fblmum.month,
+            COALESCE(fblmum.year, ?)  AS year,
+            fblmum.total_score,
+            fblmum.percentage,
+            fblmum.lm_id AS who_receive_feedback_id,
+            fblmum.lm_dbname,
+            fblmum.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_lm_by_um fblmum
+            ON sa.id = fblmum.manager_id
+        AND fblmum.year = ?
+        AND fblmum.lm_id = ?
+        WHERE sa.id = ${who_give_feedback_id}
+        
+        `
+    }else if(feedback_type === "um_by_lm"){
+       
+        feedback_table = 'feedback_um_by_lm' 
+        success_message = ``
+        error_message = 'Error fetching Local Manager Feedback records'
+        who_receive_feedback_table_id = 'um_id'
+        who_give_feedback_table_id = 'lm_id'
+
+        query_feedback_month = `
+        SELECT 
+            sa.id AS who_give_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name as who_give_feedback_name,
+            sa.manager_id as um_id,
+            COALESCE(fbumlm.feedback_score, 0) AS feedback_score,
+            COALESCE(fbumlm.responses, '{}') AS responses,
+            COALESCE(fbumlm.month, ?)  AS month,
+            COALESCE(fbumlm.year, ?)  AS year,
+            fbumlm.total_score,
+            fbumlm.percentage,
+            fbumlm.um_id AS who_receive_feedback_id,
+            fbumlm.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_um_by_lm fbumlm
+            ON sa.id = fbumlm.lm_id
+        AND sa.manager_id = fbumlm.um_id
+        AND fbumlm.month = ?
+        AND fbumlm.year = ?
+        WHERE sa.manager_id = ? AND sa.id != 2394;
+        `
+
+        query_feedback_year = `
+          SELECT 
+            sa.id AS who_giv_feedback_id,
+            sa.firstname,
+            sa.lastname,
+            sa.image_link,
+            sa.db_name as who_give_feedback_name,
+            sa.manager_id as um_id,
+            COALESCE(fbumlm.feedback_score, 0) AS feedback_score,
+            COALESCE(fbumlm.responses, {}) AS responses,
+            fbumlm.total_score,
+            fbumlm.percentage,
+            fbumlm.month,
+            COALESCE(fbumlm.year, ?)  AS year,
+            fbumlm.um_id AS who_receive_feedback_id,
+            fbumlm.can_update
+        FROM sales_agents sa
+        LEFT JOIN feedback_um_by_lm fbumlm
+            ON sa.id = fbumlm.lm_id
+        AND sa.manager_id = fbumlm.um_id
+        AND fbumlm.year = ?
+        WHERE sa.manager_id = ? AND sa.id != 2394;
+        
+        `
+
+    }
+
+   
+    try {
+        if(fullyear == 'true' || fullyear == true){
+
+            if(req.user.login_type == 'salesagentuser' && !req.query.is_sales_admin ){
+                
+                const [result] = await pool.execute(
+                    `SELECT * FROM  ${feedback_table} WHERE ${who_give_feedback_table_id}=? AND ${who_receive_feedback_table_id}=?   AND year=?`,[who_give_feedback_id,who_receive_feedback_id,givenYear]  
+
+                )
+                // connection.release()
+                result.sort((a,b) => {
+                    return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
+                    monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
+                })
+                if(export_to_excel){
+                    return result
+                }else{
+                
+                    res.json(result)  
+                }
+            }
+
+            if(req.user.login_type == 'standarduser' || (req.is_sales_admin && req.user.agent_type == 2)){
+                console.log('if rustan is user must came here')
+                const [result] = await pool.execute(
+                   
+                query_feedback_year,[givenYear,givenYear,who_receive_feedback_id]
+                )
+                // connection.release()
+                result.sort((a,b) => {
+                    return monthNames.indexOf(a.month.charAt(0).toUpperCase() + a.month.slice(1).toLowerCase()) - 
+                    monthNames.indexOf(b.month.charAt(0).toUpperCase() + b.month.slice(1).toLowerCase());
+                })
+                if(export_to_excel){
+                    return result
+                }else{
+                
+                    res.json(result)  
+                }
+            }            
+
+
+
+
+        // monthly only not full year
+        }else {
+            if(req.user.login_type == 'salesagentuser' && !req.query.is_sales_admin){
+            
+                const [result] = await pool.execute(
+                `SELECT * FROM  ${feedback_table} WHERE ${who_give_feedback_table_id}=? AND ${who_receive_feedback_table_id}=?  AND month=? AND year=?`,[who_give_feedback_id,who_receive_feedback_id,givenMonth,givenYear]  
+                // query_feedback_month,[givenMonth,givenYear, givenMonth,givenYear,who_receive_feedback_id]
+                )
+                // connection.release()
+                
+                if(export_to_excel){
+                    return result
+                }else{
+                    
+                    res.json(result)
+                    
+                
+                }
+            }
+
+            if(req.user.login_type == 'standarduser' || (req.query.is_sales_admin && req.user.agent_type ==2)){
+             
+                const [result] = await pool.execute(
+                
+                query_feedback_month,[givenMonth,givenYear, givenMonth,givenYear,who_receive_feedback_id]
+                )
+                // connection.release()
+                
+                if(export_to_excel){
+                    return result
+                }else{
+                    
+                    res.json(result)
+                    
+                
+                }
+
+              
+            }            
+
+        
+        }
+    }catch(error){
+        console.error(error_message, error)
+        res.status(500).json({error: 'Database Error' ,error_message})
+    }
+
   
 
  }
 
- exports.removeAgentsFeedback = async(req,res, next) => {
+ exports.removeSalesFeedback = async(req,res, next) => {
     const agentId = req.params.agent_id
     const feedbackDate = req.body.date 
     const lmId = req.body.lm_id 
     const month = req.body.month 
     const year = req.body.year
+    const direction = req.body.direction
+
+    let feedback_table
+    let success_message
+    let error_message
+    if(direction === "agent_by_lm"){
+        feedback_table = 'feedback_agents_by_lm' 
+        success_message = `Agent Feedback deleted successfully`
+        error_message = 'Agent Feedback Not Found, Or Cannot Delete Agent Feedback'
+    }else if(direction === "lm_by_agent"){
+        feedback_table = 'feedback_lm_by_agents' 
+        success_message = `Local Manager Feedback deleted successfully`
+        error_message = 'Local Manager Feedback Not Found, Or Cannot Delete Local Manager Feedback'
+    }
 
     try {
-        const query = "DELETE FROM agents_feedback WHERE agent_id=? AND lm_id=? AND date=? AND month=? AND year=?"
+        const query = `DELETE FROM ${feedback_table} WHERE agent_id=? AND lm_id=? AND date=? AND month=? AND year=?`
         const [result] = await pool.execute(query, [agentId, lmId,  feedbackDate, month, year])
 
         if (result.affectedRows === 0){
-            return res.status(400).json({message: 'Agent Feedback Not found'})
+            return res.status(400).json({message: error_message})
         }
 
-        res.status(200).send({ message: 'Agent Feedback deleted successfully' });
+        res.status(200).send({ message: success_message });
     }
-    catch(error) {
+    catch(error) {``
         console.error('Error deleting agent feedback:', error)
-        res.status(500).json({error: 'Database Error, Cannot Delete Agent Feedback'})
+        res.status(500).json({error: 'Database Error', error_message})
     }
  }
 
- exports.addLmFeedback = async (req, res, next) => {
-
-    const {manager_id, manager_dbname, lm_id , lm_dbname, responses, feedback_score, total_score, percentage, date, month,year} = req.body
-    const lmId = req.params.lm_id
-    // if agent_type is not 2 which senior manager  return 404 error
-    // const user = req.user 
-    const user = {}
-    user.agent_type = 2
-
-    if (user.agent_type != 2) {
-        return res.status(404).json({message: "The Senior Manager is only allowed to give feedback on LMs"})
-    }
-    try {
-
-        const responsesJson = JSON.stringify(responses)
-        const query = "INSERT INTO lm_feedback (manager_id, manager_dbname,lm_id , lm_dbname,  responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [manager_id, manager_dbname, lmId , lm_dbname, responsesJson, feedback_score, total_score, percentage, date, month,year])
-
-        res.status(201).json({
-            message: `New Feedback  for lm_id: ${lm_id} are created or recorded`
-        })
-        
-    }catch(error){
-        console.error('Error inserting new feedback records', error)
-        res.status(500).json({error: 'Database Error, Cannot create Local Manager Feedback'})
-    }  
- }
-
- exports.updateLmFeedback = async (req, res, next) => {
-
-    const {manager_id, manager_dbname, lm_id , lm_dbname, responses, feedback_score, total_score, percentage, date, month,year} = req.body
-    const lmId = req.params.lm_id
-
-        // if agent_type is not 2 which senior manager  return 404 error
-    const user = req.user 
-    // const user = {}
-    // user.agent_type = 2
-
-    if (user.agent_type != 2) {
-        return res.status(404).json({message: "The Senior Manager is only allowed to give feedback on LMs"})
-    }
-
-    //check if can_update is true then the edit can processed else throw and error
-    const [canUpdate] = await pool.execute(
-        'SELECT can_update FROM  `lm_feedback` WHERE lm_id=? AND manager_id=? AND month=? AND year=?',[ lmId, manager_id, month,year]  
-    )
-
-    if (!canUpdate[0].can_update) {
-        return res.status(404).json({message: "You are not allowed to update your feedback response,Please contact your IT or Manager"})
-    }
-            
-    try {
-        const responsesJson = JSON.stringify(responses)
-        const query = "UPDATE lm_feedback SET  responses=?, feedback_score=?, total_score=?, percentage=? WHERE lm_id=? AND manager_id=? AND month=? AND year=? AND date=?"
-        
-        const [result]  = await pool.execute(query, [responsesJson, feedback_score, total_score, percentage,lm_id, manager_id, month, year,date])
-        
-        if (result.affectedRows === 0){
-            return res.status(400).json({message: 'Local Manager Feedback Not Found..'})
-        }
-
-
-        res.status(201).json({
-            message: `Local Manager Feedback is updated`
-        })
-        
-    }catch(error){
-        console.error('Error Updating Local Manager Feedback records', error)
-        res.status(500).json({error: 'Database Error, Cannot Update Local Manager Feedback '})
-    }
- }
-
- exports.getLmFeedback = async (req, res, next) => {
-
-    // if agent_type is not 2 which senior manager  return 404 error
-    const user = req.user 
-    // const user = {}
-    // user.agent_type = 2
-
-    // if (user.agent_type != 2) {
-    //     return res.status(404).json({message: "The Senior Manager is only allowed to get feedback on LMs"})
-    // }
-
-    let fullyear = req.query.fullyear
-   
-    const export_to_excel = req.export_to_excel
-
-    let givenMonth
-    let givenYear 
-    const currentDate = new Date()
- 
-    if (!req.query.month ||  req.query.month ==="") {
-        
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
-    }else {
-        givenMonth = req.query.month
-    }
-    
-    if(!req.query.year || req.query.year ===""){
-        givenYear = currentDate.getFullYear()
-    }else {
-        givenYear = req.query.year
-    }
-    
-    // const lmId = req.params.lm_id
-
-    let lmId
-
-    if(req.params.lm_id){
-        lmId = req.params.lm_id
-    }else{
-        lmId = req.query.agent_id
-    }
-
-    // const connection =  await pool.getConnection()
-    if(fullyear == 'true' || fullyear == true){
-        const [result] = await pool.execute(
-            'SELECT * FROM  `lm_feedback` WHERE lm_id=?  AND year=?',[lmId,givenYear]  
-        )
-
-        if(export_to_excel){
-            return result
-        }else{
-            res.json(result)
-        }
-    }else{
-        const [result] = await pool.execute(
-            'SELECT * FROM  `lm_feedback` WHERE lm_id=? AND month=? AND year=?',[lmId,givenMonth,givenYear]  
-        )
-        if(export_to_excel){
-            return result
-        }else{
-            res.json(result)
-        }
-
-    }
-
-
- }
-
- exports.removeLmFeedback = async(req,res, next) => {
-
-     const user = req.user 
-    //   const user = {}
-    //   user.agent_type = 2
-  
-      if (user.agent_type != 2) {
-          return res.status(404).json({message: "The Senior Manager is only allowed to Delete feedback on LMs"})
-      }
-
-
-    const lmId = req.params.lm_id
-    const feedbackDate = req.body.date 
-    const managerId = req.body.manager_id
-    const month = req.body.month 
-    const year = req.body.year
-
-    try {
-        const query = "DELETE FROM lm_feedback WHERE lm_id=? AND manager_id=? AND date=? AND month=? AND year=?"
-        const [result] = await pool.execute(query, [ lmId, managerId, feedbackDate, month, year])
-
-        if (result.affectedRows === 0){
-            return res.status(400).json({message: 'Local Manager Feedback Not found'})
-        }
-
-        res.status(200).send({ message: 'Local Manager Feedback deleted successfully' });
-    }
-    catch(error) {
-        console.error('Error deleting Local Manager feedback:', error)
-        res.status(500).json({error: 'Database Error, Cannot Delete Local Manager Feedback'})
-    }
-    
- }
-
- exports.addManagerFeedback = async (req, res, next) => {
-    const {manager_id, manager_dbname, agent_id , agent_dbname, responses, feedback_score, total_score, percentage, date, month,year} = req.body
-    const managerId = req.params.manager_id
-
-    try {
-
-        const responsesJson = JSON.stringify(responses)
-        const query = "INSERT INTO managers_feedback (agent_id, agent_dbname,manager_id, manager_dbname,  responses, feedback_score, total_score, percentage, date, month,year) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [agent_id, agent_dbname, managerId, manager_dbname, responsesJson, feedback_score, total_score, percentage, date, month,year])
-
-        res.status(201).json({
-            message: `New Feedback  for manager with id : ${managerId } are created or recorded`
-        })
-        
-    }catch(error){
-        console.error('Error inserting new feedback records', error)
-        res.status(500).json({error: 'Database Error, Cannot create  Manager Feedback'})
-    }  
- }
-
- exports.updateManagerFeedback = async (req, res, next) => {
-
-    console.log(req.body)
-    const {manager_id, manager_dbname, agent_id , agent_dbname, responses, feedback_score, total_score, percentage, date, month,year} = req.body
-    const managerId = req.params.manager_id
-
-
-
-    //check if can_update is true then the edit can processed else throw and error
-    const [canUpdate] = await pool.execute(
-        'SELECT can_update FROM  `managers_feedback` WHERE agent_id=? AND manager_id=? AND month=? AND year=?',[ agent_id, managerId, month,year]  
-    )
-
-    if (!canUpdate[0].can_update) {
-        return res.status(404).json({message: "You are not allowed to update your feedback response,Please contact your IT or Manager"})
-    }
-            
-    try {
-        const responsesJson = JSON.stringify(responses)
-        const query = "UPDATE managers_feedback SET  responses=?, feedback_score=?, total_score=?, percentage=? WHERE agent_id=? AND manager_id=? AND month=? AND year=? AND date=?"
-        
-        const [result]  = await pool.execute(query, [responsesJson, feedback_score, total_score, percentage,agent_id, managerId, month, year,date])
-        
-        if (result.affectedRows === 0){
-            return res.status(400).json({message: ' Manager Feedback Not Found..'})
-        }
-
-
-        res.status(201).json({
-            message: ` Manager Feedback is updated`
-        })
-        
-    }catch(error){
-        console.error('Error Updating  Manager Feedback records', error)
-        res.status(500).json({error: 'Database Error, Cannot Update Manager Feedback '})
-    }
- }
-
- exports.getMangerFeedback = async (req, res, next) => {
-   
-    let givenMonth
-    let givenYear 
-    const currentDate = new Date()
-    const export_to_excel = req.export_to_excel
-    let fullyear = req.query.fullyear
-
-    console.log(req.query)
-    
-    if (!req.query.month ||  req.query.month ==="") {
-        
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
-        givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
-    }else {
-        givenMonth = req.query.month
-    }
-    
-    if(!req.query.year || req.query.year ===""){
-        givenYear = currentDate.getFullYear()
-    }else {
-        givenYear = req.query.year
-    }
-    
-    //const managerId = req.params.manager_id
-
-    
-    const agentId = req.query.agent_id
-
-    let managerId 
-
-    if (req.params.manager_id){
-        managerId = req.params.manager_id
-    }else{
-        managerId = req.query.agent_id
-    }
-
-    if (agentId){   
-        if(fullyear == 'true' || fullyear == true) {
-            const [result] = await pool.execute(
-                'SELECT * FROM  `managers_feedback` WHERE manager_id=? AND agent_id=?  AND year=?',[managerId, agentId,givenYear]  
-            )
-            if(export_to_excel){
-                return result
-            }else{
-                res.json(result)
-            }
-        }else{
-            const [result] = await pool.execute(
-                'SELECT * FROM  `managers_feedback` WHERE manager_id=? AND agent_id=? AND month=? AND year=?',[managerId, agentId,givenMonth,givenYear]  
-            )
-
-            if(export_to_excel){
-                return result
-            }else{
-              
-                return  res.json(result)
-            }
-        }
-
-
-        
-   }else {
-        if(fullyear == 'true' || fullyear == true){
-            const [result] = await pool.execute(
-                'SELECT * FROM  `managers_feedback` WHERE manager_id=?  AND year=?',[managerId,givenYear]  
-            )
-            if(export_to_excel){
-                return result
-            }else{
-                res.json(result)
-            }
-        }else{
-            const [result] = await pool.execute(
-                'SELECT * FROM  `managers_feedback` WHERE manager_id=?  AND month=? AND year=?',[managerId,givenMonth,givenYear]  
-            )
-            if(export_to_excel){
-               return result
-            }else{
-                
-                return  res.json(result)
-            }
-            
-        }
- 
-   }
-
-       
- }
- exports.removeManagerFeedback = async(req,res, next) => {
- 
-
-    const managerId = req.params.manager_id
-    const feedbackDate = req.body.date 
-    const agentId = req.body.agent_id
-    const month = req.body.month 
-    const year = req.body.year
-
-    try {
-        const query = "DELETE FROM managers_feedback WHERE agent_id=? AND manager_id=? AND date=? AND month=? AND year=?"
-        const [result] = await pool.execute(query, [ agentId, managerId, feedbackDate, month, year])
-
-        if (result.affectedRows === 0){
-            return res.status(400).json({message: ' Manager Feedback Not found'})
-        }
-
-        res.status(200).send({ message: ' Manager Feedback deleted successfully' });
-    }
-    catch(error) {
-        console.error('Error deleting  Manager feedback:', error)
-        res.status(500).json({error: 'Database Error, Cannot Delete  Manager Feedback'})
-    }    
- }
 
 
  //CONTROLLER FEEDBACK BY QA
@@ -694,12 +873,12 @@ exports.addNewFeedback = async (req, res, next) => {
     }
    
     const { qa_id , qa_dbname, agent_id, agent_dbname, role, feedback_score, date, month,year} = req.body
-    const agentId = req.params.agent_id
+    
         try {
 
             
             const query = "INSERT INTO feedback_by_qa (qa_id , qa_dbname, agent_id, agent_dbname, qa_role, feedback_score, date, month,year) VALUES (?,?,?,?,?,?,?,?,?)"
-            const [result]  = await pool.execute(query, [qa_id , qa_dbname, agentId, agent_dbname,role, feedback_score,  date, month,year])
+            const [result]  = await pool.execute(query, [qa_id , qa_dbname, agent_id, agent_dbname,role, feedback_score,  date, month,year])
 
             res.status(201).json({
                 message: `New Feedback By QA  for agent_id: ${agent_id}  are created or recorded`
@@ -821,10 +1000,30 @@ exports.addNewFeedback = async (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+   
 
+                // Get the month name
+    const monthNames = [
+              "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"
+    ];
 
-    const month = req.query.month
-    const year = req.query.year
+    const currentDate = new Date()
+    let month 
+    let year
+    if (!req.query.month ||  req.query.month ==="") {
+        
+        month =  monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
+    }else {
+        month = req.query.month
+    }
+    
+    if(!req.query.year || req.query.year ===""){
+        year =  currentDate.getFullYear()
+    }else {
+        year = req.query.year
+    }
+
 
     try {
         const [result] = await pool.execute(
@@ -843,8 +1042,8 @@ exports.addNewFeedback = async (req, res, next) => {
             LEFT JOIN feedback_by_qa AS fbyqa
                 ON sa.id = fbyqa.agent_id
             AND fbyqa.month = ?
-            AND fbyqa.year = ?;
-
+            AND fbyqa.year = ?
+            
             `,
             [ month, year, month, year]
         )
@@ -864,8 +1063,8 @@ exports.addNewFeedback = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-
-    const agentId = req.params.agent_id
+    console.log('the body need to deleted', req.body)
+    const agentId = req.body.id
     const qaId = req.body.qa_id
     const month = req.body.month 
     const year = req.body.year

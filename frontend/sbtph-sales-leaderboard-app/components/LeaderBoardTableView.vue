@@ -21,8 +21,8 @@
               <th class="border border-gray-300 px-20 py-2">Employee Name</th>
               <th class="border border-gray-300 px-4 py-2">Score</th>
               <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Absences</th>
-              <th class="border border-gray-300 px-4 py-2">Tardiness</th>
+              <th class="border border-gray-300 px-4 py-2">Absences-score</th>
+              <th class="border border-gray-300 px-4 py-2">Tardiness-score</th>
               <th class="border border-gray-300 px-4 py-2">Total</th>
               <th class="border border-gray-300 px-4 py-2">Memo-score</th>
               <th class="border border-gray-300 px-4 py-2">Feedback-score</th>
@@ -79,7 +79,8 @@
         })
 
       const totalTheRating = (rating1, rating2) =>{
-            return  Number(rating1) + Number(rating2)
+            const total = Number(rating1) + Number(rating2)
+            return total.toFixed(4)
         }
 
       const setRatingNameColor = (agent) => {

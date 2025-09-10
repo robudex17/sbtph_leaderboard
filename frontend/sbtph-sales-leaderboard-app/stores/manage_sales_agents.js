@@ -142,8 +142,8 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
                 url = API.fetchSalesAgentTardiness
                 break
             case "salesAgentFeedback":
-                errorMessage = `Failed to fetch sales agent tardiness with the id of ${agentId}`
-                url = API.fetchSalesAgentFeedback
+                errorMessage = `Failed to fetch sales agent feedback with the id of ${agentId}`
+                url = API.fetchSalesAgentFeedbackByAdmin
                 break     
             
                 

@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100 p-4 mt-20">
       <div class="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-semibold text-gray-800 text-center"> {{ feedbackTitle }} FOR <span class="uppercase text-blue-700 font-bold"> ({{ dbName }})</span></h2>
+        <h2 class="text-2xl font-semibold text-gray-800 text-center"> {{ feedbackTitle }} FOR <span class="uppercase text-blue-700 font-bold"> ({{ who_receive_feedback_db_name }})</span></h2>
         <p class="text-gray-600 text-center mb-6"> {{ feedbackSubtitle }}</p>
         <!-- <div>
           {{   feedback.length}}
@@ -91,7 +91,7 @@
 
     const route = useRoute()
     const query = route.query
-    const dbName = query.db_name
+    const { who_receive_feedback_id, who_receive_feedback_db_name, who_give_feedback_id, who_give_feedback_db_name } = query
     const id = ref(null)
 
     if (props.feedback.length > 0){
@@ -151,47 +151,74 @@
         return;
       }
 
-      let feedbackData = {}
-      
-      if (props.feedbackType == 'agents'){
-        feedbackData = {
-          
-          responses: responses.value,
-          total_score: totalScore.value,
-          percentage: percentage.value,
-          feedback_score: feedbackScore.value,
-          lm_id: currentUser.login_id,
-          lm_dbname: currentUser.db_name,
-          agent_dbname: dbName,
-          
-        }; 
 
-      }else if (props.feedbackType == 'managers') {
-        feedbackData = {
+
+      const feedbackData = {
           
           responses: responses.value,
           total_score: totalScore.value,
           percentage: percentage.value,
           feedback_score: feedbackScore.value,
-          agent_dbname: currentUser.db_name,
-          agent_id: currentUser.login_id,
-          manager_dbname: dbName,
-          
-          
+          who_give_feedback_id,
+          who_give_feedback_db_name,
+          who_receive_feedback_id,
+          who_receive_feedback_db_name,
+          feedback_type: props.feedbackType
         };
-      }else if (props.feedbackType == 'lms'){
-        feedbackData = {
+      
+      // if (props.feedbackType == 'agent_by_lm'){
+      //   feedbackData = {
           
-          responses: responses.value,
-          total_score: totalScore.value,
-          percentage: percentage.value,
-          feedback_score: feedbackScore.value,
-          lm_dbname: dbName,
-          manager_dbname: currentUser.db_name,
-          manager_id: currentUser.login_id
+      //     responses: responses.value,
+      //     total_score: totalScore.value,
+      //     percentage: percentage.value,
+      //     feedback_score: feedbackScore.value,
+      //     lm_id: who_give_feedback_id,
+      //     lm_dbname: who_give_feedback_db_name,
+      //     agent_id: who_receive_feedback_id,
+      //     agent_dbname: who_receive_feedback_db_name
+      //   };
+
+      // }else if (props.feedbackType == 'lm_by_agent'){
+      //   feedbackData = {
           
-        };
-      }
+      //     responses: responses.value,
+      //     total_score: totalScore.value,
+      //     percentage: percentage.value,
+      //     feedback_score: feedbackScore.value,
+      //     agent_id: who_give_feedback_id,
+      //     agent_dbname: who_give_feedback_db_name,
+      //     lm_id: who_receive_feedback_id,
+      //     lm_dbname: who_receive_feedback_db_name
+
+      //   };
+      // }else if (props.feedbackType == 'um_by_lm'){
+      //   feedbackData = {
+          
+      //     responses: responses.value,
+      //     total_score: totalScore.value,
+      //     percentage: percentage.value,
+      //     feedback_score: feedbackScore.value,
+      //     lm_id: who_give_feedback_id,
+      //     lm_dbname: who_give_feedback_db_name,
+      //     manager_id: who_receive_feedback_id,
+      //     manager_dbname: who_receive_feedback_db_name
+          
+      //   };
+      // }else if (props.feedbackType == 'lm_by_um'){
+      //   feedbackData = {
+          
+      //     responses: responses.value,
+      //     total_score: totalScore.value,
+      //     percentage: percentage.value,
+      //     feedback_score: feedbackScore.value,
+      //     manager_id: who_give_feedback_id,
+      //     lm_dbname: who_give_feedback_db_name,
+      //     lm_id: who_receive_feedback_id,
+      //     lm_dbname: who_receive_feedback_db_name
+          
+      //   };
+      // }
 
       if (isUpdating.value){
         if (props.feedback[0].can_update == 0){

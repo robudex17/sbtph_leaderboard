@@ -103,10 +103,7 @@ exports.loginUser = async(req,res, next) => {
 
        const query = "SELECT * FROM sales_agents_login WHERE username=?"
        const [loginUser] = await pool.execute(query, [username])
-
-
-    
-       
+   
        if(!loginUser || !(await bcyrpt.compare(password, loginUser[0].password_hash))){
          return res.status(401).json({message: 'Invalid Credentials'})
        }

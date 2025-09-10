@@ -21,6 +21,7 @@ const salesManagerRoutes = require('./routes/sales_managers_route')
 const salesLoginRoutes = require('./routes/sales_login_routes')
 const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
+const salesEvaluationDataRoutes = require('./routes/sales_evaluation_data_routes')
 
 const app = express()
 
@@ -44,6 +45,7 @@ app.use("/api", salesDashboardRoutes)
 app.use("/api", salesAnalyticsRoutes)
 app.use("/api", salesMarketRoutes)
 app.use("/api", salesManagerRoutes)
+app.use('/api',salesEvaluationDataRoutes)
 // app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed
 
 // OPTIONAL: test-only route

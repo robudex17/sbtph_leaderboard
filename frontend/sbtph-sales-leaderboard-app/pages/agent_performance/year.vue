@@ -86,7 +86,10 @@
           <div v-else>
             <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
             <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
-            <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/>
+            <!-- <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/> -->
+          <sales-metrcis-summary
+           :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"
+          ></sales-metrcis-summary>
           </div>
 
       </div>

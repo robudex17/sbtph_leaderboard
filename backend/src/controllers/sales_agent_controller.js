@@ -6,7 +6,7 @@ const path = require('path')
 exports.fetchSalesAgents = async (req,res, next ) => {
 
     //query his/her manager or senior manager
-    if (req.user.role == 'manager' && req.user.agent_type == 1 && req.query.give_feedback == 'manager'){
+    if (req.user.role == 'manager' && req.user.agent_type == 1 && req.query.feedback_type == 'um_by_lm'){
         try{
             // const connection =  await pool.getConnection()
     
@@ -44,7 +44,8 @@ exports.fetchSalesAgents = async (req,res, next ) => {
         }  
 
     //query his/her agents
-    }else if (req.user.role == 'manager'  && req.user.agent_type == 1){
+    }else if (req.user.role == 'manager'  && req.user.agent_type == 1 && req.query.feedback_type == 'agent_by_lm'){
+        console.log('this came in this option?')
         try{
             // const connection =  await pool.getConnection()
     
@@ -122,7 +123,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
         }  
     }
     //agent query his/her local manager
-    else if(req.user.role == 'user' && req.user.agent_type == 0  ){
+    else if(req.user.role == 'user' && req.user.agent_type == 0 && req.query.feedback_type == 'lm_by_agent'){
         try{
             // const connection =  await pool.getConnection()
     

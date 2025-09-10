@@ -2,7 +2,7 @@
     <div >
       <h1 class="text-2xl font-bold mb-4 text-center">{{ attendanceTitle }}</h1>
       <div class="overflow-x-auto">
-        <table class="min-w-full border border-green-500 rounded-lg">
+        <table  v-if="attendanceDetails.length > 0" class="min-w-full border border-green-500 rounded-lg">
           <thead class="bg-green-200">
             <tr>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th> -->
@@ -13,7 +13,8 @@
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
               <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
                 Actions
-                <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
+                <!-- <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0" -->
+                 <button :disabled="currentUser.login_type != 'standarduser'"
                   @click="openModal('add')" 
                   class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                   <font-awesome-icon icon="plus" />
@@ -48,6 +49,65 @@
             </tr>
           </tbody>
         </table>
+        <table v-else class="min-w-full border border-green-500 rounded-lg">
+          <thead class="bg-green-200">
+            <tr>
+
+
+              <th class="py-2 px-4 text-left text-lg font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-lg font-medium text-green-900">Description</th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>              
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
+              <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
+                <!-- <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0" -->
+                 <button :disabled="currentUser.login_type != 'standarduser'"
+                  @click="openModal('add')" 
+                  class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
+                  <font-awesome-icon icon="plus" />
+                  Add
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+               <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-medium font-bold text-green-800">No {{ attendanceType }} yet recorded for the {{ month }} {{ year }}</td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+                <td class="py-2 px-4 text-sm text-green-800"></td>
+            </tr>
+          </tbody>
+        </table>        
       </div>
   
       <!-- Modal -->
