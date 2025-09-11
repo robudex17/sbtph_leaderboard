@@ -140,6 +140,7 @@
                 { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
                 // { name: 'Upload Target/Shipok Sales Data', route: '/admin/upload_target_shipok_data', icon: ['fas', 'fa-upload'] },
                 // { name: 'Upload New Deposit Sales Data', route: '/admin/upload_new_deposit_data', icon: ['fas', 'fa-upload'] },
+                { name: 'Sales Evaluation', route: '/admin/sales_evaluation', icon: ['fas', 'user-tie'] },
                 { name: 'Upload Sales Evaluation Data', route: '/admin/upload_sales_evaluation_data', icon: ['fas', 'fa-upload'] },
                 // { name: 'export', route: '/admin/export_to_excel', icon: ['fas', 'fa-file-excel'] },
   

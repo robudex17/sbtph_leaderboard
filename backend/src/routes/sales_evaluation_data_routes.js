@@ -10,7 +10,10 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 // I remove the validateTarget because it is not needed for now
 
-// router.post('/sales_evaluation_data', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.addAgentNewTarget)
+router.post('/sales_evaluation_data/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesEvaluationDataController.addSalesEvaluationData)
+
+
+router.delete('/sales_evaluation_data/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), salesEvaluationDataController.deleteSalesEvaluationData)
 
 
 router.get('/sales_evaluation_data', authenticateToken,authorizeRoles('admin', 'manager'),validateMonthYear, salesEvaluationDataController.fetchSalesEvaluationData)
@@ -19,7 +22,6 @@ router.get('/sales_evaluation_data', authenticateToken,authorizeRoles('admin', '
 // router.put('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.updateAgentTarget)
 
 
-// router.delete('/sales_evaluation_data/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), salesTargetShipokController.deleteAgentTarget)
 
 
 module.exports = router

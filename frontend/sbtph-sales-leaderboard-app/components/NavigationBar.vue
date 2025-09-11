@@ -209,6 +209,7 @@
        '/admin/upload_target_shipok_data',
       '/admin/upload_new_deposit_data',
       '/admin/upload_sales_evaluation_data',
+      '/admin/sales_evaluation',
       '/'
 
     ])

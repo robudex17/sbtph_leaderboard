@@ -23,6 +23,7 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         salesAgentMemo: [],
         salesAgentTardiness: [],
         salesAgentFeedback: [],
+        salesAgentEvaluation: [],
         loading:false,
         error: null
     })
@@ -884,6 +885,154 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         }
     }
 
+    
+    const fetchSalesEvaluation = async (queryString) =>{
+        state.loading = true;
+        state.error = null;
+
+        let url = API.salesAgentsEvaluation
+        url = new URL(`${url}`)
+
+        if (queryString) {
+            Object.keys(queryString).forEach((key) =>
+                url.searchParams.append(key, queryString[key])
+            )
+        }
+        try {
+            // Fetch sales agent info
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+
+           
+            state.salesAgentEvaluation = data;
+        } catch (error) {
+            const customError = new Error(`Failed to fetch sales agents evaluation: ${error.message}`);
+            customError.originalError = error;  // Attach the original error
+            throw customError;
+        }
+    }
+
+
+    const submitSalesEvaluation = async (agent_id, data) => {
+        state.loading = true
+        state.error = null
+        try {
+            const response = await fetch(`${API.salesAgentsEvaluation}/${agent_id}`, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            }) 
+         
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
+
+            if (!response.ok) {
+                
+                const errors = await response.json()
+                throw new Error(errors || "An unknown error occurred");
+            }
+  
+           let month 
+           let year 
+
+           if(agent_id == 'all' ){
+            month = data[0].month
+            year = data[0].year
+           }else{
+            month = data.month
+            year = data.year
+           }
+           await fetchSalesEvaluation({month: month, year: year})
+           alert(`Submitting evaluation for : ${agent_id} is successful` )
+        } catch (error) {
+            console.log(error.message)
+            state.error = error.message
+        } finally {
+            state.loading = false
+        }
+    }
+    
+    const reviewSalesEvaluation = async (agent_id, data) => {
+        state.loading = true
+        state.error = null
+   
+        try {
+            const response = await fetch(`${API.salesAgentsEvaluation}/${agent_id}`, {
+                method: 'DELETE',
+                body: JSON.stringify(data),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+                // body: JSON.stringify(target)
+            }) 
+         
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }    
+
+            if (!response.ok) {
+                
+                const errors = await response.json()
+                throw new Error(errors || "An unknown error occurred");
+            }
+  
+           
+           await fetchSalesEvaluation({month: data.month, year: data.year})
+           let message 
+           if (agent_id == 'all') {
+               message = `Sales Evaluation Data For ${agent_id} are marked for review`
+           }else {
+                message = `Sales Evaluation Data for : ${agent_id} is marked for review`
+           }
+
+           alert(message)
+        } catch (error) {
+            console.log(error)
+            state.error = error.message
+        } finally {
+            state.loading = false
+        }
+    }    
+
+
     return {
         state, 
         fetchSalesAgents,
@@ -903,7 +1052,10 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
         deleteAgentAttendanceType,
         addAgentFeedback,
         updateAgentFeedback,
-        deleteAgentFeedback
+        deleteAgentFeedback,
+        fetchSalesEvaluation, 
+        submitSalesEvaluation,
+        reviewSalesEvaluation
     }
 })
 

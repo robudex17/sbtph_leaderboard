@@ -15,6 +15,7 @@ const API = {
     fetchSalesAgentFeedbackByAdmin: `${HTTPADDR}/feedback_by_admin`,
     fetchAgentMarket:  `${HTTPADDR}/agent_market`,
     fetchManagers: `${HTTPADDR}/managers`,
+    salesAgentsEvaluation: `${HTTPADDR}/sales_evaluation_data`,
 
     standardUsers:  `${HTTPADDR}/standardusers`,
     

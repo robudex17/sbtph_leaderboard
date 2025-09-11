@@ -202,36 +202,74 @@
             <tbody>
 
               <tr v-if="selectedAgent">
+                
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Performance(80%)</td>
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.shipok_score }}</td>
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.performance_rating }}</td>
               </tr>
 
               <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">
+                  Absence (5%)
+                </td>
+
+                <td
+                  v-for="(value, index) in [selectedAgent.absence_score, selectedAgent.absence_rating]"
+                  :key="index"
+                  class="px-4 py-2 font-semibold border bg-gray-900 text-center"
+                  :class="selectedAgent.submitted == 1 ? 'text-gray-100' : 'text-red-400'"
+                >
+                  {{ selectedAgent.submitted == 1 ? value : 'NO DATA' }}
+                </td>
               </tr>
               <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">
+                  Tardiness (5%)
+                </td>
+                <td
+                  v-for="(value, index) in [selectedAgent.tardiness_score, selectedAgent.tardiness_rating]"
+                  :key="index"
+                  class="px-4 py-2 font-semibold border bg-gray-900 text-center"
+                  :class="selectedAgent.submitted == 1 ? 'text-gray-100' : 'text-red-400'"
+                >
+                  {{ selectedAgent.submitted == 1 ? value : 'NO DATA' }}
+                </td>
               </tr>
+
               <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo(5%) </td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">
+                  Memo (5%)
+                </td>
+                <td
+                  v-for="(value, index) in [selectedAgent.memo_score, selectedAgent.memo_rating]"
+                  :key="index"
+                  class="px-4 py-2 font-semibold border bg-gray-900 text-center"
+                  :class="selectedAgent.submitted == 1 ? 'text-gray-100' : 'text-red-400'"
+                >
+                  {{ selectedAgent.submitted == 1 ? value : 'NO DATA' }}
+                </td>
               </tr>
+
               <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">
+                  Feedback (5%)
+                </td>
+                <td
+                  v-for="(value, index) in [selectedAgent.feedback_score, selectedAgent.feedback_rating]"
+                  :key="index"
+                  class="px-4 py-2 font-semibold border bg-gray-900 text-center"
+                  :class="selectedAgent.submitted == 1 ? 'text-gray-100' : 'text-red-400'"
+                >
+                  {{ selectedAgent.submitted == 1 ? value : 'NO DATA' }}
+                </td>
               </tr>
-              <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">New Deposit(10%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.deposit_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.additional_points }}</td>
-              </tr>
+
+            <tr v-if="selectedAgent">
+               <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">New Deposit(10%)</td> 
+               <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.deposit_score }}</td> 
+               <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.additional_points }}</td>
+            </tr>
+
             </tbody>
           </table>
           <table class="min-w-full table-auto mt-6">
