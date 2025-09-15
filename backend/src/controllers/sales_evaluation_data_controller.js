@@ -56,7 +56,7 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
       AND fba.month = ?
       AND fba.year = ?
     LEFT JOIN feedback_by_qa fbq
-        ON sa.id = fba.agent_id
+        ON sa.id = fbq.agent_id
       AND fbq.month = ?
       AND fbq.year = ?  
     LEFT JOIN market

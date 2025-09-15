@@ -16,6 +16,7 @@ export const feedbackStore = defineStore('feedback', () => {
         // agents: [],
         // lms: [],
         // managers: [],
+        admin: [],
         agent_by_lm: [],
         lm_by_agent: [],
         lm_by_um: [],

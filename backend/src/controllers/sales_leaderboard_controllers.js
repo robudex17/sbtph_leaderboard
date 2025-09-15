@@ -610,13 +610,13 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     const currentDate = new Date()
     if (!req.query.month ||  req.query.month ==="") {
         
-        givenMonth =  "June" //monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
+        givenMonth =  monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
     }
     
     if(!req.query.year || req.query.year ===""){
-        givenYear =  2025//currentDate.getFullYear()
+        givenYear =  currentDate.getFullYear()
     }else {
         givenYear = req.query.year
     }

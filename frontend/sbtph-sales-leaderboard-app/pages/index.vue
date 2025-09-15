@@ -465,11 +465,11 @@ if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
          ]
 
     if (!query.value.month){
-        query.value.month =  "June" //months[new Date().getMonth()]
+        query.value.month = months[new Date().getMonth()]
      }
 
     if (!query.value.year){
-        query.value.year =  2025 //new Date().getFullYear()
+        query.value.year =  new Date().getFullYear()
     }
 
 const exportUrl = API.export.leaderboard

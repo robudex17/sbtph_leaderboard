@@ -21,9 +21,9 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             "July", "August", "September", "October", "November", "December"
         ];
 
-    //const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
-    const givenMonth = "June"
-    const givenYear =   "2025" // currentDate.getFullYear()
+    const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
+    // const givenMonth = "June"
+    const givenYear =    currentDate.getFullYear()
     const  withTrucks = true
     //const  dashboarOption = req.query.dashboardoption 
 

@@ -255,19 +255,19 @@ const currentUser = authStore.state.user
 
 
 
-// const months = [
-//   'January', 'February', 'March', 'April', 'May', 'June',
-//   'July', 'August', 'September', 'October', 'November', 'December'
-// ]
+const months = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+]
 
-// const month = ref(months[new Date().getMonth()])
-// const year = ref(new Date().getFullYear())
+const month = ref(months[new Date().getMonth()])
+const year = ref(new Date().getFullYear())
 
 //hard coded month and year for temporary usage only
 
-const month = "June"
+// const month = "June"
 
-const year = 2025
+// const year = 2025
 
 //const dashboardoption = ref(route.query.dashboardoption || 'individual')
 
