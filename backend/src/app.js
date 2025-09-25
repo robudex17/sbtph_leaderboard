@@ -16,12 +16,17 @@ const salesLeaderboardRoutes = require('./routes/sales_leaderboard_route')
 const salesDashboardRoutes = require('./routes/sales_dashboard_routes')
 const salesAnalyticsRoutes = require('./routes/sales_analytics_route')
 const salesMarketRoutes = require('./routes/sales_market_route')
+const salesTeamRoutes = require('./routes/sales_teams_routes')
 const salesManagerRoutes = require('./routes/sales_managers_route')
 // const importExportDataRoutes = require('./routes/import_export_data_routes')
 const salesLoginRoutes = require('./routes/sales_login_routes')
 const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
 const salesEvaluationDataRoutes = require('./routes/sales_evaluation_data_routes')
+
+
+//new added for experiment 
+const salesAgentsRoutes2 = require('./routes/sales_agents_route2')
 
 const app = express()
 
@@ -44,8 +49,15 @@ app.use("/api", salesLeaderboardRoutes)
 app.use("/api", salesDashboardRoutes)
 app.use("/api", salesAnalyticsRoutes)
 app.use("/api", salesMarketRoutes)
+app.use("/api", salesTeamRoutes)
 app.use("/api", salesManagerRoutes)
 app.use('/api',salesEvaluationDataRoutes)
+
+
+//new added for experiment
+app.use("/api/test", salesAgentsRoutes2)
+
+
 // app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed
 
 // OPTIONAL: test-only route

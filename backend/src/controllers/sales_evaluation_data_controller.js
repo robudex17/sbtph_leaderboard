@@ -8,63 +8,132 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
  
 
   
-  const [sales_agents_result] = await pool.execute(
+  // const [sales_agents_result] = await pool.execute(
     
 
-    `
-      SELECT 
-        sa.*,
-        COALESCE(ses.month, ?) AS month,
-        COALESCE(ses.year, ?) AS year,
-        COALESCE(ses.submitted, 0) AS submitted,
-        COALESCE(ts.target, 0) AS target,
-        COALESCE(ts.ship_ok, 0) AS ship_ok,
-        COALESCE(COUNT(DISTINCT nd.id), 0) AS total_new_deposit,
-        COALESCE(COUNT(DISTINCT ab.id), 0) AS total_absences,
-        COALESCE(COUNT(DISTINCT td.id), 0) AS total_tardiness,
-        COALESCE(COUNT(DISTINCT mm.id), 0) AS total_memo,
-        COALESCE(fba.feedback, 0) AS feedback_admin,
-        COALESCE(fbq.feedback_score, 0) AS feedback_qa,
-        market.market_name
+  //   `
+  //     SELECT 
+  //       sa.*,
+  //       COALESCE(ses.month, ?) AS month,
+  //       COALESCE(ses.year, ?) AS year,
+  //       COALESCE(ses.submitted, 0) AS submitted,
+  //       COALESCE(ts.target, 0) AS target,
+  //       COALESCE(ts.ship_ok, 0) AS ship_ok,
+  //       COALESCE(COUNT(DISTINCT nd.id), 0) AS total_new_deposit,
+  //       COALESCE(COUNT(DISTINCT ab.id), 0) AS total_absences,
+  //       COALESCE(COUNT(DISTINCT td.id), 0) AS total_tardiness,
+  //       COALESCE(COUNT(DISTINCT mm.id), 0) AS total_memo,
+  //       COALESCE(fba.feedback, 0) AS feedback_admin,
+  //       COALESCE(fbq.feedback_score, 0) AS feedback_qa,
+  //       market.market_name
+  //   FROM sales_agents sa
+  //   LEFT JOIN sales_evaluation_status ses
+  //       ON sa.id = ses.agent_id
+  //     AND ses.month = ?
+  //     AND ses.year = ?
+  //   LEFT JOIN target_shipok ts
+  //       ON sa.id = ts.agent_id
+  //     AND ts.month = ?
+  //     AND ts.year = ?
+  //   LEFT JOIN new_deposit nd
+  //       ON sa.id = nd.agent_id
+  //     AND nd.month = ?
+  //     AND nd.year = ?
+  //   LEFT JOIN absences ab
+  //       ON sa.id = ab.agent_id
+  //     AND ab.month =  ?
+  //     AND ab.year = ?
+  //   LEFT JOIN tardiness td
+  //       ON sa.id = td.agent_id
+  //     AND td.month = ?
+  //     AND td.year = ?
+  //   LEFT JOIN memo mm
+  //       ON sa.id = mm.agent_id
+  //     AND mm.month = ?
+  //     AND mm.year = ?
+  //   LEFT JOIN feedback fba
+  //       ON sa.id = fba.agent_id
+  //     AND fba.month = ?
+  //     AND fba.year = ?
+  //   LEFT JOIN feedback_by_qa fbq
+  //       ON sa.id = fbq.agent_id
+  //     AND fbq.month = ?
+  //     AND fbq.year = ?  
+  //   LEFT JOIN market
+  //       ON sa.market_id = market.id
+  //   WHERE sa.status = 'active'
+  //   GROUP BY sa.id, fba.feedback, fbq.feedback_score;
+
+  //     `, [givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
+  //         givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
+  //         givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
+
+  //       ]
+  // )
+
+  const [sales_agents_result] = await pool.execute(
+
+        `
+        SELECT 
+        sa.id,
+        MAX(sa.firstname) AS firstname,
+        MAX(sa.lastname) AS lastname,
+        MAX(sa.db_name) AS db_name,
+        MAX(sa.image_link) AS image_link,
+        MAX(sa.agent_type) AS agent_type,
+        MAX(sa.manager_id) AS manager_id,
+        MAX(sa.status) AS status,
+        COALESCE(MAX(ses.month), ?) AS month,
+        COALESCE(MAX(ses.year), ?) AS year,
+        COALESCE(MAX(ses.submitted), 0) AS submitted,
+        COALESCE(MAX(ts.target), 0) AS target,
+        COALESCE(MAX(ts.ship_ok), 0) AS ship_ok,
+        COUNT(DISTINCT nd.id) AS total_new_deposit,
+        COUNT(DISTINCT ab.id) AS total_absences,
+        COUNT(DISTINCT td.id) AS total_tardiness,
+        COUNT(DISTINCT mm.id) AS total_memo,
+        COALESCE(MAX(fba.feedback), 0) AS feedback_admin,
+        COALESCE(MAX(fbq.feedback_score), 0) AS feedback_qa,
+        MAX(market.market_name) AS market_name
     FROM sales_agents sa
     LEFT JOIN sales_evaluation_status ses
         ON sa.id = ses.agent_id
-      AND ses.month = ?
-      AND ses.year = ?
+        AND ses.month = ?
+        AND ses.year = ?
     LEFT JOIN target_shipok ts
         ON sa.id = ts.agent_id
-      AND ts.month = ?
-      AND ts.year = ?
+        AND ts.month = ?
+        AND ts.year = ?
     LEFT JOIN new_deposit nd
         ON sa.id = nd.agent_id
-      AND nd.month = ?
-      AND nd.year = ?
+        AND nd.month = ?
+        AND nd.year = ?
     LEFT JOIN absences ab
         ON sa.id = ab.agent_id
-      AND ab.month =  ?
-      AND ab.year = ?
+        AND ab.month = ?
+        AND ab.year = ?
     LEFT JOIN tardiness td
         ON sa.id = td.agent_id
-      AND td.month = ?
-      AND td.year = ?
+        AND td.month = ?
+        AND td.year = ?
     LEFT JOIN memo mm
         ON sa.id = mm.agent_id
-      AND mm.month = ?
-      AND mm.year = ?
+        AND mm.month = ?
+        AND mm.year = ?
     LEFT JOIN feedback fba
         ON sa.id = fba.agent_id
-      AND fba.month = ?
-      AND fba.year = ?
+        AND fba.month = ?
+        AND fba.year = ?
     LEFT JOIN feedback_by_qa fbq
         ON sa.id = fbq.agent_id
-      AND fbq.month = ?
-      AND fbq.year = ?  
+        AND fbq.month = ?
+        AND fbq.year = ?
     LEFT JOIN market
         ON sa.market_id = market.id
     WHERE sa.status = 'active'
-    GROUP BY sa.id, fba.feedback, fbq.feedback_score;
-
-      `, [givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
+    GROUP BY sa.id
+    ORDER BY sa.id;
+       `, [givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
           givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
           givenMonth,givenYear,givenMonth,givenYear,givenMonth,givenYear,
 
@@ -300,9 +369,9 @@ for (const agent of sales_agents) {
     }
 
     // Enforce feedback_qa > 0
-    if (Number(agent.feedback_qa) <= 0) {
-      isReady = false
-    }
+    // if (Number(agent.feedback_qa) <= 0) {
+    //   isReady = false
+    // }
 
     // Final override: if feedback_admin > 0 → ready_to_submit = true
     if (Number(agent.feedback_admin) > 0) {

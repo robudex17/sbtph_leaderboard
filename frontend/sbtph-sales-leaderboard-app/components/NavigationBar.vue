@@ -4,6 +4,25 @@
           <!-- Brand -->
           <div class="flex items-center gap-10">
               <div class="text-lg font-bold">SBTPH SALES APP</div>
+              <!-- Dropdown for manage sales agent -->
+              <div v-if="route.path =='/admin/agent2/manage_sales_agents'" class="flex items-center gap-2">
+         
+                <select 
+                  class="px-2 py-1 border  font-bold text-sm rounded bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                 v-model="salesEmployementStatus"
+                >
+              
+                <option class="text-green-500 font-bold" value="Hired">ACTIVE</option>
+                <option  class="text-red-500 font-bold" value="Resigned">RESIGNED</option>
+
+                </select>
+                <button  
+                  class="px-2 py-1 bg-blue-500 text-white rounded font-bold text-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  @click="fetchSalesAgents"
+                >
+                  Submit
+                </button>
+              </div>                 
 
               <!-- Dropdown for Dashboard -->
               <div v-if="route.path =='/dashboard'" class="flex items-center gap-2">
@@ -139,6 +158,7 @@
     const selectedMonth = ref("");
     const selectedYear = ref("");
     const truckOption = ref(true) //default is  include the truck 
+    
 
     // Dashboard values
     // const individual = 'individual'
@@ -153,10 +173,10 @@
       dashboardOption.value = "individual"
     }
 
-    
-
-
+  
     const leaderboardOption = ref('agent')
+
+    const salesEmployementStatus = ref('Hired')
 
 
 
@@ -185,7 +205,11 @@
       '/admin/agent_performance/yearly',
       '/admin/upload_target_shipok_data',
        '/admin/upload_new_deposit_data',
-       '/admin/upload_sales_evaluation_data'
+       '/admin/upload_sales_evaluation_data',
+       '/admin/markets_and_teams',
+
+
+       '/admin/agent2/manage_sales_agents',
 
     ])
 
@@ -195,7 +219,10 @@
       '/feedback/feedback_by_sales',
       '/admin/upload_target_shipok_data',
       '/admin/upload_new_deposit_data' ,
-      '/admin/upload_sales_evaluation_data'   
+      '/admin/upload_sales_evaluation_data' ,
+       '/admin/markets_and_teams',
+       
+       '/admin/agent2/manage_sales_agents',
     ])
 
     const pathWithoutTrucksOption = ref([
@@ -210,7 +237,11 @@
       '/admin/upload_new_deposit_data',
       '/admin/upload_sales_evaluation_data',
       '/admin/sales_evaluation',
-      '/'
+      '/',
+       '/admin/markets_and_teams',
+
+
+       '/admin/agent2/manage_sales_agents',
 
     ])
 
@@ -306,7 +337,21 @@
         return true
     }
 
+    const fetchSalesAgents = () => {
+      if (route.path == '/admin/agent2/manage_sales_agents') {
+         
+          const currentRoute = router.currentRoute.value 
 
+          router.push( {
+             path: currentRoute.path,
+             query: {
+               employee_status: salesEmployementStatus.value
+             } 
+
+          })
+      }
+      return
+    }
     const submitDateSelection = () => {
 
       if(route.path == '/dashboard'){

@@ -17,26 +17,27 @@
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_ship_ok }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_ship_ok) }}
+                            {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_shipok) }}
                             <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
                             <!-- {{ target_shipok.total_target > 0 ? Math.round((target_shipok.total_ship_ok / target_shipok.total_target) * 100 + Number.EPSILON) + '%' : '0%' }}   -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_ship_ok }}</p>
+                        <div :class="(target_shipok.total_target - target_shipok.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>
                 </div>                
         </div>
           <div v-else-if="dashboardoption =='team'">
-                <!-- <div>{{  data }}</div> -->
+              
+               
                 <p class="text-gray-800 font-bold text-5xl mb-10">Team Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.team_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
@@ -47,12 +48,12 @@
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_ship_ok }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                           {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_ship_ok) }}
+                           {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_shipok) }}
                             <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
                             <!-- {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }}  -->
                            <!-- {{ target_shipok.total_target  > 0 ? Math.round((target_shipok.total_target  * 100) / target_shipok.total_target) + '%' : '0%' }} -->
@@ -62,7 +63,7 @@
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
                         <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_ship_ok }}</p>
+                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>
@@ -96,11 +97,11 @@
                         >
                             <td class="py-2 px-4 text-md uppercase">{{ agent.db_name }}</td>
                              <td class="py-2 px-4 text-md uppercase">{{ agent.market_name }}</td>
-                            <td class="py-2 px-4 text-md uppercase">{{ agent.total_target }}</td>
+                            <td class="py-2 px-4 text-md uppercase">{{ agent.target }}</td>
                   
-                            <td class="py-2 px-4 text-md">{{ agent.total_ship_ok }}</td>
+                            <td class="py-2 px-4 text-md">{{ agent.shipok }}</td>
                             <td class="py-2 px-4 text-md">
-                            {{ agent.total_ship_ok > 0 ? ((agent.total_ship_ok / agent.total_target ) * 100).toFixed(2) + '%' : '0%' }}
+                            {{ agent.shipok > 0 ? ((agent.shipok / agent.target ) * 100).toFixed(2) + '%' : '0%' }}
                             </td>
                         </tr>
                         </tbody>
@@ -123,13 +124,14 @@
                 </div>
             </div>     -->
             <div v-else-if="dashboardoption=='overall'">
+   
                 <p class="text-gray-800 font-bold text-5xl mb-10 ">Overall PH Office Results</p>
                 <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].monthly_target }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].total_target }}</p>
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
@@ -138,14 +140,14 @@
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ getWholeNumberPercentage(data[0].monthly_target, data[0].total_shipok) }}
+                            {{ getWholeNumberPercentage(data[0].total_target, data[0].total_shipok) }}
                             <!-- {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }} -->
                            <!-- {{ data.monthly_target > 0 ? Math.round((data.total_shipok * 100) / data.monthly_target) + '%' : '0%' }} -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(data[0].monthly_target - data[0].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ data[0].monthly_target - data[0].total_shipok }}</p>
+                        <div :class="(data[0].total_target - data[0].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ data[0].total_target - data[0].total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>
@@ -181,9 +183,9 @@
                             <td class="py-2 px-4 text-md uppercase">{{ market.market_name }}</td>
                             <td class="py-2 px-4 text-md uppercase">{{ market.total_target }}</td>
                     
-                            <td class="py-2 px-4 text-md">{{ market.total_ship_ok }}</td>
+                            <td class="py-2 px-4 text-md">{{ market.total_shipok }}</td>
                             <td class="py-2 px-4 text-md">
-                                {{ market.total_ship_ok > 0 ? ((market.total_ship_ok / market.total_target) * 100).toFixed(2) + '%' : '0%' }}
+                                {{ market.total_shipok > 0 ? ((market.total_shipok / market.total_target) * 100).toFixed(2) + '%' : '0%' }}
                             </td>
                             </tr>
                         </tbody>
@@ -195,7 +197,7 @@
                    <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">Trucks Excluded</h2>
                       <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data[1].monthly_target }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[1].total_target }}</p>
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
@@ -204,14 +206,14 @@
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ getWholeNumberPercentage(data[1].monthly_target, data[1].total_shipok) }}
+                            {{ getWholeNumberPercentage(data[1].total_target, data[1].total_shipok) }}
                             <!-- {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }} -->
                            <!-- {{ data.monthly_target > 0 ? Math.round((data.total_shipok * 100) / data.monthly_target) + '%' : '0%' }} -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(data[1].monthly_target - data[1].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ data[1].monthly_target - data[1].total_shipok }}</p>
+                        <div :class="(data[1].total_target - data[1].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ data[1].total_target - data[1].total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>

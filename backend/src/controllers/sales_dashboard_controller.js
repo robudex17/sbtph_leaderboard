@@ -24,6 +24,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
     // const givenMonth = "June"
     const givenYear =    currentDate.getFullYear()
+
+    
     const  withTrucks = true
     //const  dashboarOption = req.query.dashboardoption 
 
@@ -38,9 +40,102 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         dashboarOption = req.query.dashboardoption
     }
 
+      // Map month names to numbers
+    const monthMap = {
+      January: "01",
+      February: "02",
+      March: "03",
+      April: "04",
+      May: "05",
+      June: "06",
+      July: "07",
+      August: "08",
+      September: "09",
+      October: "10",
+      November: "11",
+      December: "12"
+    };
 
   
- 
+
+ // Convert "March" -> "03"
+    const monthNumber = monthMap[givenMonth];
+    if (!monthNumber) {
+      return res.status(400).json({ error: "Invalid givenMonth format" });
+    }
+
+
+  const snapshot = `${givenYear}-${monthNumber.toString().padStart(2, '0')}`;  
+
+
+  let dashboarddMasterQuery = 
+    `
+       SELECT 
+                sa.id AS id,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.email,
+                sa.image_link,
+                aa.agent_type,
+                r.role_name AS agent_role,
+                aa.manager_id,
+                mgr.db_name AS manager_dbname,
+                mr.role_name AS manager_role,
+                m.id AS market_id,
+                m.name AS market_name,
+                t.id AS team_id,
+                t.name AS team_name,
+                ae.status AS employee_status,
+                COALESCE(ts.target, 0) AS target,
+                COALESCE(ts.ship_ok, 0) AS shipok
+            FROM sales_agents2 sa
+            JOIN (
+                SELECT aa1.*
+                FROM agent_assignments aa1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_assignments
+                    WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                AND aa1.id = aa2.latest_id
+            ) aa ON sa.id = aa.agent_id
+            JOIN (
+                SELECT ae1.*
+                FROM agent_employments ae1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_employments
+                    WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                        AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                AND ae1.id = ae2.latest_id
+            ) ae ON sa.id = ae.agent_id
+            LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+            LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+            LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                    AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                    AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+            LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+            LEFT JOIN markets m ON aa.market_id = m.id
+            LEFT JOIN teams t ON aa.team_id = t.id
+            LEFT JOIN target_shipok ts 
+                ON ts.agent_id = sa.id 
+                AND ts.month = ?
+                AND ts.year = ?
+            WHERE aa.agent_type  != 2
+
+    `
 
 
 
@@ -102,45 +197,86 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }
 
       const dashboardQueryForMarkets = (filterBy, operator, value, orderBy) => {
+        // const query = `
+        //           WITH deposit_count AS (
+        //       SELECT 
+        //           market_id, 
+        //           month, 
+        //           year, 
+        //           COUNT(*) AS total_deposit
+        //       FROM new_deposit
+        //       WHERE month = ? AND year = ?
+        //       GROUP BY market_id, month, year
+        //   )
+        //   SELECT 
+        //       market.id AS market_id,
+        //       market.team_id,
+        //       market.market_name,
+        //       target_shipok.month AS month,
+        //       target_shipok.year AS year,
+        //       COALESCE(SUM(target_shipok.target), 0) AS total_target,
+        //       COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+        //       COALESCE(deposit_count.total_deposit, 0) AS total_deposit
+        //   FROM 
+        //       market
+        //   LEFT JOIN 
+        //       sales_agents ON market.id = sales_agents.market_id
+        //   LEFT JOIN 
+        //       target_shipok 
+        //       ON sales_agents.id = target_shipok.agent_id
+        //       AND target_shipok.month = ?
+        //       AND target_shipok.year = ?
+        //   LEFT JOIN 
+        //       deposit_count 
+        //       ON market.id = deposit_count.market_id
+        //   WHERE 
+        //       ${filterBy} ${operator} ${value}  AND market.team_id !=0
+        //   GROUP BY 
+        //       market.id, market.market_name, deposit_count.total_deposit
+        //   ORDER BY 
+        //       ${orderBy};
+        //   `
+
         const query = `
-                  WITH deposit_count AS (
-              SELECT 
-                  market_id, 
-                  month, 
-                  year, 
-                  COUNT(*) AS total_deposit
-              FROM new_deposit
-              WHERE month = ? AND year = ?
-              GROUP BY market_id, month, year
-          )
-          SELECT 
-              market.id AS market_id,
-              market.team_id,
-              market.market_name,
-              target_shipok.month AS month,
-              target_shipok.year AS year,
-              COALESCE(SUM(target_shipok.target), 0) AS total_target,
-              COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
-              COALESCE(deposit_count.total_deposit, 0) AS total_deposit
-          FROM 
-              market
-          LEFT JOIN 
-              sales_agents ON market.id = sales_agents.market_id
-          LEFT JOIN 
-              target_shipok 
-              ON sales_agents.id = target_shipok.agent_id
-              AND target_shipok.month = ?
-              AND target_shipok.year = ?
-          LEFT JOIN 
-              deposit_count 
-              ON market.id = deposit_count.market_id
-          WHERE 
-              ${filterBy} ${operator} ${value}  AND market.team_id !=0
-          GROUP BY 
-              market.id, market.market_name, deposit_count.total_deposit
-          ORDER BY 
-              ${orderBy};
-          `
+                WITH deposit_count AS (
+                    SELECT 
+                        market_id, 
+                        month, 
+                        year, 
+                        COUNT(*) AS total_deposit
+                    FROM new_deposit
+                    WHERE month = ? AND year = ?
+                    GROUP BY market_id, month, year
+                )
+                SELECT 
+                    market.id AS market_id,
+                    market.team_id,
+                    market.market_name,
+                    target_shipok.month AS month,
+                    target_shipok.year AS year,
+                    COALESCE(SUM(target_shipok.target), 0) AS total_target,
+                    COALESCE(SUM(target_shipok.ship_ok), 0) AS total_ship_ok,
+                    COALESCE(deposit_count.total_deposit, 0) AS total_deposit
+                FROM market
+                LEFT JOIN sales_agents ON market.id = sales_agents.market_id
+                LEFT JOIN target_shipok 
+                    ON sales_agents.id = target_shipok.agent_id
+                    AND target_shipok.month = ?
+                    AND target_shipok.year = ?
+                LEFT JOIN deposit_count 
+                    ON market.id = deposit_count.market_id
+                    AND deposit_count.month = target_shipok.month
+                    AND deposit_count.year = target_shipok.year
+                WHERE  ${filterBy} ${operator} ${value}  AND market.team_id !=0
+                GROUP BY 
+                    market.id, 
+                    market.team_id,
+                    market.market_name,
+                    target_shipok.month,
+                    target_shipok.year
+                ORDER BY market.id;
+                        
+        `
           return query
       }
 
@@ -193,35 +329,77 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }
 
 
-      
+   
+   const fetchTeamTargetShipok = (result,month, year) => {
+                let team_targets = result.reduce((acc, agent) => {
 
-       let queryIndividual;
+                const teamId = agent.team_id 
+            
+                
+                //this section I use market_name as team_name if  more than one market in a team I 
+                //will combine it with this format  'market1/market2'
+                if(!acc[teamId]){
+                    acc[teamId] = {
+                        team_name: agent.market_name,
+                        team_id: teamId,
+                        martket_id: agent.market_id,
+                        market_name: agent.market_name,
+                        month: month,
+                        year: year,
+                        total_shipok: 0,
+                        total_target: 0,
+                       
+                        teammembers:[]
+
+                    }
+                }
+
+                if(acc[teamId.team_name != agent.market_name]){
+                    acc[teamId].team_name = `${acc[teamId].team_name}/${agent.market_name}`
+                }
+
+                acc[teamId].total_target  +=  Number(agent.target || 0 )
+                acc[teamId].total_shipok  +=  Number(agent.shipok || 0)
+            
+
+                acc[teamId].teammembers.push(agent)
+
+                return acc
+
+           }, {}) 
+            //get the values only
+            team_targets = Object.values(team_targets)
+
+            return team_targets
+    }
+     let individualTargets
       if (dashboarOption == 'individual'){
+   
          if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
-             queryIndividual =  dashboardQueryForInvidualAgents("sales_agents.id", "!=", 0, "market.market_name")
-        
+               const [result] = await pool.execute(
+                dashboarddMasterQuery,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
+            )
+             individualTargets  = result     
+           
          }else{
             queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
+
+               const [result] = await pool.execute(
+                `${dashboarddMasterQuery} AND  sa.id=?`
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.login_id]
+            )   
+                 
          }
-        //  }else if(loginUser.role == 'manager' && loginUser.agent_type == 1){
-        //     queryIndividual = dashboardQueryForInvidualAgents("market.id", "=", loginUser.market_id, "sales_agents.id")
   
 
-        //  }else if(loginUser.role == 'user' && loginUser.agent_type == 0) {
-        //      queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
-
-        //  }
-
-         const [marketTargetShipok] = await pool.execute(
-           queryIndividual,
-          [givenMonth, givenYear,givenMonth, givenYear]
-        )
+     
 
         // transform total_target and total_ship_ok value of null to 0
-        dashboard.data = marketTargetShipok.map(item => ({
+        dashboard.data = individualTargets.map(item => ({
           ...item,
-          total_target: item.total_target == null ? 0: item.total_target,
-          total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
+          total_target: item.target == null ? 0: item.target,
+          total_shipok: item.shipok == null ? 0 : item.shipok,
           month: item.month == null ? givenMonth : item.month,
           year: item.year == null ? givenYear : item.year,
         }))
@@ -229,159 +407,96 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       
       }else if (dashboarOption == 'team'){
+        let teamTargets = []
+      
         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
-            
-            //fetch the list of market
-            const [teams] = await pool.execute(
-            'SELECT  * FROM team'
-            );
 
-            for (const team of teams) {
-            if (team.id == 0 || team.id == 6) { // team is 6 is For the Develeper for testing only
-                continue;
-            }
 
-            // 1. Query and transform data for the market
-            const queryTeam = dashboardQueryForTeams( );
-
+          const [result] = await pool.execute(
+                dashboarddMasterQuery,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
+            )
         
-           
-            const [marketTargetShipok] = await pool.execute(
-                queryTeam,
-                [givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, team.id]
-            );
-
-            console.log(marketTargetShipok)
-            
-
-            const marketTransformed = marketTargetShipok.map(item => ({
-                ...item,
-                total_target: item.total_target == null ? 0 : item.total_target,
-                total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
-                total_deposit: item.total_deposit == null ? 0 : item.total_deposit,
-                month: item.month == null ? givenMonth : item.month,
-                year: item.year == null ? givenYear : item.year,
-            }));
-
-            console.log('after transformed',marketTransformed)
-            
-
-            // 2. Query and transform data for the individual agents (teammembers)
-            const queryTeammembers = dashboardQueryForInvidualAgents("market.team_id", "=", team.id, "sales_agents.id");
-            const [teammembersRaw] = await pool.execute(
-                queryTeammembers,
-                [givenMonth, givenYear, givenMonth, givenYear]
-            );
-
-            const teammembersTransformed = teammembersRaw.map(agent => ({
-                ...agent,
-                total_target: agent.total_target == null ? 0 : agent.total_target,
-                total_ship_ok: agent.total_ship_ok == null ? 0 : agent.total_ship_ok,
-                total_deposit: agent.total_deposit == null ? 0 : agent.total_deposit,
-                month: agent.month == null ? givenMonth : agent.month,
-                year: agent.year == null ? givenYear : agent.year,
-            }));
-
+          teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
           
-            // 3. Attach to dashboard
-            dashboard.data.push({
-                ...marketTransformed[0], // assuming only one row per market
-                teammembers: teammembersTransformed
-            });
-        }
+        
+         dashboard.data = teamTargets
+        
         //get the specific market plus get the agents that belong to the market
         }else {
          
-            // 1. Query and transform data for the specific market
-            const queryMarket = dashboardQueryForMarkets("market.id", "=", loginUser.market_id, "market.id");
-            const [marketTargetShipok] = await pool.execute(
-            queryMarket,
-            [givenMonth, givenYear, givenMonth, givenYear]
-            );
 
-            const marketTransformed = marketTargetShipok.map(item => ({
-            ...item,
-            total_target: item.total_target == null ? 0 : item.total_target,
-            total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
-            total_deposit: item.total_deposit == null ? 0 : item.total_deposit,
-            month: item.month == null ? givenMonth : item.month,
-            year: item.year == null ? givenYear : item.year,
-            }));
+            const [result] = await pool.execute(
+                `${dashboarddMasterQuery} AND m.id=?`,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.market_id]
+            )
 
-            // 2. Query and transform team members under this market
-            const queryTeammembers = dashboardQueryForInvidualAgents("market.id", "=", loginUser.market_id, "sales_agents.id");
-            const [teammembersRaw] = await pool.execute(
-            queryTeammembers,
-            [givenMonth, givenYear, givenMonth, givenYear]
-            );
-
-            const teammembersTransformed = teammembersRaw.map(agent => ({
-            ...agent,
-            total_target: agent.total_target == null ? 0 : agent.total_target,
-            total_ship_ok: agent.total_ship_ok == null ? 0 : agent.total_ship_ok,
-            total_deposit: agent.total_deposit == null ? 0 : agent.total_deposit,
-            month: agent.month == null ? givenMonth : agent.month,
-            year: agent.year == null ? givenYear : agent.year,
-            }));
-
-            
-
-            // 3. Build dashboard object for single market
-            dashboard.data.push({
-            ...marketTransformed[0], // assume one row per market
-            teammembers: teammembersTransformed})
-
+         teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
+         dashboard.data = teamTargets
+  
         }
 
       }else if ( dashboarOption == 'overall'){
-        queryTargetShipok = "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE month=? AND year=? GROUP BY month,year"
-        const [overallResult] = await pool.execute(
-        queryTargetShipok,
-        [givenMonth, givenYear]
-        )
-            
-        const [overallData] = overallResult
-
-        if ( overallData == null || overallData == ""){
-          overallData = {month:givenMonth,year: givenYear,monthly_target:"0",total_shipok:"0"}
-        }
-
-         // 1. Query and transform data for the market
-        const queryTeam = dashboardQueryForMarkets("market.id", "!=", 0 , "market.id");
-        const [marketTargetShipok] = await pool.execute(
-                queryTeam,
-                [givenMonth, givenYear, givenMonth, givenYear]
-         );
+           let overAllTargets = []
+           let targetWithTrucks = []
+           let targetWithoutTrucks = []
+           const [result] = await pool.execute(
+                dashboarddMasterQuery,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
+            )
         
-         const marketTransformed = marketTargetShipok.map(item => ({
-                ...item,
-                total_target: item.total_target == null ? 0 : item.total_target,
-                total_ship_ok: item.total_ship_ok == null ? 0 : item.total_ship_ok,
-                total_deposit: item.total_deposit == null ? 0 : item.total_deposit,
-                month: item.month == null ? givenMonth : item.month,
-                year: item.year == null ? givenYear : item.year,
-            }));
-        // console.log(marketTransformed)
-        overallData.team = marketTransformed 
-        dashboard.data.push(overallData)
+        let teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
 
-        //ALL TARGET/SHIPOK BUT TRUCKS MARKET EXCLUDED 
-
-        let queryTargetShipokWithoutTrucks = "SELECT month, year, SUM(target) AS monthly_target, SUM(ship_ok) AS total_shipok FROM `target_shipok` WHERE market_id !=10  AND month=? AND year=? GROUP BY month,year"
-        const [overallResultWithoutTrucks] = await pool.execute(
-        queryTargetShipokWithoutTrucks,
-        [givenMonth, givenYear]
-        )
+        targetWithTrucks = teamTargets.map(({ teammembers, ...rest}) => rest).reduce((acc, team) => {
+            let overTeam = 'overall'
             
-        const [overallDataWithoutTrucks] = overallResultWithoutTrucks
+            if(!acc[overTeam]){
+                acc[overTeam] = {
+                    month: givenMonth, 
+                    year: givenYear,
+                    total_target: Number(team.total_target || 0),
+                    total_shipok: Number(team.total_shipok || 0),
+                    team_name: 'overll market',
+                    team: [],
+                }
+              
+            }
+            acc[overTeam].total_target += Number(team.total_target || 0)
+            acc[overTeam].total_shipok += Number(team.total_shipok || 0) 
+            acc[overTeam].team.push(team)
 
-        if ( overallResultWithoutTrucks == null || overallDataWithoutTrucks == ""){
-          overallDataWithoutTrucks = {month:givenMonth,year: givenYear,monthly_target:"0",total_shipok:"0"}
-        }
-      
-     
-      dashboard.data.push(overallDataWithoutTrucks)  
+            return acc
+        },{})
+
     
+        targetWithoutTrucks = teamTargets.map(({teammembers, ...rest})=> rest).filter(team => team.team_name != 'trucks').reduce((acc, team) => {
+            let overTeam = 'overall'
+            if(!acc[overTeam]){
+                acc[overTeam] = {
+                    month: givenMonth, 
+                    year: givenYear,
+                    total_target: Number(team.total_target || 0),
+                    total_shipok: Number(team.total_shipok || 0),
+                    team_name: 'overll market',
+                    
+                }
+              
+            }
+            acc[overTeam].total_target += Number(team.total_target || 0)
+            acc[overTeam].total_shipok += Number(team.total_shipok || 0) 
+            // acc[overTeam].team.push(team)
+
+            return acc
+
+        }, {})
+        targetWithTrucks = Object.values(targetWithTrucks)
+        targetWithoutTrucks = Object.values(targetWithoutTrucks)
+
+        overAllTargets.push(targetWithTrucks[0])
+        overAllTargets.push(targetWithoutTrucks[0])
+    
+        dashboard.data = overAllTargets
+
 
       }
 

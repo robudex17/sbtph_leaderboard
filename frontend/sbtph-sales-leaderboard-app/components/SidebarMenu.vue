@@ -142,8 +142,11 @@
                 // { name: 'Upload New Deposit Sales Data', route: '/admin/upload_new_deposit_data', icon: ['fas', 'fa-upload'] },
                 { name: 'Sales Evaluation', route: '/admin/sales_evaluation', icon: ['fas', 'user-tie'] },
                 { name: 'Upload Sales Evaluation Data', route: '/admin/upload_sales_evaluation_data', icon: ['fas', 'fa-upload'] },
+                  { name: 'Markets and Teams', route: '/admin/markets_and_teams', icon: ['fas', 'user-tie'] },
                 // { name: 'export', route: '/admin/export_to_excel', icon: ['fas', 'fa-file-excel'] },
-  
+
+
+               { name: 'Manage Sales Agents2', route: '/admin/agent2/manage_sales_agents?employee_status=Hired', icon: ['fas', 'user-tie'] },
 
               ]
             }

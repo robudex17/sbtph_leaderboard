@@ -6,6 +6,13 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 const  {validateMonthYear} = require('../middleware/validator.js')
 
+router.get('/markets', authenticateToken, salesMarketController.fetchMarkets)
+router.get('/markets/:market_id', authenticateToken, salesMarketController.fetchMarkets )
+router.post('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
+router.put('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
+router.delete('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
+
+
 router.get('/agent_market', authenticateToken, salesMarketController.fetchAgentMarket)
 
 router.get('/agent_market_target_shipok', authenticateToken, validateMonthYear,salesMarketController.fetchAgentMarketTargetShipok)

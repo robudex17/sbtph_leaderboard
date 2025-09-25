@@ -28,6 +28,9 @@ const API = {
     agentTargetShipok:  `${HTTPADDR}/agent_target_shipok`,
     agentDeposit: `${HTTPADDR}/agent_deposit`,
 
+    markets: `${HTTPADDR}/markets`,
+    teams: `${HTTPADDR}/teams`,
+
     agentAttendance: {
         absence: `${HTTPADDR}/agent_absent`,
         tardiness: `${HTTPADDR}/agent_tardiness`,
@@ -65,9 +68,10 @@ const API = {
         team_performance_monthly :  `${HTTPADDR}/agent_market_target_shipok_new_deposit_export`,
         team_performance_yearly :   `${HTTPADDR}/agent_market_target_shipok_new_deposit_year_export`,
 
-    }
+    },
 
-  
+  // newly added for experiment 
+   salesAgents2: `${HTTPADDR}/test/sales_agents`,
 }
 
 export default API 

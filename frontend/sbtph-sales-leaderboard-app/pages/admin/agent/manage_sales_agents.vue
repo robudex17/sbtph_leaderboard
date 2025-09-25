@@ -441,6 +441,7 @@ const currentAgent = ref({
   db_name: '',
   market_id: '',
   manager_name: '',
+  
   image: '',
 });
 
@@ -547,6 +548,7 @@ const resetCurrentAgent = () => {
     agent_type: '0',
     db_name: '',
     market_id: '',
+    team_id: '',
     manager_name: '',
     image: '',
   };

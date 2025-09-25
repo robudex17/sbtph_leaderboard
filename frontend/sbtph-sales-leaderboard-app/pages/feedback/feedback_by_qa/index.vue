@@ -7,20 +7,24 @@
     <div >
 
         <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">QA FEEDBACK</h1>
-    
+
 
         <!-- Agents Table -->
         <div class="overflow-x-auto shadow-xl rounded-lg">
           <table class="w-full table-auto border-collapse bg-white">
             <thead>
               <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">ID</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900"> Name</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">Market</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">Month</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">Year</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">Feedback</th>
-                <th class="py-2 px-4 text-center text-medium font-bold text-green-900">Actions</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">ID</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900"> Name</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900"> Employee Status</th>
+                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Manager</th>     
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Market</th>
+                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Team</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Month</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Year</th>
+                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Feedback By</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Feedback</th>
+                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -29,10 +33,10 @@
                 :key="index"
                 class="even:bg-blue-50 odd:bg-white"
               >
-                <td class="py-4 px-6 border text-center text-gray-700">
+                <td class="py-1 px-6 border text-center text-gray-700">
                   {{ agent.id }}
                 </td>
-                <td class="py-2 px-4 text-center text-medium font-medium text-green-900">
+                <td class="py-1 px-4  border text-center text-medium font-medium text-green-900">
                     <div class="flex items-center space-x-3 ml-3">
                       <img
                         v-if="agent && agent.image_link"
@@ -43,17 +47,30 @@
                       <span>{{ agent.db_name }}</span>
                     </div>
                 </td>
-                <td class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-center text-sm  font-bold " 
+                  :class="agent.employee_status=== 'Hired' ? 'text-green-500 font-bold' : 'text-red-500 font-bold' ">
+                  {{ agent.employee_status }}
+                </td>     
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                  {{ agent.manager_dbname }}
+                </td>                             
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
                   {{ agent.market_name }}
+                </td>                
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                  {{ agent.team_name }}
                 </td>
-                <td class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
                   {{ agent.month }}
                 </td>
-                <td class="py-2 px-4 text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
                   {{ agent.year }}
                 </td>
+                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                  {{ agent.qa_dbname  }}
+                </td>               
                 <td 
-                  class="py-4 px-6 border text-center"
+                  class="py-4 px-6 border text-center font-bold text-green-500"
                   :class="{ 'text-red-500 font-bold': agent.feedback === 'No Feedback' }"
                 >
                   {{ agent.feedback }}
@@ -65,13 +82,17 @@
                         path: `/feedback/feedback_by_qa/${agent.id}`,  query: { agent_type: agent.agent_type, agent_role: agent.role , agent_dbname: agent.db_name}
                         
                       }"
-                      class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      class="px-4 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                     >
                       Feedback Details
                     </NuxtLink> -->
-                      <button v-if="agent.feedback == 'No Feedback'"
+                      <button v-if="agent.feedback == 'No Feedback'" :disabled="agent.employee_status == 'Resigned'"
                       @click="openModal('add', agent)" 
-                      class="ml-2 bg-green-500 text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600">
+                      class="ml-2  text-white py-1 px-3 rounded-lg flex items-center gap-2 hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                       :class="agent.employee_status=== 'Resigned' ? 'bg-gray-600 font-bold' : 'bg-green-600 font-bold' "
+                      >
+                     
+                      
                       <font-awesome-icon icon="plus" />
                       Add 
                     </button>
@@ -125,8 +146,8 @@
                 </div>
 
                 <div class="flex justify-end gap-2">
-                  <button type="button" @click="closeModal" class="bg-gray-500 text-white py-2 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
-                  <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Submit</button>
+                  <button type="button" @click="closeModal" class="bg-gray-500 text-white py-1 px-4 rounded-lg hover:bg-gray-600">Cancel</button>
+                  <button type="submit" class="bg-green-500 text-white py-1 px-4 rounded-lg hover:bg-green-600">Submit</button>
                 </div>
               </form>
             </div>
@@ -138,7 +159,7 @@
             <button
               v-for="page in totalPages"
               :key="page"
-              class="px-4 py-2 border rounded"
+              class="px-4 py-1 border rounded"
               :class="{
                 'bg-blue-500 text-white': currentPage === page,
                 'bg-white text-gray-700': currentPage !== page,

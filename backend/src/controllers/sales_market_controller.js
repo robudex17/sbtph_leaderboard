@@ -1,6 +1,8 @@
 const pool =  require('../config/db')
 const { validationResult } = require('express-validator')
 
+
+// Will remove this later
 exports.fetchAgentMarket = async (req, res, next) => {
 
 
@@ -12,6 +14,112 @@ exports.fetchAgentMarket = async (req, res, next) => {
     // connection.release()
     res.json(result)
 }
+
+
+exports.fetchMarkets = async (req, res, next) => {
+
+    
+    // const connection =  await pool.getConnection()
+
+    const marketId = req.params.market_id 
+    const marketStatus = req.query.market_status
+   
+    if(marketId){
+         const [result] = await pool.execute(
+        `SELECT *  FROM markets WHERE id=?,`[marketId]  
+    )
+    // connection.release()
+      return res.json(result)
+    }
+     
+    if(marketStatus && marketStatus== 1 ){
+        const [result] = await pool.execute(
+       `SELECT *  FROM markets WHERE status=?`,[marketStatus]  
+   )
+       return res.json(result)
+   }
+
+
+    const [result] = await pool.execute(
+        'SELECT *  FROM `markets`'  
+    )
+    // connection.release()
+    
+   return res.json(result)
+}
+
+
+exports.addUpdateDeleteMarket = async (req, res, next) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    let query;
+    let valuesOfQuestionMark;
+    let errorMessage;
+    let successMessage;
+    const httpMethd = req.method;
+
+    try {
+        if (httpMethd === 'POST') {
+            const { name } = req.body;
+
+            // Check if market with same name (case-insensitive) and active already exists
+            const [existing] = await pool.execute(
+                `SELECT * FROM markets WHERE LOWER(name) = LOWER(?) AND status = 1`,
+                [name]
+            );
+
+            if (existing.length > 0) {
+                return res.status(400).json({ error: `Market "${name}" already exists and is active.` });
+            }
+
+            query = `INSERT INTO markets (name) VALUES (?)`;
+            valuesOfQuestionMark = [name];
+            successMessage = `New Market: ${name} is created or recorded`;
+            errorMessage = `Error inserting new Market`;
+
+        } else if (httpMethd === 'PUT') {
+            const { id, name, status } = req.body;
+
+            // Check if this market is dismantled already
+            const [rows] = await pool.execute(`SELECT status FROM markets WHERE id = ?`, [id]);
+
+            if (rows.length === 0) {
+                return res.status(404).json({ error: `Market with ID ${id} not found.` });
+            }
+
+            if (rows[0].status === 0) {
+                return res.status(400).json({ error: `Market with ID ${id} is already dismantled and cannot be updated.` });
+            }
+
+            query = `UPDATE markets SET name = ?, status = ? WHERE id = ?`;
+            valuesOfQuestionMark = [name, status, id];
+            successMessage = `Market Name is set to ${name} and status is set to ${status}`;
+            errorMessage = `Error in updating Market Record`;
+
+        } else if (httpMethd === 'DELETE') {
+            const { marketId } = req.body;
+            query = `DELETE FROM markets WHERE id = ?`;
+            valuesOfQuestionMark = [marketId];
+            successMessage = `Market: ${marketId} is deleted`;
+            errorMessage = `Error deleting Market`;
+        }
+
+        const [result] = await pool.execute(query, valuesOfQuestionMark);
+
+        res.status(201).json({
+            message: successMessage
+        });
+
+    } catch (error) {
+        console.error(errorMessage, error);
+        res.status(500).json({ error: `Database Error, ${errorMessage}` });
+    }
+};
+
 
 exports.fetchAgentMarketTargetShipok = async (req, res, next)  => {
    

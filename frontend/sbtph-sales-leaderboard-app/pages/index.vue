@@ -52,7 +52,7 @@
                   class="w-20 h-20 rounded-full object-cover mb-4"
                 />
                 <div v-else class="w-20 h-20 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
-                  <span class="text-xl">{{ team.team_name.charAt(0) || '' }}</span>
+                  <span class="text-xl">{{ team.team_name || '' }}</span>
                 </div>
                 <div class="text-center">
                   <h3 class="text-lg font-semibold">{{ team.team_name }}</h3>
@@ -162,7 +162,7 @@
           class="w-40 h-40 rounded-full object-cover mb-4"
         />
         <div v-else class="w-40 h-40 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
-          <span class="text-4xl">{{ selectedAgent ? selectedAgent.db_name.charAt(0) : '' }}</span>
+          <span class="text-4xl">{{ selectedAgent ? selectedAgent.db_name : '' }}</span>
         </div>
         <div class="text-center">
           <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
@@ -189,6 +189,24 @@
         </div>
         <p class="text-lg font-bold mt-2">Month Of: {{ selectedAgent ? selectedAgent.month : '' }}</p>
         <p class="text-lg font-bold mt-2">Year: {{ selectedAgent ? selectedAgent.year : '' }}</p>
+        <div class="mt-6 w-full overflow-x-auto">
+           <table class="min-w-full table-auto">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Employee Status</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Market</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Team</th>
+              </tr>
+            </thead>
+            <tbody>
+                 <td class="px-4 py-2 font-semibold border text-center bg-gray-900"><span :class="selectedAgent.employee_status=== 'Hired' ? 'text-green-500 font-bold' : 'text-red-500 font-bold' ">{{ selectedAgent ? selectedAgent.employee_status : '' }}</span></td> 
+               <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent ? selectedAgent.market_name.toUpperCase() : '' }}</td> 
+               <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent ? selectedAgent.team_name.toUpperCase() : '' }}</td>
+            </tbody>
+          </table>
+
+            
+        </div>
         <!-- Table for Additional Information -->
         <div class="mt-6 w-full overflow-x-auto">
           <table class="min-w-full table-auto">
@@ -313,7 +331,7 @@
           class="w-40 h-40 rounded-full object-cover mb-4"
         />
         <div v-else class="w-40 h-40 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
-          <span class="text-4xl">{{ selectedTeam ? selectedTeam.team_name.charAt(0) : '' }}</span>
+          <span class="text-4xl">{{ selectedTeam ? selectedTeam.team_name : '' }}</span>
         </div>
         <div class="text-center">
           <h3 class="text-3xl font-semibold">{{ selectedTeam ? selectedTeam.team_name : 'No Team selected' }}</h3>
