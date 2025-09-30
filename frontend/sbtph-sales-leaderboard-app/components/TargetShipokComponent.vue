@@ -2,19 +2,20 @@
     <div >
         <h1 class="text-2xl font-bold mb-4 text-center">Sales Agent Target/ShipOk</h1>
         <div class="overflow-x-auto">
-          <table class="min-w-full border border-green-500 rounded-lg">
-            <thead class="bg-green-200">
+         
+        <table class="w-full table-auto border-collapse bg-white">
+          <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
               <tr>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-                <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th> -->
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">TARGET</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">SHIPOK</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">PERCENTAGE</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">MARKET ID</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market Name</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
+                <!-- <th class="py-2 px-4 text-left text-sm font-medium border ">Agent ID</th> -->
+                <th class="py-2 px-4 text-left text-sm font-medium border ">Month</th>
+                <th class="py-2 px-4 text-left text-sm font-medium border">Year</th>
+                <!-- <th class="py-2 px-4 text-left text-sm font-medium ">Date</th> -->
+                <th class="py-2 px-4 text-left text-sm font-medium border">TARGET</th>
+                <th class="py-2 px-4 text-left text-sm font-medium border">SHIPOK</th>
+                <th class="py-2 px-4 text-left text-sm font-medium border">PERCENTAGE</th>
+                <th class="py-2 px-4 text-left text-sm font-medium border">MARKET</th>
+                <th class="py-2 px-4 text-left text-sm font-medium border">TEAM </th>
+                <th class="py-2 px-4 text-left text-sm font-medium  flex justify-between items-center">
                   Actions
                   <button :disabled="targetShipokDetails.length == 1 || currentUser.agent_type == 1 || currentUser.role == 'user' || currentUser.agent_type == 2"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                     @click="openModal('add')" 
@@ -30,28 +31,28 @@
                 v-for="(targetShipokDetail, index) in targetShipokDetails" 
                 :key="targetShipokDetails.id + index" 
                   class="odd:bg-white even:bg-green-50">
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.agent_id }}</td>
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.month }}</td>
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.year }}</td>
+                  <!-- <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.id }}</td> -->
+                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.eval_month }}</td>
+                  <td class="py-2 px-4 text-sm">{{ targetShipokDetail.eval_year }}</td>
                   <!-- <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.date }}</td> -->
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.target }}</td>
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.ship_ok }}</td>
-                  <td class="py-2 px-4 text-sm text-green-800 font-bold"
+                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.target }}</td>
+                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.shipok }}</td>
+                  <td class="py-2 px-4 text-sm  font-bold"
                     :class="{
                       'text-red-500': percentage(targetShipokDetail) <= 50,
                       'text-green-500': percentage(targetShipokDetail) >= 51 && percentage(targetShipokDetail) <= 100,
                       'text-purple-500': percentage(targetShipokDetail) > 100
                     }"
                     >{{ percentage(targetShipokDetail)}}% </td>
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_id }}</td> 
-                  <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.market_name}}</td>
+                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.market_name.toUpperCase() }}</td> 
+                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.team_name.toUpperCase()}}</td>
                   <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
                     <button 
                         :disabled="currentUser.role == 'user' ||
                         currentUser.agent_type == 1 ||
                         currentUser.agent_type == 0  || 
                         fullyear == true"
-                        @click="openModal('edit', index)" 
+                        @click="openModal('edit', targetShipokDetail)" 
                         class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Edit
                     </button>
@@ -60,7 +61,7 @@
                         currentUser.agent_type == 1 || 
                         currentUser.agent_type == 0 ||
                         currentUser.agent_type == 2"
-                        @click="deleteTarget(targetShipokDetail.agent_id, targetShipokDetail.date)" 
+                        @click="deleteTarget(targetShipokDetail)" 
                         class="bg-red-500 text-white py-1 px-3 rounded-lg hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
                         Delete
                     </button>
@@ -78,18 +79,18 @@
                 
                     <div class="mb-4">
                       <label class="block text-sm font-medium mb-2">Agent ID</label>
-                      <input v-model="form.agent_id" type="number" class="w-full border rounded-lg p-2" disabled required />
+                      <input v-model="form.id" type="number" class="w-full border rounded-lg p-2" disabled required />
                     </div>
                     
                     <div class="mb-4">
                       <label class="block text-sm font-medium mb-2">MOnth</label>
-                      <input type="text" class="w-full border rounded-lg p-2" v-model="form.month" disabled required />
+                      <input type="text" class="w-full border rounded-lg p-2" v-model="form.eval_month" disabled required />
                     </div>
 
                     <!-- Year Field - Current Year -->
                     <div class="mb-4">
                       <label class="block text-sm font-medium mb-2">Year</label>
-                      <input type="text" class="w-full border rounded-lg p-2" v-model="form.year" disabled required />
+                      <input type="text" class="w-full border rounded-lg p-2" v-model="form.eval_year" disabled required />
                     </div>
               
                     <div class="mb-4" >
@@ -99,7 +100,7 @@
                     </div>
                     <div class="mb-4"  >
                           <label class="block text-sm font-medium mb-2">ShipOk</label>
-                          <input v-if="currentUser.login_type == 'standarduser'" v-model="form.ship_ok" type="text" class="w-full border rounded-lg p-2"  />
+                          <input v-if="currentUser.login_type == 'standarduser'" v-model="form.shipok" type="text" class="w-full border rounded-lg p-2"  />
                           <input v-else v-model="shipOKEntry" type="text" class="w-full border rounded-lg p-2"  />
                           <p v-if="errorShipOk" class="text-red-500 text-sm mt-2">{{ errorShipOk }}</p>
                     </div>                
@@ -177,13 +178,14 @@
     const today = new Date()
     const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const agent_id = route.params.agent_id
+ 
     const form = ref({
-        agent_id: agent_id,
-        month: month.value,
-        year:  year.value,
+        id: agent_id,
+        eval_month: month.value,
+        eval_year:  year.value,
         date: '',
         target: '',
-        ship_ok: '',
+        shipok: '',
         market_id: '',
       
       });
@@ -200,7 +202,7 @@
         // Validate Ship OK input on every keystroke
     const validateShipOk  = () => {
          if(currentUser.login_type == 'standarduser'){
-          if (form.value.ship_ok === "" || !/^\d+$/.test(form.value.ship_ok)) {
+          if (form.value.shipok === "" || !/^\d+$/.test(form.value.shipok)) {
             errorShipOk.value = "Please enter a valid whole number.";
           } else {
             errorShipOk.value = "";
@@ -216,28 +218,33 @@
      }
 
 
-    const openModal = (type, index = null) => {
+    const openModal = (type, agent = null) => {
+       
+      if(props.agent.employee_status == 'Resigned'){
+        alert(`Adding or Updating Target/Shipok of Resigned Agent  is prohibited. `)
+        return
+      }
+
+      if( agent != null && agent.employee_status == 'Resigned'){
+         alert(`Adding or Updating Target/Shipok of Resigned Agent  is prohibited. `)
+         return
+        }
+      //Dont allow delete  on already submitted.
+       if(agent != null && agent.submitted == 1){
+        alert(`Adding or Updating Target/Shipok that already submitted is prohibited. `)
+        return
+       }
+
         modalType.value = type;
         showModal.value = true;
 
-        if (type === 'edit' && index !== null) {
+        if (type === 'edit' && agent !== null) {
           validateTarget();
           validateShipOk();
-        form.value = { ...props.targetShipokDetails[index]}
-        } else {
-          validateTarget();
-          validateShipOk();
-          form.value = {
-          
-            agent_id: agent_id,
-            month: month.value,
-            year:  year.value,
-            date: date,
-            target: '',
-            ship_ok: '',
-            market_id:  props.agent.market_id,
-          };
+          form.value = { ...agent}
+
         }
+   
       
       };
 
@@ -250,7 +257,7 @@
       
     const percentage = ((data) => {
         
-        return Math.ceil((Number(data.ship_ok) / Number(data.target)) * 100 * 100) / 100;
+        return Math.ceil((Number(data.shipok) / Number(data.target)) * 100 * 100) / 100;
       })
       
     const emit = defineEmits(['passNewTarget', 'passUpdatedTarget', 'passDeleteTarget'])
@@ -270,8 +277,8 @@
               emit('passUpdatedTarget', agent_id,{month:month.value, year:year.value}, form.value )
             }else{
               // do some shipok manipulation before emitting
-              form.value.ship_ok =  Number(form.value.ship_ok) + Number(shipOKEntry.value)
-              if (form.value.ship_ok < 0) {
+              form.value.shipok =  Number(form.value.shipok) + Number(shipOKEntry.value)
+              if (form.value.shipok < 0) {
                 alert("Ship OK value cannot be negative.");
                 return
               }
@@ -282,10 +289,24 @@
           closeModal();
       };
       
-    const deleteTarget = (agent_id, target_date) => {
+    const deleteTarget = (agent) => {
+      //Dont allow delete on agent that already resigne
+
+      if(agent.employee_status == 'Resigned'){
+         alert(`Deleting Target/Shipok of Resigned Agent  is prohibited. `)
+         return
+      }
+      //Dont allow delete  on already submitted.
+       if(agent.submitted == 1){
+        alert(`Deleting Target/Shipok that already submitted is prohibited. `)
+        return
+       }
+
+       
+
         if (confirm(`Are you sure you want to delete this target?`)) {
 
-        emit('passDeleteTarget', agent_id, {month:month.value, year:year.value}, target_date )
+        emit('passDeleteTarget', agent.id, {month:month.value, year:year.value}, "" )
 
         }
       };
@@ -319,7 +340,7 @@
 
       // Watcher for the ship_ok field
     watch(
-        () => form.value.ship_ok,
+        () => form.value.shipok,
         (newValue) => {
           // If empty or not a whole number, set error
           if (newValue === '' || !/^\d+$/.test(newValue)) {

@@ -2,16 +2,16 @@
     <div >
       <h1 class="text-2xl font-bold mb-4 text-center">{{ attendanceTitle }}</h1>
       <div class="overflow-x-auto">
-        <table  v-if="attendanceDetails.length > 0" class="min-w-full border border-green-500 rounded-lg">
-          <thead class="bg-green-200">
+        <table  v-if="attendanceDetails.length > 0" class="w-full table-auto border-collapse bg-white">
+          <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
             <tr>
-              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">ID</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Month</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Year</th>
-              <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Date</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Description</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium ">ID</th> -->
+              <th class="py-2 px-4 text-left text-sm font-medium ">Agent ID</th>
+              <th class="py-2 px-4 text-left text-sm font-medium ">Month</th>
+              <th class="py-2 px-4 text-left text-sm font-medium ">Year</th>
+              <!-- <th class="py-2 px-4 text-left text-sm font-medium ">Date</th> -->
+              <th class="py-2 px-4 text-left text-sm font-medium ">Description</th>
+              <th class="py-2 px-4 text-left text-sm font-medium  flex justify-between items-center">
                 Actions
                 <!-- <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0" -->
                  <button :disabled="currentUser.login_type != 'standarduser'"
@@ -28,13 +28,13 @@
               v-for="(attendance, index) in attendanceDetails" 
               :key="attendance.id + index" 
               class="odd:bg-white even:bg-green-50">
-              <!-- <td class="py-2 px-4 text-sm text-green-800">{{ attendance.id }}</td> -->
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.agent_id }}</td>
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.month }}</td>
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.year }}</td>
-              <!-- <td class="py-2 px-4 text-sm text-green-800">{{ attendance.date }}</td> -->
-              <td class="py-2 px-4 text-sm text-green-800">{{ attendance.description }}</td>
-              <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
+              <!-- <td class="py-2 px-4 text-sm ">{{ attendance.id }}</td> -->
+              <td class="py-2 px-4 text-sm ">{{ attendance.agent_id }}</td>
+              <td class="py-2 px-4 text-sm ">{{ attendance.month }}</td>
+              <td class="py-2 px-4 text-sm ">{{ attendance.year }}</td>
+              <!-- <td class="py-2 px-4 text-sm ">{{ attendance.date }}</td> -->
+              <td class="py-2 px-4 text-sm ">{{ attendance.description }}</td>
+              <td class="py-2 px-4 text-sm  flex gap-2">
                 <button  :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"
                   @click="openModal('edit', index)" 
                   class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
@@ -49,42 +49,42 @@
             </tr>
           </tbody>
         </table>
-        <table v-else class="min-w-full border border-green-500 rounded-lg">
-          <thead class="bg-green-200">
+        <table v-else class="w-full table-auto border-collapse bg-white">
+          <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
             <tr>
 
 
-              <th class="py-2 px-4 text-left text-lg font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-lg font-medium text-green-900">Description</th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>              
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900"></th>
-              <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center">
+              <th class="py-2 px-4 text-left text-lg font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-lg font-medium ">Description</th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>              
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium "></th>
+              <th class="py-2 px-4 text-left text-sm font-medium  flex justify-between items-center">
                 <!-- <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0" -->
                  <button :disabled="currentUser.login_type != 'standarduser'"
                   @click="openModal('add')" 
@@ -97,14 +97,14 @@
           </thead>
           <tbody>
             <tr>
-               <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-medium font-bold text-green-800">No {{ attendanceType }} yet recorded for the {{ month }} {{ year }}</td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
-                <td class="py-2 px-4 text-sm text-green-800"></td>
+               <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-medium font-bold ">No {{ attendanceType }} yet recorded for the {{ month }} {{ year }}</td>
+                <td class="py-2 px-4 text-sm "></td>
+                <td class="py-2 px-4 text-sm "></td>
             </tr>
           </tbody>
         </table>        
@@ -175,6 +175,14 @@
           attendanceDetails: {
               type: Array,
               required: true,
+          },
+          agent: {
+            type:Object,
+            required: true
+          },
+          submitted: {
+            require: true,
+            type:Number
           }
       });
 
@@ -240,6 +248,18 @@
       }
       
       const openModal = (type, index = null) => {
+
+       if(props.agent.employee_status == 'Resigned'){
+        alert(`Adding or Updating ${props.attendanceType} of Resigned Agent  is prohibited. `)
+        return
+      }
+
+      if(props.submitted == 1){
+        alert(`Adding or Updating ${props.attendanceType} that is already submitted  is prohibited. `)
+        return
+      }
+
+
         modalType.value = type;
         showModal.value = true;
         
@@ -291,6 +311,17 @@
       };
       
       const deleteAttendanceType = (attendanceId) => {
+
+        if(props.agent.employee_status == 'Resigned'){
+          alert(`Deleting ${props.attendanceType} of Resigned Agent  is prohibited. `)
+          return
+        }
+
+        if(props.submitted == 1){
+          alert(`Deleting ${props.attendanceType} that is already submitted is prohibited. `)
+          return
+        }
+
         if (confirm(`Are you sure you want to delete this ${props.attendanceType}?`)) {
              emit('passDeleteAttendance', agentId, {month: month.value, year: year.value}, props.attendanceType, {id: attendanceId})
         };

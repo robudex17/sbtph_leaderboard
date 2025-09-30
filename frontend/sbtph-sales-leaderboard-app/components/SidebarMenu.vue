@@ -126,7 +126,7 @@
               route: null, icon: ['fas', 'poll'],
               subMenu:[
                 { name: 'BY QA', route: '/feedback/feedback_by_qa', icon: ['fas', 'users']  },
-                
+                { name: 'BY Admin', route: '/feedback/feedback_by_admin', icon: ['fas', 'users']  },
               ] 
             
             },            
@@ -137,7 +137,7 @@
               icon: ['fas', 'cog'],
               subMenu: [
                 { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
-                { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
+                // { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
                 // { name: 'Upload Target/Shipok Sales Data', route: '/admin/upload_target_shipok_data', icon: ['fas', 'fa-upload'] },
                 // { name: 'Upload New Deposit Sales Data', route: '/admin/upload_new_deposit_data', icon: ['fas', 'fa-upload'] },
                 { name: 'Sales Evaluation', route: '/admin/sales_evaluation', icon: ['fas', 'user-tie'] },
@@ -146,7 +146,7 @@
                 // { name: 'export', route: '/admin/export_to_excel', icon: ['fas', 'fa-file-excel'] },
 
 
-               { name: 'Manage Sales Agents2', route: '/admin/agent2/manage_sales_agents?employee_status=Hired', icon: ['fas', 'user-tie'] },
+               { name: 'Manage Sales Agents', route: '/admin/agent2/manage_sales_agents?employee_status=Hired', icon: ['fas', 'user-tie'] },
 
               ]
             }

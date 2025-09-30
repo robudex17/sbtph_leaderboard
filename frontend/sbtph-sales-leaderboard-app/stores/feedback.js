@@ -47,7 +47,13 @@ export const feedbackStore = defineStore('feedback', () => {
             case "qa":
                 errorMessage = `Failed to fetch   ${feedbackType} feedback`
                 url = API.feedback.qa
-                break                              
+                break  
+            
+            case "admin":
+                
+                 errorMessage = `Failed to fetch  ${feedbackType} feedback`                       
+                 url = API.agentFeedback
+                break                                 
        
             
                 
@@ -57,7 +63,9 @@ export const feedbackStore = defineStore('feedback', () => {
         }
         
          url = new URL(`${url}/${id}`)
-         console.log('the feedback url is.. tadaaaa' , url)
+    
+
+       
         if (queryString) {
             Object.keys(queryString).forEach((key) =>
                 url.searchParams.append(key, queryString[key])
@@ -88,15 +96,17 @@ export const feedbackStore = defineStore('feedback', () => {
             }
     
             const data = await response.json();
-            console.log(data[0])
-            if (feedbackType != "qa"){
+         
+           
+            if (feedbackType != "qa" &&  feedbackType != 'admin'){
+           
                 if (data && data.length > 0 ){
                     data[0].responses = JSON.parse(data[0].responses)
                 }
             }
            
             
-             
+           
             state[feedbackType] = data
           
             state.loading = false
@@ -116,7 +126,7 @@ export const feedbackStore = defineStore('feedback', () => {
         let url;
         let errorMessage
         console.log('feedbackData',id, feedbackResponse, feedbackType, query, httpMethod )
-        
+  
         switch(feedbackType){
 
            case "agent_by_lm":
@@ -125,14 +135,17 @@ export const feedbackStore = defineStore('feedback', () => {
            case "um_by_lm":
                 errorMessage = `Failed to fetch  ${feedbackType} feedback`
                 url = API.feedback.sales
-                console.log('It came here...')
+              
                 break 
 
             case "qa":
                     errorMessage = `Failed to fetch  ${feedbackType} feedback`
                     url = API.feedback.qa
-                    break                
-       
+                    break
+            case "admin":
+                 errorMessage = `Failed to fetch  ${feedbackType} feedback`                       
+                url =`${API.agentFeedback}/${id}`
+                break       
                           
             default:
                 console.log('Invalid Feedback  Type')
@@ -165,10 +178,8 @@ export const feedbackStore = defineStore('feedback', () => {
                 const errors = await response.json()
                 throw new Error(errors || "An unknown error occurred");
             }
-  
-           
-           await fetchFeedback(id, query, feedbackType)
-           if (httpMethod == 'POST'){
+       
+          if (httpMethod == 'POST'){
                
                 alert(`Adding New ${feedbackType} feedback with id of ${id} is successful` ) 
            }else if (httpMethod== 'PUT'){
@@ -178,6 +189,10 @@ export const feedbackStore = defineStore('feedback', () => {
            }else{
             console.log('Un Identified method.')
            }
+
+
+           await fetchFeedback(id, query, feedbackType)
+    
           
         } catch (error) {
             console.log(error.message)

@@ -617,9 +617,9 @@
                 <i class="fas fa-edit"></i>
                   Edit
                 </button>
-                <NuxtLink   v-if="agentEmployeeStatus == 'Hired'"
+                <NuxtLink  
                   :to="{
-                    path: `/admin/agent/${agent.id}/details`, query: { agent_type: agent.agent_type, agent_role: agent.role , agent_dbname: agent.db_name}
+                    path: `/admin/agent2/${agent.id}/details`, query: { agent_type: agent.agent_type,  manager_id: agent.manager_id, agent_role: agent.role , agent_dbname: agent.db_nam, employee_status: agent.employee_status}
                     
                   }"
                   class="px-1 py-2 bg-blue-500 text-white text-center text-sm font-bold rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -918,7 +918,8 @@
 
       if(new Date(currentAgent.value.effective_from) < new Date(currentAgent.value.start_date) ){
         alert('Cannot Set Effective from earlier than the date hire or or the start date')
-        currentAgent.value.effective_from = currentAgent.value.start_date
+        currentAgent.value.effective_from = originalAssignment.value.effective_from
+        currentAgent.value.start_date = originalAssignment.value.start_date
         return
       }
     }
@@ -929,17 +930,19 @@
         currentAgent.value.start_date = today   // auto set hire date to today
         currentAgent.value.end_date = null      // clear resignation date
         currentAgent.value.effective_from = today
-      }else if(currentAgent.value.employee_status === 'Resigned'  && currentAgent.value.active_agent){
-        currentAgent.value.end_date = today
+      }else if(currentAgent.value.employee_status === 'Resigned'  ){
+        currentAgent.value.end_date = originalAssignment.value.end_date
         
         currentAgent.value.changed_assignment = false
+        currentAgent.value.changed_date_hire = false
+        currentAgent.value.changed_info = false
         currentAgent.value.effective_to = currentAgent.value.end_date
         currentAgent.value.start_date = originalAssignment.value.start_date
         currentAgent.value.firstname = originalAssignment.value.firstname
         currentAgent.value.lastname = originalAssignment.value.lastname
         currentAgent.value.db_name = originalAssignment.value.db_name
         currentAgent.value.email = originalAssignment.value.email
-        currentAgent.value.image_link = originalAssignment.value.email
+        currentAgent.value.image_link = originalAssignment.value.image_link
 
         currentAgent.value.manager_id = originalAssignment.value.manager_id
         currentAgent.value.agent_type = originalAssignment.value.agent_type
@@ -1115,7 +1118,21 @@
       return false
     }
 
+    const setEffectiveToDate = (newDateAssignment) => {
+      let newAssignment = new Date(newDateAssignment)
 
+      // clone date
+      let prevAssignment = new Date(newAssignment)
+
+      //Subtract 1 Day
+      prevAssignment.setDate(newAssignment.getDate() -1)
+
+      // Format YYYY-MM-DD 
+
+      let formatDate =  prevAssignment.toISOString().split('T')[0];
+      return formatDate
+
+    }
 
     const addAgent = async() => {
       try {
@@ -1133,39 +1150,85 @@
       
     };
 
+
+
     const updateAgent = async() => {
-      if (deepEqual(currentAgent.value, originalAssignment.value)) {
-        alert('No changes detected.')
-        return
-      }
-
-     
-      if(new Date(currentAgent.value.effective_from).getTime() == new Date(originalAssignment.value.effective_from).getTime()
-          && currentAgent.value.agent_type == originalAssignment.value.agent_type  
-          && currentAgent.value.manager_id == originalAssignment.value.manager_id 
-          && currentAgent.value.market_id == originalAssignment.value.market_id 
-          && currentAgent.value.team_id == originalAssignment.value.team_id  ){
+      if(currentAgent.value.employee_status !=  'Resigned'){
+        if (deepEqual(currentAgent.value, originalAssignment.value)) {
+            alert('No changes detected.')
+            return
+          }
           
-            currentAgent.value.changed_assignment = false
-      }
+          //CHECKING Further 
+      
+          // Extract YYYY-MM from both dates
+          const newDate = new Date(currentAgent.value.effective_from);
+          const oldDate = new Date(originalAssignment.value.effective_from);
 
-      if(new Date(currentAgent.value.start_date).getTime() == new Date(originalAssignment.value.start_date).getTime()){
-        currentAgent.value.changed_date_hire = false
-      }else{
-        currentAgent.value.changed_date_hire = true
-      }
+          const newYearMonth = `${newDate.getFullYear()}-${newDate.getMonth()}`;
+          const oldYearMonth = `${oldDate.getFullYear()}-${oldDate.getMonth()}`;
 
-      if(currentAgent.value.firstname == originalAssignment.value.firstname && currentAgent.value.lastname == originalAssignment.value.lastname && 
-        currentAgent.value.email == originalAssignment.value.email  &&  currentAgent.value.image_link == originalAssignment.value.image_link && 
-        currentAgent.value.db_name == originalAssignment.value.db_name  && !(currentAgent.value.image instanceof File)
+          if (newYearMonth === oldYearMonth) {
+            alert('Cannot assign in the same month and year as the previous assignment. Please choose another date.');
+            currentAgent.value.changed_assignment = false;
+            return;
+          }
+              // && currentAgent.value.agent_type == originalAssignment.value.agent_type  
+              // && currentAgent.value.manager_id == originalAssignment.value.manager_id 
+              // && currentAgent.value.market_id == originalAssignment.value.market_id 
+              // && currentAgent.value.team_id == originalAssignment.value.team_id  ){
 
-      ){
-        currentAgent.value.changed_info = false
+          if(new Date(currentAgent.value.effective_from).getTime() < new Date(originalAssignment.value.effective_from).getTime()){
+            alert('Cannot assign date assignment earlier than the previous assigmrnt. Please choose another date.');
+            currentAgent.value.changed_assignment = false;        
+            return
+          }
+          
+          // IF CURRENTLY HIRED DONT ALLOW TO ASSIGN TO SAME SET OF ASSIGNMENT 
+          // OR IF REHIRED AND ALREADY active_status is already true
+          if(currentAgent.value.employee_status == 'Hired' || (currentAgent.value.employee_status == 'Rehired' && currentAgent.active_agent)) {
+
+              if(currentAgent.value.agent_type == originalAssignment.value.agent_type &&  currentAgent.value.manager_id == originalAssignment.value.manager_id 
+                && currentAgent.value.market_id == originalAssignment.value.market_id  &&  currentAgent.value.team_id == originalAssignment.value.team_id 
+
+              ){
+                alert('The same set of Assignment. Please create new set of assigments')
+                  currentAgent.value.changed_assignment = false 
+                  return
+
+           }
+          }
+
+
+          currentAgent.value.effective_to = setEffectiveToDate(currentAgent.value.effective_from)
+          currentAgent.value.changed_assignment = true
+         
+
+
+          if(new Date(currentAgent.value.start_date).getTime() == new Date(originalAssignment.value.start_date).getTime()){
+            currentAgent.value.changed_date_hire = false
+          }else{
+            currentAgent.value.changed_date_hire = true
+          }
+
      
-      }else{
-        currentAgent.value.changed_info = true
-       
+          if(currentAgent.value.firstname == originalAssignment.value.firstname && currentAgent.value.lastname == originalAssignment.value.lastname && 
+            currentAgent.value.email == originalAssignment.value.email  &&  currentAgent.value.image_link == originalAssignment.value.image_link && 
+            currentAgent.value.db_name == originalAssignment.value.db_name  && !(currentAgent.value.image instanceof File)
+
+          ){
+            currentAgent.value.changed_info = false
+        
+          }else{
+            currentAgent.value.changed_info = true
+          
+          }
+
+
+
       }
+
+ 
         
       await manageSalesAgentStore.updateSalesAgent(currentAgent.value, route.query);
         // fetchSalesAgents()

@@ -15,7 +15,9 @@
                 <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">ID</th>
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Name</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Employee Status</th>
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Market</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Team</th>
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Month</th>
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Year</th>
                     <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Target</th>
@@ -58,34 +60,67 @@
                     </td>
                     
                     <!-- Market, Month, Year, Target, ShipOk -->
+                    <td class="py-0.5 px-4 text-left text-xs  border"
+                         :class="{
+                          'text-red-600 font-bold': agent.employee_status === 'Resigned',
+                          'text-green-600 font-bold': agent.employee_status === 'Hired' || agent.employee_status === 'Rehired'
+                        }" 
+                    >
+                     {{ agent.employee_status }}
+                    </td>
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
                      {{ agent.market_name }}
+                    </td>  
+                    <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
+                     {{ agent.team_name }}
+                    </td>                                     
+                    <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
+                    {{ agent.eval_month }}
                     </td>
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
-                    {{ agent.month }}
+                    {{ agent.eval_year }}
                     </td>
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
-                    {{ agent.year }}
+                      
+                     <!-- <span v-if="agent.agent_type ==2"> {{ agent.target }} </span> -->
+                      <button  @click="openMetricsTypeModal({ employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, metrics_type: 'targetShipok' })" >
+                        {{ agent.target }} 
+                      </button>
                     </td>
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
-                    {{ agent.target }}
-                    </td>
-                    <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
-                    {{ agent.ship_ok }}
+                      <!-- <span v-if="agent.agent_type ==2"> {{ agent.shipok }} </span> -->
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, metrics_type: 'targetShipok' })" >
+                        {{ agent.shipok }} 
+                      </button>
+              
                     </td>
 
-                    <!-- Performance Metrics -->
-                    <td class="py-0.5 px-4 text-center text-xs font-medium text-gray-700 border">
-                    {{ agent.total_new_deposit }}
+                    <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
+                      <!-- <span v-if="agent.agent_type ==2"> {{ agent.shipok }} </span> -->
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_new_deposit: agent.total_new_deposit, agent_type: agent.agent_type, metrics_type: 'newDeposit' })" >
+                        {{ agent.total_new_deposit }} 
+                      </button>
+              
                     </td>
                     <td class="py-0.5 px-4 text-center text-xs font-medium text-gray-700 border">
-                    {{ agent.total_absences }}
+                    
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_absences:  agent.total_absences, agent_type: agent.agent_type, metrics_type: 'absence' })" >
+                      {{ agent.total_absences }}
+                      </button>                    
                     </td>
                     <td class="py-0.5 px-4 text-center text-xs font-medium text-gray-700 border">
-                    {{ agent.total_tardiness }}
+                   
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_tardiness:  agent.total_tardiness, agent_type: agent.agent_type, metrics_type: 'tardiness' })" >
+                      {{ agent.total_tardiness }}
+
+                      </button>                      
                     </td>
                     <td class="py-0.5 px-4 text-center text-xs font-medium text-gray-700 border">
-                    {{ agent.total_memo }}
+        
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_memo:  agent.total_memo, agent_type: agent.agent_type, metrics_type: 'memo' })" >
+                      {{ agent.total_memo }}
+
+                      </button>                       
                     </td>
 
                     <!-- Feedback Columns -->
@@ -93,13 +128,22 @@
                     class="py-0.5 px-4 text-center text-xs border"
                     :class="{ 'text-red-500 font-bold': agent.feedback_admin === 'No Feedback', 'text-green-900 font-medium': agent.feedback_admin !== 'No Feedback' }"
                     >
-                    {{ agent.feedback_admin }}
+                    
+
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, agent_dbname:agent.db_name, month: agent.eval_month, year: agent.eval_year, feedback:  agent.feedback_admin, agent_type: agent.agent_type, metrics_type: 'feedback_admin' })" >
+                       {{ agent.feedback_admin }}
+
+                      </button>                    
                     </td>
                     <td
                     class="py-0.5 px-4 text-center text-xs border"
                     :class="{ 'text-red-500 font-bold': agent.feedback_qa === 'No Feedback', 'text-green-900 font-medium': agent.feedback_qa !== 'No Feedback' }"
                     >
-                    {{ agent.feedback_qa }}
+                   
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id,  agent_dbname:agent.db_name,month: agent.eval_month, year: agent.eval_year, feedback:  agent.feedback_qa, agent_type: agent.agent_type, metrics_type: 'feedback_qa' })" >
+                        {{ agent.feedback_qa }}
+
+                      </button> 
                     </td>
                      <td
                     class="py-0.5 px-4 text-center text-xs border font-medium text-blue-700"
@@ -166,6 +210,18 @@
                 </tr>
                 </tbody>     
           </table>
+
+    <sales-evaluation-component
+      :showModal="showModalMetricsType"
+      :metricsType="metricsType"
+      :modalType="modalMeticsType"
+      :agentData="selectedData"
+      :modalMeticsTypeMessage="modalMeticsTypeMessage"
+      @passClose="resetValues"
+      @passAddDataAgent="addDataAgent"
+       @passEditDataAgent="editDataAgent"
+      @passDeleteDataAgent="deleteDataAgent"
+    ></sales-evaluation-component>
 
       <!-- Modal -->
       <div 
@@ -307,7 +363,7 @@
   import { ref, computed } from 'vue';
   import { onMounted } from 'vue';
 
-
+   
 
 
   
@@ -325,21 +381,54 @@
   
     const currentUser = authStore.state.user 
 
-    const showModal = ref(false);
-    const modalType = ref('add');
-    const modalData = ref(null);
+    const showModal = ref(false)
+
+    const showModalMetricsType = ref(false);
+    const modalMeticsType = ref('add');
+    const  modalMeticsTypeMessage = ref([])
+
+    const selectedData = ref({})
+    const metricsType = ref("")
 
 
+    const modalData = ref("")
 
 
+    const itemsPerPage = 10;
+    const currentPage = ref(1);
+    const isModalOpen = ref(false);
+    const isModalOpenForLogin = ref(false)
+    const  enablePasswordRecovery = ref(false)
+    const editMode = ref(false); // Toggle between Add and Edit mode
+    const editLoginMode = ref(false); // Toggle between Add and Edit mode for login
+    const imagePreview = ref(null);
+
+      const monthMap = {
+      January: "01",
+      February: "02",
+      March: "03",
+      April: "04",
+      May: "05",
+      June: "06",
+      July: "07",
+      August: "08",
+      September: "09",
+      October: "10",
+      November: "11",
+      December: "12"
+    };
+
+
+    const useFeedbackStore  = feedbackStore()
+
+    const useManageSalesStore = useManageSalesAgentStore();
+      
 
     // Months for the dropdown
   const months = [
             'January', 'February', 'March', 'April', 'May', 'June',
             'July', 'August', 'September', 'October', 'November', 'December'
          ];
-
-
 
 
 
@@ -351,14 +440,252 @@
         query.year = new Date().getFullYear()
     }
 
-   
+
+
+    const openMetricsTypeModal = (selectedAgent) => {
+    
+
+      metricsType.value = selectedAgent.metrics_type
+
+     if(selectedAgent.submitted ==1 ){
+        alert(`Adding, Updating, or Deleting ${metricsType.value} that is already submitted is prohited.`)
+        return
+      }
+
+      if(selectedAgent.employee_status == 'Resigned' ){
+        alert(`Adding, Updating, or Deleting Agent that is already resigned is prohited.`)
+        return
+      }
+     
+      switch(metricsType.value){
+          case "targetShipok":
+              modalMeticsTypeMessage.value = [ "Add  Target/Shipok", "Edit Target/Shipok`"]
+            if(selectedAgent.agent_type== 2){
+              alert('Cannot Update the agent directly')
+              return
+            }
+            if(Number(selectedAgent.target) > 0){
+              modalMeticsType.value = 'edit'
+           
+            }
+            showModalMetricsType.value = true
+            selectedData.value = selectedAgent
+            break
+          case "newDeposit": 
+            modalMeticsTypeMessage.value = [ "Add  New Deposit", "Edit New Deposit"]
+            if(selectedAgent.agent_type== 2){
+              alert('Cannot Update the agent directly')
+              return
+            }
+            showModalMetricsType.value = true
+             selectedData.value = selectedAgent
+            break
+          case "absence":
+            if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
+            modalMeticsTypeMessage.value = [ "Add  New Absence", "Edit Absence"]
+             showModalMetricsType.value = true
+             selectedData.value = selectedAgent
+            break
+          case "tardiness":
+            if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
+             modalMeticsTypeMessage.value = [ "Add  New Tardiness", "Edit Tardiness"]
+            showModalMetricsType.value = true
+            selectedData.value = selectedAgent
+          
+            break
+          case "memo":
+            if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
+             modalMeticsTypeMessage.value = [ "Add  New Memo", "Edit Memo"]
+             selectedData.value = selectedAgent
+              showModalMetricsType.value = true
+            break
+          case "feedback_admin":
+            if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
+
+            if(parseFloat(selectedAgent.feedback) > 0){
+                modalMeticsType.value = 'edit'
+            }
+             modalMeticsTypeMessage.value = [ "Add Admin Feedback", "Edit Admin Feedback"]
+             selectedData.value = selectedAgent
+             showModalMetricsType.value = true            
+            break
+          case "feedback_qa":
+            if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
+
+            
+            if(parseFloat(selectedAgent.feedback) > 0){
+                modalMeticsType.value = 'edit'
+            }
+             modalMeticsTypeMessage.value = [ "Add  Qa Feedback", "Edit  Qa Feedback"]
+             selectedData.value = selectedAgent
+             showModalMetricsType.value = true           
+            break
+          default:
+          console.log("Unknown Metircs type");
+          break;
+      }
+
+    }
+
+    const resetValues   = () => {
+          showModalMetricsType.value = false
+          modalMeticsType.value = 'add'
+          metricsType.value = ''
+          modalMeticsTypeMessage.value = []
+      }
+    
+     const addDataAgent = async(totalRecords ,agent) => {
+
+      const monthNumber = monthMap[agent.month];
+
+
+     switch (metricsType.value){
+       case "targetShipok": 
+          
+              
+              await useManageSalesStore.addAgentTarget( agent.agent_id, query, agent)
+              fetchSalesAgentsEvaluation(query)
+             break
+       case "newDeposit":
+            
+             agent.evaluation = true
+             agent.total_records = totalRecords
+             agent.new_deposit = 10000
+             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
+             await useManageSalesStore.addAgentDeposit(agent.agent_id, query, agent)
+             fetchSalesAgentsEvaluation(query)
+            break
+
+
+       case "absence":
+       case "tardiness":
+       case "memo":     
+             agent.evaluation = true
+             agent.total_records = totalRecords
+             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
+             await useManageSalesStore.addAgentAttendanceType(agent.agent_id, query, metricsType.value, agent)
+             fetchSalesAgentsEvaluation(query)
+          break 
+       case "feedback_admin":
+            agent.admin_id = currentUser.login_id 
+            agent.admin_dbname = currentUser.db_name
+            agent.admin_role = currentUser.role
+            agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin',  query, 'POST')
+          
+            fetchSalesAgentsEvaluation(query)
+          break
+       case "feedback_qa":  
+
+            agent.qa_id = currentUser.login_id 
+            agent.qa_dbname = currentUser.db_name
+            agent.role = currentUser.role   
+            agent.feedback_score = agent.feedback  // assign feedback value to feedback_score because the qa feedback  is save as feedback_score
+            agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`  
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', query, 'POST')
+          
+             fetchSalesAgentsEvaluation(query)  
+          break      
+
+      
+      default:
+          console.log("Unknow Metircs type");
+          break;
+
+     }
   
+  
+    }
+
+    const editDataAgent = async(totalRecords, agent) => {
+      const monthNumber = monthMap[agent.month];
+      switch (metricsType.value){
+         case "targetShipok":
+              await useManageSalesStore.updateAgentTarget(agent.agent_id,  query, agent )
+              fetchSalesAgentsEvaluation(query)
+             break
+       case "feedback_admin":
+            agent.admin_id = currentUser.login_id 
+            agent.admin_dbname = currentUser.db_name
+            agent.admin_role = currentUser.role
+            agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin', query, 'PUT')
+      
+            fetchSalesAgentsEvaluation(query)
+          break
+       case "feedback_qa":  
+            agent.qa_id = currentUser.login_id 
+            agent.qa_dbname = currentUser.db_name
+            agent.role = currentUser.role   
+            agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`  
+             agent.feedback_score = agent.feedback  // assign feedback value to feedback_score because the qa feedback  is save as feedback_score
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', query, 'PUT')
+            fetchSalesAgentsEvaluation(query)
+          break                
+        default:
+          console.log("Unknow Metircs type");
+          break;
+
+       } 
+    
+        
+    }
+
+        const deleteDataAgent = async(totalRecords,agent) => {
+          const monthNumber = monthMap[agent.month];
+          switch (metricsType.value){
+            case "targetShipok":
+                  await useManageSalesStore.updateAgentTarget(agent.agent_id,  query, agent )
+                  fetchSalesAgentsEvaluation(query)
+              break  
+            case "newDeposit":   
+                  //  alert(agent.agent_id)
+                  agent.evaluation = true
+                  agent.total_records = totalRecords
+                  await useManageSalesStore.deleteAgentNewDeposit(agent.agent_id,  query, agent )
+                  fetchSalesAgentsEvaluation(query)
+              break 
+          case "absence":
+          case "tardiness":
+          case "memo":     
+              agent.evaluation = true
+              agent.total_records = totalRecords
+              agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
+              await useManageSalesStore.deleteAgentAttendanceType(agent.agent_id, query, metricsType.value, agent)
+              fetchSalesAgentsEvaluation(query)
+            break    
+                                     
+            default:
+              console.log("Unknow Metircs type");
+              break;
+
+          } 
+        
+        
+    }
+
+
+
     const today = new Date()
     const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-   const useFeedbackStore  = feedbackStore()
-
-   const useManageSalesStore = useManageSalesAgentStore();
+   
+   
 
    const fetchSalesAgentsEvaluation = (query) => {
     useManageSalesStore.fetchSalesEvaluation(query) 
@@ -381,8 +708,8 @@
     await useManageSalesStore.submitSalesEvaluation(agent.id, {
         agent_id: agent.id,
         agent_dbname: agent.db_name,
-        month: agent.month,
-        year: agent.year,
+        month: agent.eval_month,
+        year: agent.eval_year,
         date: date,
         submitted: 1
     });
@@ -414,8 +741,8 @@ const  reviewSalesEvaluation = async (agent) => {
 
    // Call the store action to review sales evaluation
    await useManageSalesStore.reviewSalesEvaluation(agent.id, {
-       month: agent.month,
-       year: agent.year
+       month: agent.eval_month,
+       year: agent.eval_year
    });
 }
 
@@ -439,15 +766,7 @@ const openModal = ( data) => {
   
   });
   
-  const itemsPerPage = 10;
-  const currentPage = ref(1);
-  const isModalOpen = ref(false);
-  const isModalOpenForLogin = ref(false)
-  const  enablePasswordRecovery = ref(false)
-  const editMode = ref(false); // Toggle between Add and Edit mode
-  const editLoginMode = ref(false); // Toggle between Add and Edit mode for login
-  const imagePreview = ref(null);
-  
+
 
   
 

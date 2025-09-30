@@ -68,6 +68,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
 
             console.log(data)
             state.salesAgents = data;
+            state.loading = false
         } catch (error) {
             const customError = new Error(`Failed to fetch sales agents info: ${error.message}`);
             customError.originalError = error;  // Attach the original error
@@ -78,7 +79,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
     const fetchSalesAgent = async (agentId) => {
         state.loading = true;
         state.error = null;
-        let url = API.salesAgents
+        let url = API.salesAgents2
         try {
             // Fetch sales agent info
             const response = await fetch(`${url}/${agentId}`, {
@@ -105,6 +106,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
     
             const data = await response.json();
             state.salesAgentBio = data;
+             state.loading = false
         } catch (error) {
             const customError = new Error(`Failed to fetch sales agents info: ${error.message}`);
             customError.originalError = error;  // Attach the original error
@@ -185,6 +187,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
     
             const data = await response.json();
             state[detailsType] = data;
+             state.loading = false
 
         } catch (error) {
             const customError = new Error(`${errorMessage}: ${error.message}`);
@@ -448,7 +451,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
         state.error = null
         console.log(`the endpoint is: ${API.agentTargetShipok}/${agent_id}`)
         try {
-            const response = await fetch(`${API.agentTargetShipok}/${agent_id}?date=${target_date}`, {
+            const response = await fetch(`${API.agentTargetShipok}/${agent_id}?month=${query.month}&year=${query.year}`, {
                 method: 'DELETE',
                 headers: {
                   'Content-Type': 'application/json',
@@ -485,7 +488,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
     }
 
 
-    const addAgentDeposit = async (agent_id, query, target) => {
+    const addAgentDeposit = async (agent_id, query, deposit) => {
         state.loading = true
         state.error = null
        
@@ -496,7 +499,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
                   'Content-Type': 'application/json',
                   'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify(target)
+                body: JSON.stringify(deposit)
             }) 
          
             //token is  invalid  remove to local storage 

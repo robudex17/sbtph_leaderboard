@@ -6,7 +6,7 @@
     </div> -->
     <div >
 
-        <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">QA FEEDBACK</h1>
+        <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">ADMIN FEEDBACK</h1>
 
 
         <!-- Agents Table -->
@@ -67,7 +67,7 @@
                   {{ agent.year }}
                 </td>
                 <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
-                  {{ agent.qa_dbname  }}
+                  {{ agent.admin_dbname  }}
                 </td>               
                 <td 
                   class="py-4 px-6 border text-center font-bold text-green-500"
@@ -141,7 +141,7 @@
 
                 <div class="mb-4">
                   <label class="block text-sm font-medium mb-2">Feedback</label>
-                  <input v-model="form.feedback_score" type="text" class="w-full border rounded-lg p-2"
+                  <input v-model="form.feedback" type="text" class="w-full border rounded-lg p-2"
                   @keydown.backspace="onBackSpace"
                   />
                   <p v-if="errorFeedback.feedbackError" class="text-red-500 text-sm mt-2">{{ errorFeedback.feedbackError }}</p>
@@ -212,12 +212,12 @@
    const form = ref({
         agent_id: '',
         agent_dbname: '',
-        qa_id: '',
-        qa_dbname: '',
-        role: '',
+        admin_id: '',
+        admin_dbname: '',
+        admin_role: '',
         month: '',
         year: '',
-        feedback_score: '',
+        feedback: '',
       });
 
     // Months for the dropdown
@@ -245,8 +245,8 @@
    const useFeedbackStore  = feedbackStore()
 
    
-   const fetchSalesAgentsFeedbackByQa = (query) => {
-    useFeedbackStore.fetchFeedback('all', query, 'qa')
+   const fetchSalesAgentsFeedbackByAdmin = (query) => {
+    useFeedbackStore.fetchFeedback('all', query, 'admin')
   };
   
   const config = useRuntimeConfig()
@@ -257,7 +257,7 @@
  
  
   onMounted(() => {
-    fetchSalesAgentsFeedbackByQa(query)
+    fetchSalesAgentsFeedbackByAdmin(query)
   });
   
   const itemsPerPage = 10;
@@ -272,7 +272,7 @@
 
   
 
-  const agents = computed(() => useFeedbackStore.state.qa);
+  const agents = computed(() => useFeedbackStore.state.admin);
 
   const totalPages = computed(() =>
     Math.ceil(agents.value.length / itemsPerPage)
@@ -286,6 +286,7 @@
 
       const openModal = (type, agent) => {
 
+
         if(agent.submitted == 1){
           alert('Adding or Updating feedback for an agent that is already submitted is prohibited.')
           return
@@ -296,30 +297,33 @@
         showModal.value = true;
 
 
+ 
+
+
         if(type == 'add'){
             form.value = {
               agent_id: agent.id,
               agent_dbname: agent.db_name,
-              qa_id: currentUser.login_id,
-              qa_dbname: currentUser.db_name,
-              role: currentUser.role,
+              admin_id: currentUser.login_id,
+              admin_dbname: currentUser.db_name,
+              admin_role: currentUser.role,
               month:  agent.month,
               year:  agent.year,
               date:new Date().toISOString().split('T')[0], // Set today's date as default,
-              feedback_score: '',
+              feedback: '',
             };
         }else if(type == 'edit'){
 
             form.value = {
               agent_id: agent.id,
               agent_dbname: agent.db_name,
-              qa_id: currentUser.login_id,
-              qa_dbname: currentUser.db_name,
-              role: currentUser.role,
+              admin_id: currentUser.login_id,
+              admin_dbname: currentUser.db_name,
+              admin_role: currentUser.role,
               month:  agent.month,
               year:  agent.year,
               date: new Date().toISOString().split('T')[0],
-              feedback_score: agent.feedback
+              feedback: agent.feedback
             };
         };
       }
@@ -339,17 +343,17 @@
         errorFeedback.value = { monthYearError: '', feedbackError: '' }; // Reset errors
 
     
-        if (!form.value.feedback_score || !/^\d+(\.\d+)?$/.test(form.value.feedback_score)) {
+        if (!form.value.feedback || !/^\d+(\.\d+)?$/.test(form.value.feedback)) {
               errorFeedback.value.feedbackError = "Please enter a valid numeric feedback.";
               return 
         }
 
-        if (parseFloat(form.value.feedback_score) > 5 ) {
+        if (parseFloat(form.value.feedback) > 5 ) {
               errorFeedback.value.feedbackError = "The Highest Feedback you can give is 5.0 ";
               return 
         }
 
-            if ( parseFloat(form.value.feedback_score) == 0 || parseFloat(form.value.feedback_score) < 0) {
+            if ( parseFloat(form.value.feedback) == 0 || parseFloat(form.value.feedback) < 0) {
               errorFeedback.value.feedbackError = "Feedback value of zero(0) or negative value is not allowed";
               return 
         }
@@ -366,6 +370,8 @@
             return 
           }
 
+     
+
           if(currentUser.role != 'admin'){
               alert('"Access Denied: Insufficient Permission')
               closeModal();
@@ -374,18 +380,18 @@
           if (modalType.value === 'add') {
 
           try {
-            await useFeedbackStore.addUpdateDeleteFeedback(form.value.agent_id, form.value, 'qa', query, 'POST')
+            await useFeedbackStore.addUpdateDeleteFeedback(form.value.agent_id, form.value, 'admin', query, 'POST')
                console.log('the feedback query is', query)
-               fetchSalesAgentsFeedbackByQa({month: form.value.month, year: form.value.year});
+               fetchSalesAgentsFeedbackByAdmin({month: form.value.month, year: form.value.year});
               }catch(error){
               console.log(error)
            }
         
           } else if (modalType.value === 'edit') {
             try {
-              await useFeedbackStore.addUpdateDeleteFeedback(form.value.agent_id, form.value, 'qa', query, 'PUT')
+              await useFeedbackStore.addUpdateDeleteFeedback(form.value.agent_id, form.value, 'admin', query, 'PUT')
                 console.log('the feedback query is', query)
-              fetchSalesAgentsFeedbackByQa({month: form.value.month, year: form.value.year});
+              fetchSalesAgentsFeedbackByAdmin({month: form.value.month, year: form.value.year});
             } catch (error) {
               console.log(error)
            }
@@ -404,8 +410,8 @@
         console.log('the agent feedback need to delete', agent.id)
           console.log('the feedback query is', query)
         if (confirm(`Are you sure you want to delete this feedback?`)) {
-            await useFeedbackStore.addUpdateDeleteFeedback(agent.id, agent, 'qa', query, 'DELETE')
-            fetchSalesAgentsFeedbackByQa({month: agent.month, year: agent.year});
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.id, agent, 'admin', query, 'DELETE')
+            fetchSalesAgentsFeedbackByAdmin({month: agent.month, year: agent.year});
  
         }
       };
@@ -414,7 +420,7 @@
  watch(route, async (newRoute) => {
 
   router.push(newRoute.fullPath);
-  await useFeedbackStore.fetchFeedback('all', newRoute.query, 'qa')
+  await useFeedbackStore.fetchFeedback('all', newRoute.query, 'admin')
 
 });
 
