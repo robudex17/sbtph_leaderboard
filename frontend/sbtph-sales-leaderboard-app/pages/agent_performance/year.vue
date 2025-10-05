@@ -1,11 +1,12 @@
 <template>
     <div>
     <div class="p-4 mt-20">
+      <!-- <div>{{ leaderBoardStore.state.agentYearPerformance.yearAverage }}</div> -->
       <!-- Loading Spinner -->
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
-  
+    
       <!-- Leaderboard View -->
       <div v-else>
             <!-- Toggle Button for Card/Table View -->
@@ -22,11 +23,12 @@
             :exportFileName="exportFileName"
             :query="query"
             :token="token"
+            :incomplete="agent?.hasIncomplete"
         ></export-to-excel-component>   
         </div>
      
         <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
-        <div v-else-if="agent?.target == 0 || !agent || leaderBoardStore.state.error"  class="text-red-700 font-bold  text-5xl">
+        <div v-else-if=" !agent || leaderBoardStore.state.error"  class="text-red-700 font-bold  text-5xl">
           No Available Data.
         </div>
         <div v-else>
@@ -85,10 +87,11 @@
           </div>
           <div v-else>
             <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.year}} Year Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
-            <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"></leader-board-table-view>
+            <leader-board-table-view :agents="leaderBoardStore.state.agentYearPerformance.agentMetricsFullYear"></leader-board-table-view>
             <!-- <agentDetails class="p-4 mt-5" :fullyear="route.query.fullyear"/> -->
           <sales-metrcis-summary
-           :agents="leaderBoardStore.state.agentYearPerformance.agentMetircsFullYear"
+           :agents="[agent]"
+           :fullyear="true"
           ></sales-metrcis-summary>
           </div>
 
@@ -258,6 +261,7 @@
   const { setRatingNameColor } = useRatingColor()
   
   route.query.fullyear = true
+  const all = false
 
   route.query.month = months[new Date().getMonth()]
   
@@ -268,7 +272,7 @@
   const exportUrl = API.export.agent_peformance
 
   const exportFileName = computed(()=> {
-  return `agent-yearly-performance.xlsx`
+  return `${agent.value?.db_name}-agent-yearly-performance.xlsx`
   })
 
     
@@ -294,12 +298,57 @@
     return leaderBoardStore.state.agentYearPerformance.yearAverage
   })
 
+  // const yearSummaryMetrics = computed(() =>{
+           // if array is empty return []
+          // if (!agent.value || agent.value.length === 0) return [];
+
+          // let summary = {
+          //   shipok: 0,
+          //   shipok_score: 0,
+          //   deposit_score: 0,
+          //   absences: 0, 
+          //   tardiness: 0,
+          //   memo: 0,
+          //   absence_score: 0,
+          //   tardiness_score : 0,
+          //   memo_score : 0, 
+          //   feedback_score: 0
+          // };
+
+          // let count = agent.value.length;
+
+          // agent.value.forEach(item => {
+          //   summary.shipok += item.shipok;
+          //   summary.shipok_score += Number(item.shipok_score);
+          //   summary.deposit_score += Number(item.deposit_score);
+          //   summary.absences += Number(item.absences);
+          //   summary.tardiness += Number(item.tardiness);
+          //   summary.memo += Number(item.memo);
+          //   summary.absence_score += Number(item.absence_score)
+          //   summary.tardiness_score += Number(item.tardiness_score);
+          //   summary.memo_score += Number(item.memo_score);
+          //   summary.feedback_score += Number(item.feedback_score);
+          //   summary.year = item.year
+          // });
+
+          // average the score fields
+          // summary.shipok_score = summary.shipok_score / count || 0;
+          // summary.absence_score = summary.absence_score / count || 0;
+          // summary.absence_score = 
+
+       //   return [summary]; // wrap in array as you requested
+
+  // })
+
+
+  
+
 
   
   // Method to fetch leaderboard data
-  const leaderBoardData = async(query) => {
+  const leaderBoardData = async(all,query) => {
  
-    await leaderBoardStore.fetchLeaderboard(query);
+    await leaderBoardStore.fetchLeaderboard(all,query);
   };
   
   // Show the details of the selected agent
@@ -328,14 +377,14 @@
     newRoute.query.fullyear = true
     newRoute.query.agent_id = agentId
     query.value = newRoute.query
-    leaderBoardData(query.value)
+    leaderBoardData(all,query.value)
     
   })
   
   
   // Fetch leaderboard data on mount
   onMounted( async() => {
-    await leaderBoardData(query.value);
+    await leaderBoardData(all,query.value);
     
   });
   

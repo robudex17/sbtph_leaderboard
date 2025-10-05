@@ -370,10 +370,7 @@
   const router = useRouter();
   const route = useRoute();
   
-  
-  const query = route.query;
-  // const month = ref(null)
-  // const year = ref(null)
+
   
   //get the current user
     const authStore = useAuthStore()
@@ -431,14 +428,6 @@
          ];
 
 
-
-    if(!query.month){
-        query.month = months[new Date().getMonth()]
-    }
-
-    if(!query.year){
-        query.year = new Date().getFullYear()
-    }
 
 
 
@@ -558,8 +547,8 @@
        case "targetShipok": 
           
               
-              await useManageSalesStore.addAgentTarget( agent.agent_id, query, agent)
-              fetchSalesAgentsEvaluation(query)
+              await useManageSalesStore.addAgentTarget( agent.agent_id, route.query, agent)
+              fetchSalesAgentsEvaluation(route.query)
              break
        case "newDeposit":
             
@@ -567,8 +556,8 @@
              agent.total_records = totalRecords
              agent.new_deposit = 10000
              agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
-             await useManageSalesStore.addAgentDeposit(agent.agent_id, query, agent)
-             fetchSalesAgentsEvaluation(query)
+             await useManageSalesStore.addAgentDeposit(agent.agent_id, route.query, agent)
+             fetchSalesAgentsEvaluation(route.query)
             break
 
 
@@ -578,17 +567,17 @@
              agent.evaluation = true
              agent.total_records = totalRecords
              agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
-             await useManageSalesStore.addAgentAttendanceType(agent.agent_id, query, metricsType.value, agent)
-             fetchSalesAgentsEvaluation(query)
+             await useManageSalesStore.addAgentAttendanceType(agent.agent_id, route.query, metricsType.value, agent)
+              fetchSalesAgentsEvaluation(route.query)
           break 
        case "feedback_admin":
             agent.admin_id = currentUser.login_id 
             agent.admin_dbname = currentUser.db_name
             agent.admin_role = currentUser.role
             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`
-            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin',  query, 'POST')
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin',  route.query, 'POST')
           
-            fetchSalesAgentsEvaluation(query)
+            fetchSalesAgentsEvaluation(route.query)
           break
        case "feedback_qa":  
 
@@ -597,9 +586,9 @@
             agent.role = currentUser.role   
             agent.feedback_score = agent.feedback  // assign feedback value to feedback_score because the qa feedback  is save as feedback_score
             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`  
-            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', query, 'POST')
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', route.query, 'POST')
           
-             fetchSalesAgentsEvaluation(query)  
+             fetchSalesAgentsEvaluation(route.query)  
           break      
 
       
@@ -616,17 +605,18 @@
       const monthNumber = monthMap[agent.month];
       switch (metricsType.value){
          case "targetShipok":
-              await useManageSalesStore.updateAgentTarget(agent.agent_id,  query, agent )
-              fetchSalesAgentsEvaluation(query)
+              await useManageSalesStore.updateAgentTarget(agent.agent_id, route.query, agent )
+      
+              fetchSalesAgentsEvaluation(route.query)
              break
        case "feedback_admin":
             agent.admin_id = currentUser.login_id 
             agent.admin_dbname = currentUser.db_name
             agent.admin_role = currentUser.role
             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`
-            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin', query, 'PUT')
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'admin', route.query, 'PUT')
       
-            fetchSalesAgentsEvaluation(query)
+            fetchSalesAgentsEvaluation(route.query)
           break
        case "feedback_qa":  
             agent.qa_id = currentUser.login_id 
@@ -634,8 +624,8 @@
             agent.role = currentUser.role   
             agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-28`  
              agent.feedback_score = agent.feedback  // assign feedback value to feedback_score because the qa feedback  is save as feedback_score
-            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', query, 'PUT')
-            fetchSalesAgentsEvaluation(query)
+            await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', route.query, 'PUT')
+            fetchSalesAgentsEvaluation(route.query)
           break                
         default:
           console.log("Unknow Metircs type");
@@ -650,15 +640,15 @@
           const monthNumber = monthMap[agent.month];
           switch (metricsType.value){
             case "targetShipok":
-                  await useManageSalesStore.updateAgentTarget(agent.agent_id,  query, agent )
-                  fetchSalesAgentsEvaluation(query)
+                  await useManageSalesStore.updateAgentTarget(agent.agent_id,  route.query, agent )
+                  fetchSalesAgentsEvaluation(route.query)
               break  
             case "newDeposit":   
                   //  alert(agent.agent_id)
                   agent.evaluation = true
                   agent.total_records = totalRecords
-                  await useManageSalesStore.deleteAgentNewDeposit(agent.agent_id,  query, agent )
-                  fetchSalesAgentsEvaluation(query)
+                  await useManageSalesStore.deleteAgentNewDeposit(agent.agent_id,  route.query, agent )
+                   fetchSalesAgentsEvaluation(route.query)
               break 
           case "absence":
           case "tardiness":
@@ -666,8 +656,8 @@
               agent.evaluation = true
               agent.total_records = totalRecords
               agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
-              await useManageSalesStore.deleteAgentAttendanceType(agent.agent_id, query, metricsType.value, agent)
-              fetchSalesAgentsEvaluation(query)
+              await useManageSalesStore.deleteAgentAttendanceType(agent.agent_id, route.query, metricsType.value, agent)
+              fetchSalesAgentsEvaluation(route.query)
             break    
                                      
             default:
@@ -762,7 +752,7 @@ const openModal = ( data) => {
 
  
   onMounted(() => {
-    fetchSalesAgentsEvaluation(query);
+    fetchSalesAgentsEvaluation(route.query);
   
   });
   

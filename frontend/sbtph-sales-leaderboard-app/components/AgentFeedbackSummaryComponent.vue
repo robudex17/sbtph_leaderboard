@@ -10,38 +10,38 @@
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th> -->
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Name</th> -->
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Status</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Month</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Year</th>
-              <th v-if="agents[0].agent_type == 0" class="py-2 px-4 text-left text-sm font-medium ">
+              <th class="py-2 px-2 text-sm  text-center font-bold  border">Month</th>
+              <th class="py-2 px-2 text-center text-sm font-bold  border">Year</th>
+              <th v-if="agents[0].agent_type == 0" class="py-2 px-4 text-center text-sm font-medium ">
                    <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
                    @click="openModal( agentFeedbackByLm, 'agent_by_lm' )"
-                    class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer">
+                    class="text-blue-600 underline hover:text-blue-800 font-bold cursor-pointer">
                       Feedback From LM
                    </button>
                    <span v-else>Feedback From LM</span>
                     
               </th>
-              <th v-if="agents[0].agent_type == 1" class="py-2 px-4 text-left text-sm font-medium ">
+              <th v-if="agents[0].agent_type == 1" class="py-2 px-2 text-center text-sm font-bold ">
                   <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2 "
-                   class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                   class="text-blue-600 underline hover:text-blue-800 font-bold cursor-pointer"
                    @click="openModal( lmFeedbackByAgent, 'lm_by_agent' )"
                   >
                     Feedback From Agents
                   </button>
                   <span v-else>Feedback From Agents</span>
               </th>
-              <th v-if="agents[0].agent_type == 1" class="py-2 px-4 text-left text-sm font-medium ">
+              <th v-if="agents[0].agent_type == 1" class="py-2 px-2 text-center text-sm font-bold ">
                   <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2 "
-                   class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                   class="text-blue-600 underline hover:text-blue-800 font-bold cursor-pointer"
                     @click="openModal( lmFeedbackByUm, 'lm_by_um' )"
                   >
                     Feedback From Unit Manager
                   </button>
                   <span v-else>Feedback From Unit Manager</span>
               </th>
-              <th v-if="agents[0].agent_type == 2" class="py-2 px-4 text-left text-sm font-medium ">
+              <th v-if="agents[0].agent_type == 2" class="py-2 px-2 text-center text-sm font-bold ">
                   <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
-                   class="text-blue-600 underline hover:text-green-900 font-semibold cursor-pointer"
+                   class="text-blue-600 underline hover:text-green-900 font-bold cursor-pointer"
                    @click="openModal( umFeedbackByLm, 'um_by_lm' )"
                   >
                     Feedback From Local Managers
@@ -49,9 +49,9 @@
                   <span v-else>Feedback From Local Managers</span>
               </th>
      
-              <th class="py-2 px-4 text-left text-sm font-medium ">
+              <th class="py-2 px-2  text-center text-sm font-bold ">
                 <button v-if="currentUser.login_type == 'standarduser' || currentUser.agent_type == 2"
-                 class="text-blue-600 underline hover:text-blue-800 font-semibold cursor-pointer"
+                 class="text-blue-600 underline hover:text-blue-800 font-bold cursor-pointer"
                  @click="openModal( feedbackByQa, 'qa' )"
                 >
                   Feedback From Qa
@@ -59,7 +59,7 @@
                 </button>
                 <span v-else>Feedback From Qa</span>
               </th>
-              <th class="py-2 px-4 text-left text-sm font-medium t">Overall Feedback</th>
+              <th class="py-2 px-2 text-center text-sm font-bold">Overall Feedback</th>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Photo</th> -->
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center  disabled:bg-gray-400 disabled:cursor-not-allowed">
                  <button :disabled=" currentUser.login_type != 'standarduser' || (props.overallAverageFeedback == null || props.overallAverageFeedback == '' )"
@@ -81,32 +81,32 @@
               <!-- <td class="py-2 px-4 text-sm text-green-800">
                 <span :class="['status', agents[0].status]">{{ agents[0].status }}</span>
               </td> -->
-              <td class="py-2 px-4 text-sm  border">
+              <td class="py-2 px-2 text-sm text-center  border">
                 {{ feedback.month }}
               </td>  
-              <td class="py-2 px-4 text-sm border">
+              <td class="py-2 px-2 text-sm text-center border">
                 {{ feedback.year }}   
               </td>  
-              <td  class="py-2 px-4 text-sm  text-center font-bold border"
+              <td  class="py-2 px-2 text-sm  text-center font-bold border"
                   :class="feedback.averageAgentFeedbackByLm && feedback.averageAgentFeedbackByLm != 0 ? 'text-green-800' : 'text-red-600'"
                   v-if="agents[0].agent_type == 0 "> {{feedback.averageAgentFeedbackByLm ?  feedback.averageAgentFeedbackByLm : 'No Feedback'}}
               </td>
 
-              <td  class="py-2 px-4 text-sm text-center font-bold border" 
+              <td  class="py-2 px-2 text-sm text-center font-bold border" 
                 :class=" feedback.averageLmFeedbackByAgent &&  feedbackData.averageLmFeedbackByAgent !== 0 ? 'text-green-800' : 'text-red-600'"
                 v-if="agents[0].agent_type == 1 ">{{ feedback.averageLmFeedbackByAgent ? feedback.averageLmFeedbackByAgent : 'No Feedback' }}
               </td>
               <td  
-              class="py-2 px-4 text-sm text-center font-bold border" 
+              class="py-2 px-2 text-sm text-center font-bold border" 
               :class=" feedback.averageLmFeedbackByUm &&  feedback.averageLmFeedbackByUm !== 0 ? 'text-green-800' : 'text-red-600'"
               v-if="agents[0].agent_type == 1 ">{{ feedback.averageLmFeedbackByUm ?  feedback.averageLmFeedbackByUm : 'No Feedback' }}
 
               </td>
-              <td  class="py-2 px-4 text-sm text-center font-bold border"
+              <td  class="py-2 px-2 text-sm text-center font-bold border"
               :class=" feedback.averageUmFeedbackByLm &&  feedback.averageUmFeedbackByLm !== 0 ? 'text-green-800' : 'text-red-600'"
               v-if="agents[0].agent_type == 2">{{ feedback.averageUmFeedbackByLm ? feedback.averageUmFeedbackByLm : 'No Feedback' }}</td>
 
-              <td  class="py-2 px-4 text-sm text-center font-bold border"
+              <td  class="py-2 px-2 text-sm text-center font-bold border"
                 :class="feedback.averageFeedbackByQa &&  feedback.averageFeedbackByQa !== 0 ? 'text-green-800' : 'text-red-600'"
               >
                 {{ feedback.averageFeedbackByQa ?feedback.averageFeedbackByQa : 'No Feedback' }}
@@ -114,7 +114,7 @@
 
               
               <td 
-                class="py-2 px-4  text-sm text-center font-bold border"
+                class="py-2 px-2  text-sm text-center font-bold border"
                 :class=" feedback.overallAverageFeedback && feedback.overallAverageFeedback !== 0 ? 'text-purple-800' : 'text-red-600'"
               >{{ feedback.overallAverageFeedback ? feedback.overallAverageFeedback : 'No Feedback' }}</td>
               

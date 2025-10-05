@@ -115,27 +115,113 @@ exports.loginUser = async(req,res, next) => {
        const loginId = loginUser[0].login_id
 
        // join the login and sales_agents where login.login_id = sales_agents.id
-       const [user] = await pool.execute(
+    //    const [user] = await pool.execute(
+    //     `
+    //     SELECT 
+    //             sales_agents_login.login_id AS login_id,
+    //             sales_agents_login.username AS username,
+    //             sales_agents_login.password_hash,
+    //             sales_agents_login.role AS role,
+    //             sales_agents.manager_id,
+    //             sales_agents.agent_type,
+    //             sales_agents.firstname,
+    //             sales_agents.lastname,
+    //             sales_agents.db_name,
+    //             sales_agents.market_id,
+    //             sales_agents.team_id,
+    //             sales_agents.image_link
+    //         FROM sales_agents_login
+    //         INNER JOIN sales_agents ON sales_agents_login.login_id = sales_agents.id
+    //         WHERE sales_agents_login.login_id = ?
+    //    `, [loginId]
+    //     )
+
+
+    const [user]  = await pool.execute(
+
         `
-        SELECT 
-                sales_agents_login.login_id AS login_id,
-                sales_agents_login.username AS username,
-                sales_agents_login.password_hash,
-                sales_agents_login.role AS role,
-                sales_agents.manager_id,
-                sales_agents.agent_type,
-                sales_agents.firstname,
-                sales_agents.lastname,
-                sales_agents.db_name,
-                sales_agents.market_id,
-                sales_agents.team_id,
-                sales_agents.image_link
-            FROM sales_agents_login
-            INNER JOIN sales_agents ON sales_agents_login.login_id = sales_agents.id
-            WHERE sales_agents_login.login_id = ?
-       `, [loginId]
-        )
-     
+                SELECT 
+                sa.id AS id,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.email,
+                sa.image_link,
+                aa.id AS assignment_id,
+                aa.agent_type,
+                r.role_name AS agent_role,
+                aa.manager_id,
+                mgr.db_name AS manager_dbname,
+                mr.role_name AS manager_role,
+                m.id AS market_id,
+                m.name AS market_name,
+                t.id AS team_id,
+                t.name AS team_name,
+                sales_agents_login.username,
+                sales_agents_login.role,
+                
+                DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+                DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+                DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+                DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+                CASE  
+                    WHEN ae.status = 'Hired' 
+                        AND EXISTS (
+                            SELECT 1
+                            FROM agent_employments ae2
+                            WHERE ae2.agent_id = sa.id
+                            AND ae2.status = 'Resigned'
+                            AND ae2.id < ae.id
+                        )
+                    THEN 'Rehired'
+                    ELSE ae.status
+                END AS employee_status
+
+            FROM sales_agents2 sa
+
+            -- get ALL employments
+            JOIN agent_employments ae 
+                ON sa.id = ae.agent_id
+
+            -- get ALL assignments that overlap with the employment period
+            JOIN agent_assignments aa 
+                ON sa.id = aa.agent_id
+            AND (
+                    (ae.end_date IS NULL AND aa.effective_from >= ae.start_date)
+                    OR
+                    (ae.end_date IS NOT NULL 
+                    AND aa.effective_from BETWEEN ae.start_date AND ae.end_date)
+            )
+
+            -- agent role
+            LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+            -- manager details
+            LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+            LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+            AND maa.id = (
+                SELECT MAX(id) 
+                FROM agent_assignments 
+                WHERE agent_id = mgr.id
+            )
+            LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+            -- market and team
+            LEFT JOIN markets m ON aa.market_id = m.id
+            LEFT JOIN teams t ON aa.team_id = t.id
+            LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+
+            WHERE sa.id = ?   -- 🔹 filter for your agent
+
+            ORDER BY aa.effective_from DESC;
+
+        `,[loginId]
+    )
+
+
+       if(user[0].employee_status == 'Resigned'){
+        return  res.status(401).json({message: `${user[0].firstname} ${user[0].lastname} is already Resigned. You are not allowed to login..`})
+       }
         
        if(user[0].role == 'user' && loginas != 'salesagent'){
            return res.status(401).json({message: `Your are not allowed to login as ${loginas}`})
@@ -172,7 +258,7 @@ exports.loginUser = async(req,res, next) => {
         // res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false, sameSite: 'lax' })
     //     res.json({accessToken})
     //    }
-
+  
      return res.json({accessToken})
 
     }catch(error){

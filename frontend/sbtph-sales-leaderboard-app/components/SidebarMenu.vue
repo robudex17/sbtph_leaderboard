@@ -214,7 +214,7 @@
               icon: ['fas', 'cog'],
               subMenu: [
                 // { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
-                { name: 'Manage Sales Agents', route: '/admin/agent/manage_sales_agents', icon: ['fas', 'user-tie'] },
+                { name: 'Manage Sales Agents', route: '/admin/agent2/manage_sales_agents', icon: ['fas', 'user-tie'] },
               
 
               ]
@@ -373,7 +373,14 @@
         console.log('the Route is ', route)
         const currentRoute = route.path;
 
-        if (/^\/admin\/agent\/\d+\/details$/.test(currentRoute)) {
+           if (/^\/admin\/agent2/.test(currentRoute)) {
+              
+              submenuStates.value["Admin Panel"] = true; // Open the Admin Panel submenu
+               activeMenu.value = "Manage Sales Agents";
+              return;
+        }
+
+        if (/^\/admin\/agent2\/\d+\/details$/.test(currentRoute)) {
               submenuStates.value["Admin Panel"] = true; // Open the Admin Panel submenu
                activeMenu.value = "Manage Sales Agents";
               return;

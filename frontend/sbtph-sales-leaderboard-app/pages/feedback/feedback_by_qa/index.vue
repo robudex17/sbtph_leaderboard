@@ -1,5 +1,6 @@
 <template>
-  <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20">
+  <!-- <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20"> -->
+  <div class="p-4 mt-20">
     <!-- Loading Spinner -->
     <!-- <div v-if="useFeedbackStore.state.loading">
       <spinner></spinner>
@@ -14,17 +15,17 @@
           <table class="w-full table-auto border-collapse bg-white">
             <thead>
               <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">ID</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900"> Name</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900"> Employee Status</th>
-                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Manager</th>     
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Market</th>
-                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Team</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Month</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Year</th>
-                 <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Feedback By</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Feedback</th>
-                <th class="py-1 px-4 text-center text-medium font-bold text-green-900">Actions</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">ID</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900"> Name</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900"> Employee Status</th>
+                 <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Manager</th>     
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Market</th>
+                 <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Team</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Month</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Year</th>
+                 <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Feedback By</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Feedback</th>
+                <th class="py-1 px-4 text-center  text-xs font-bold text-green-900">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -36,7 +37,7 @@
                 <td class="py-1 px-6 border text-center text-gray-700">
                   {{ agent.id }}
                 </td>
-                <td class="py-1 px-4  border text-center text-medium font-medium text-green-900">
+                <td class="py-1 px-4  border text-center  text-xs font-medium text-green-900">
                     <div class="flex items-center space-x-3 ml-3">
                       <img
                         v-if="agent && agent.image_link"
@@ -47,35 +48,35 @@
                       <span>{{ agent.db_name }}</span>
                     </div>
                 </td>
-                <td class="py-1 px-4  border text-center text-sm  font-bold " 
+                <td class="py-1 px-4  border text-center  text-xs  font-bold " 
                   :class="agent.employee_status=== 'Hired' ? 'text-green-500 font-bold' : 'text-red-500 font-bold' ">
                   {{ agent.employee_status }}
                 </td>     
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.manager_dbname }}
                 </td>                             
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.market_name }}
                 </td>                
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.team_name }}
                 </td>
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.month }}
                 </td>
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.year }}
                 </td>
-                <td class="py-1 px-4  border text-left text-sm font-medium text-green-900">
+                <td class="py-1 px-4  border text-left  text-xs font-medium text-green-900">
                   {{ agent.qa_dbname  }}
                 </td>               
                 <td 
-                  class="py-4 px-6 border text-center font-bold text-green-500"
+                  class="py-1 px-6 border text-center font-bold text-green-500"
                   :class="{ 'text-red-500 font-bold': agent.feedback === 'No Feedback' }"
                 >
                   {{ agent.feedback }}
                 </td>
-                <td class="py-4 px-6 border text-center">
+                <td class="py-0.5 px-6 border text-center">
                   <div class="flex justify-center space-x-2">
                     <!-- <NuxtLink 
                       :to="{
@@ -122,29 +123,29 @@
               <h2 class="text-xl font-bold mb-4">{{ modalType === 'add' ? `Add Feedback`  : `Edit Feedback` }}</h2>
               <form @submit.prevent="submitForm">
                 <div class="mb-4">
-                  <label class="block text-sm font-medium mb-2">Agent ID</label>
+                  <label class="block  text-xs font-medium mb-2">Agent ID</label>
                   <input v-model="form.agent_id" type="number" class="w-full border rounded-lg p-2" disabled required />
                 </div>
 
                 <div class="mb-4">
-                  <label class="block text-sm font-medium mb-2">Month</label>
+                  <label class="block  text-xs font-medium mb-2">Month</label>
                   <input type="text" class="w-full border rounded-lg p-2" v-model="form.month" disabled required />
                 </div>
 
                 <!-- Year Field - Current Year -->
                 <div class="mb-4">
-                  <label class="block text-sm font-medium mb-2">Year</label>
+                  <label class="block  text-xs font-medium mb-2">Year</label>
                   <input type="text" class="w-full border rounded-lg p-2" v-model="form.year" disabled required />
                 </div>
 
           
 
                 <div class="mb-4">
-                  <label class="block text-sm font-medium mb-2">Feedback</label>
+                  <label class="block  text-xs font-medium mb-2">Feedback</label>
                   <input v-model="form.feedback_score" type="text" class="w-full border rounded-lg p-2"
                   @keydown.backspace="onBackSpace"
                   />
-                  <p v-if="errorFeedback.feedbackError" class="text-red-500 text-sm mt-2">{{ errorFeedback.feedbackError }}</p>
+                  <p v-if="errorFeedback.feedbackError" class="text-red-500  text-xs mt-2">{{ errorFeedback.feedbackError }}</p>
                 </div>
 
                 <div class="flex justify-end gap-2">

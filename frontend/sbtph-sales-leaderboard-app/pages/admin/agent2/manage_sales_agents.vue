@@ -1,5 +1,6 @@
 <template>
-  <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen">
+  <!-- <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen"> -->
+  <div class="p-6 min-h-screen">
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Sales Agents Information</h1>
 
 
@@ -559,16 +560,16 @@
             :key="agent.id"
             class="even:bg-blue-50 odd:bg-white"
           >
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.id }}
             </td>
-            <td class="py-2 pl-1 border text-left text-xs font-bold text-gray-700">
+            <td class="py-1 px-1 border text-center text-xs font-bold text-gray-700">
               {{ agent.start_date }}
             </td>
-             <td class="py-2 pl-1 border text-left text-xs font-bold text-gray-700" v-if="agentEmployeeStatus == 'Resigned'">
+             <td class="py-1 px-1 border text-left text-xs font-bold text-gray-700" v-if="agentEmployeeStatus == 'Resigned'">
               {{ agent.end_date }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold"
+            <td class="py-1 px-2 border text-center text-xs font-bold"
             :class="{
               'text-red-600': agent.employee_status === 'Resigned',
               'text-green-600': agent.employee_status === 'Hired' || agent.employee_status === 'Rehired'
@@ -576,28 +577,28 @@
             >
               {{ agent.employee_status }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.firstname }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.lastname }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.agent_type }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.db_name }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.email }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.manager_dbname }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.market_name }}
             </td>
-            <td class="py-2 px-2 border text-center text-xs font-bold text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs font-bold text-gray-700">
               {{ agent.team_name }}
             </td>
 
@@ -605,10 +606,10 @@
               <img
                 :src="updateImageLink(agent.image_link)"
                 alt="Agent Image"
-                class="h-12 w-12 rounded-full mx-auto border border-blue-200"
+                class="h-11 w-11 rounded-full mx-auto border border-blue-200"
               />
             </td>
-            <td class="py-2 px-3 border text-center">
+            <td class="py-0.5 px-3 border text-center">
               <div class="flex justify-center space-x-2">
                 <button :disabled="currentUser.role !=='admin'"
                   class="px-2 py-1 bg-green-500 text-white text-center text-sm font-bold rounded hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
@@ -622,12 +623,12 @@
                     path: `/admin/agent2/${agent.id}/details`, query: { agent_type: agent.agent_type,  manager_id: agent.manager_id, agent_role: agent.role , agent_dbname: agent.db_nam, employee_status: agent.employee_status}
                     
                   }"
-                  class="px-1 py-2 bg-blue-500 text-white text-center text-sm font-bold rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-1 py-1 bg-blue-500 text-white text-center text-sm font-bold rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Details
                 </NuxtLink>
                 <button :disabled="currentUser.role !=='admin'" v-if="agentEmployeeStatus == 'Hired'"
-                  class="px-2 py-2 bg-gray-500 text-white text-center text-sm font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-2 py-1 bg-gray-500 text-white text-center text-sm font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditAgentLoginModal({login_id: agent.id, role: agent.role, status: agent.login_status, username: agent.username, agent_type: agent.agent_type})"
                 >
                   Login

@@ -56,45 +56,45 @@ module.exports = (io) => {
            
             next()
         },salesLeaderboardController.fetchAgentLeaderBoard,
-        salesAbsencesController.fetchAgentAbsent,
-        salesTargetShipokController.fetchAgentTarget, 
-        salesNewDepositController.fetchAgentNewDeposit ,
-        salesTardinessController.fetchAgentTardiness,
-        salesMemoController.fetchAgentMemo, 
-        salesAgentsController.fetchSalesAgent,
-        salesFeedbackController.getAgentsFeedbackByQa,
-        async (req, res, next) => {
+        // salesAbsencesController.fetchAgentAbsent,
+        // salesTargetShipokController.fetchAgentTarget, 
+        // salesNewDepositController.fetchAgentNewDeposit ,
+        // salesTardinessController.fetchAgentTardiness,
+        // salesMemoController.fetchAgentMemo, 
+        // salesAgentsController.fetchSalesAgent,
+        // salesFeedbackController.getAgentsFeedbackByQa,
+        // async (req, res, next) => {
 
-        if(req.agent_type == 0){
-            req.agent_feedback = await salesFeedbackController.getAgentsFeedback(req, res, next)
-            req.manager_feedback = []
-            req.lm_feedback = []
-            next()
-        }
+        // if(req.agent_type == 0){
+        //     req.agent_feedback = await salesFeedbackController.getAgentsFeedback(req, res, next)
+        //     req.manager_feedback = []
+        //     req.lm_feedback = []
+        //     next()
+        // }
 
-        if(req.agent_type === 1){
-            req.params.manager_id = req.query.agent_id
-            req.params.lm_id = req.query.agent_id
-            req.query.agent_id = null 
+        // if(req.agent_type === 1){
+        //     req.params.manager_id = req.query.agent_id
+        //     req.params.lm_id = req.query.agent_id
+        //     req.query.agent_id = null 
             
-            req.agent_feedback = []
-            req.manager_feedback = await salesFeedbackController.getMangerFeedback(req, res, next)
-            req.lm_feedback  =  await salesFeedbackController.getLmFeedback(req, res, next)
-            next()
-        }
+        //     req.agent_feedback = []
+        //     req.manager_feedback = await salesFeedbackController.getMangerFeedback(req, res, next)
+        //     req.lm_feedback  =  await salesFeedbackController.getLmFeedback(req, res, next)
+        //     next()
+        // }
 
-        if(req.agent_type == 2){
-            req.params.manager_id = req.query.agent_id
-            req.query.agent_id = null 
+        // if(req.agent_type == 2){
+        //     req.params.manager_id = req.query.agent_id
+        //     req.query.agent_id = null 
 
-            req.agent_feedback = []
-            req.lm_feedback = []
-            req.manager_feedback = await salesFeedbackController.getMangerFeedback(req, res, next)
-            next()
+        //     req.agent_feedback = []
+        //     req.lm_feedback = []
+        //     req.manager_feedback = await salesFeedbackController.getMangerFeedback(req, res, next)
+        //     next()
 
-        }
+        // }
         
-        }, importExportDataController.salesAgentMonthlyPerformanceExportToExcel
+         importExportDataController.salesAgentMonthlyPerformanceExportToExcel
   )
   
   

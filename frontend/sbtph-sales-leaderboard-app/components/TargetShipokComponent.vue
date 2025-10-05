@@ -7,15 +7,15 @@
           <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
               <tr>
                 <!-- <th class="py-2 px-4 text-left text-sm font-medium border ">Agent ID</th> -->
-                <th class="py-2 px-4 text-left text-sm font-medium border ">Month</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border">Year</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Month</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border">Year</th>
                 <!-- <th class="py-2 px-4 text-left text-sm font-medium ">Date</th> -->
-                <th class="py-2 px-4 text-left text-sm font-medium border">TARGET</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border">SHIPOK</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border">PERCENTAGE</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border">MARKET</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border">TEAM </th>
-                <th class="py-2 px-4 text-left text-sm font-medium  flex justify-between items-center">
+                <th class="py-2 px-2 text-center text-sm font-bold border">Target</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border">Shipok</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border">Percentage</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border">Market</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border">Team</th>
+                <th class="py-1 px-2 text-center text-sm font-bold border flex justify-between items-center">
                   Actions
                   <button :disabled="targetShipokDetails.length == 1 || currentUser.agent_type == 1 || currentUser.role == 'user' || currentUser.agent_type == 2"   class="disabled:bg-gray-400 disabled:cursor-not-allowed"
                     @click="openModal('add')" 
@@ -32,21 +32,21 @@
                 :key="targetShipokDetails.id + index" 
                   class="odd:bg-white even:bg-green-50">
                   <!-- <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.id }}</td> -->
-                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.eval_month }}</td>
-                  <td class="py-2 px-4 text-sm">{{ targetShipokDetail.eval_year }}</td>
+                  <td class="py-2 px-2 text-sm text-center border">{{ targetShipokDetail.eval_month }}</td>
+                  <td class="py-2 px-2 text-sm  text-center border">{{ targetShipokDetail.eval_year }}</td>
                   <!-- <td class="py-2 px-4 text-sm text-green-800">{{ targetShipokDetail.date }}</td> -->
-                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.target }}</td>
-                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.shipok }}</td>
-                  <td class="py-2 px-4 text-sm  font-bold"
+                  <td class="py-2 px-2 text-sm  text-center border">{{ targetShipokDetail.target }}</td>
+                  <td class="py-2 px-2 text-sm  text-center border">{{ targetShipokDetail.shipok }}</td>
+                  <td class="py-2 px-2 text-sm   text-center border font-bold"
                     :class="{
                       'text-red-500': percentage(targetShipokDetail) <= 50,
                       'text-green-500': percentage(targetShipokDetail) >= 51 && percentage(targetShipokDetail) <= 100,
                       'text-purple-500': percentage(targetShipokDetail) > 100
                     }"
                     >{{ percentage(targetShipokDetail)}}% </td>
-                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.market_name.toUpperCase() }}</td> 
-                  <td class="py-2 px-4 text-sm ">{{ targetShipokDetail.team_name.toUpperCase()}}</td>
-                  <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
+                  <td class="py-2 px-2 text-sm  text-center font-medium border">{{ targetShipokDetail.market_name.toUpperCase() }}</td> 
+                  <td class="py-2 px-2 text-sm  text-center font-medium border">{{ targetShipokDetail.team_name.toUpperCase()}}</td>
+                  <td class="py-1 px-2 text-sm  text-center border text-green-800  flex justify-center items-center gap-2">
                     <button 
                         :disabled="currentUser.role == 'user' ||
                         currentUser.agent_type == 1 ||

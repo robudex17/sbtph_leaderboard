@@ -6,11 +6,11 @@ const { validateMemo, validateMonthYear } = require('../middleware/validator')
 
 const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
-router.post('/agent_memo/:agent_id', authenticateToken, authorizeRoles('admin'), validateMemo, salesMemoController.createSalesAgentMemo)
+router.post('/agent_memo/:agent_id', authenticateToken, authorizeRoles('admin'), salesMemoController.createSalesAgentMemo)
 
 router.get('/agent_memo/:agent_id', authenticateToken,  validateMonthYear,salesMemoController.fetchAgentMemo)
 
-router.put('/agent_memo/:agent_id', authenticateToken, authorizeRoles('admin'), validateMemo, salesMemoController.updateAgentMemo)
+router.put('/agent_memo/:agent_id', authenticateToken, authorizeRoles('admin'),  salesMemoController.updateAgentMemo)
 
 router.delete('/agent_memo/:agent_id', authenticateToken, authorizeRoles('admin'), salesMemoController.deleteAgentMemo)
 

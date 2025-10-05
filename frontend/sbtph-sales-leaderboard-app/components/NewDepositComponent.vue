@@ -2,19 +2,19 @@
     <div >
         <h1 class="text-2xl font-bold mb-4 text-center">Sales Agent New Deposit</h1>
         <div class="overflow-x-auto"> 
-       {{ typeof submitted }}
+   
         <table class="w-full table-auto border-collapse bg-white">
           <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
               <tr>
                 <!-- <th class="py-2 px-4 text-left text-sm font-medium border ">ID</th> -->
                 <!-- <th class="py-2 px-4 text-left text-sm font-medium border ">Agent ID</th> -->
-                <th class="py-2 px-4 text-left text-sm font-medium border ">MONTH</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border ">YEAR</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border ">MARKET</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border ">TEAM</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Month</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Year</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Market</th>
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Team</th>
                 <!-- <th class="py-2 px-4 text-left text-sm font-medium border ">Date</th> -->
-                <th class="py-2 px-4 text-left text-sm font-medium border ">DESCRIPTION</th>
-                <th class="py-2 px-4 text-left text-sm font-medium border  flex justify-between items-center">
+                <th class="py-2 px-2 text-center text-sm font-bold border ">Description</th>
+                <th class="py-1 px-2 text-center text-sm font-bold border  flex justify-between items-center">
                   Actions
                   <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                     @click="openModal('add')" 
@@ -32,12 +32,12 @@
                 class="odd:bg-white even:bg-green-50">
                 <!-- <td class="py-2 px-4 text-sm border ">{{ newDeposit.id }}</td> -->
                 <!-- <td class="py-2 px-4 text-sm border ">{{ newDeposit.agent_id }}</td> -->
-                <td class="py-2 px-4 text-sm border ">{{ newDeposit.eval_month }}</td>
-                <td class="py-2 px-4 text-sm border ">{{ newDeposit.eval_year }}</td>
-                <td class="py-2 px-4 text-sm border ">{{ newDeposit.market_name.toUpperCase() }}</td>
-                <td class="py-2 px-4 text-sm border ">{{ newDeposit.team_name.toUpperCase()}}</td>
-                <td class="py-2 px-4 text-sm border ">{{ newDeposit.description }}</td>
-                <td class="py-2 px-4 text-sm border  flex gap-2">
+                <td class="py-2 px-2 text-sm text-center border ">{{ newDeposit.eval_month }}</td>
+                <td class="py-2 px-2 text-sm text-center border ">{{ newDeposit.eval_year }}</td>
+                <td class="py-2 px-2 text-sm text-center font-medium border ">{{ newDeposit.market_name.toUpperCase() }}</td>
+                <td class="py-2 px-2 text-sm text-center font-medium border ">{{ newDeposit.team_name.toUpperCase()}}</td>
+                <td class="py-2 px-2 text-sm text-center border ">{{ newDeposit.description }}</td>
+                <td class="py-1 px-2 text-sm text-center  border  flex justify-center  gap-2">
                   <button   :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0"
                     @click="openModal('edit', newDeposit)" 
                     class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">
@@ -214,10 +214,10 @@
         return       
       }
 
-         if(props.submitted == 1){
+      if(props.submitted == 1){
              alert(`Adding or Updating Agent New Deposit that is already submittted is prohibited. `)
             return
-          }
+      }
 
 
 

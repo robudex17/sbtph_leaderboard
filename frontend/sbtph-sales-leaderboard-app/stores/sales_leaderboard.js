@@ -31,9 +31,16 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
     })
 
     // Action to fetch sales leaderboard
-    const fetchLeaderboard = async (queryString = null, year_summary) => {
+    const fetchLeaderboard = async ( all,queryString, year_summary) => {
         state.loading = true
         state.error = null
+        let url = API.fethSalesLearderboard
+        
+        if(all){
+                url = `${url}/all`
+            }
+
+
 
         if (year_summary){
             queryString.year_summary = true
@@ -41,13 +48,18 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
       
         try {
             // Build the URL
-            let url = new URL(`${API.fethSalesLearderboard}`)
+            url = new URL(`${url}`)
+            
+
             if (queryString) {
                 Object.keys(queryString).forEach((key) =>
                     url.searchParams.append(key, queryString[key])
                 )
             }
 
+         
+
+      
             // Fetch leaderboard data
             const response = await fetch(url,{
                 method: 'GET',

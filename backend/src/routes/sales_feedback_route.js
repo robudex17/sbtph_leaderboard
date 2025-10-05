@@ -21,13 +21,24 @@ const {
 const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 
-router.post('/feedback_by_admin/:agent_id', authenticateToken,authorizeRoles('admin'), validateFeedback, salesFeedbackController.addNewFeedback)
+
+router.get('/feedback_by_admin/all',
+     authenticateToken,
+     authorizeRoles('admin','manager', 'user'),
+     validateMonthYear,
+     salesFeedbackController.getAllAgentsFeedbackByQaOrByAdmin
+)
+
+
+
+router.post('/feedback_by_admin/:agent_id', authenticateToken,authorizeRoles('admin'),  salesFeedbackController.addNewFeedback)
 
 router.get('/feedback_by_admin/:agent_id', authenticateToken, validateMonthYear,salesFeedbackController.fetchAgentFeedback)
 
-router.put('/feedback_by_admin/:agent_id', authenticateToken,authorizeRoles('admin'), validateFeedback, salesFeedbackController.updateAgentFeedback)
+router.put('/feedback_by_admin/:agent_id', authenticateToken,authorizeRoles('admin'),  salesFeedbackController.updateAgentFeedback)
 
 router.delete('/feedback_by_admin/:agent_id', authenticateToken, authorizeRoles('admin'), salesFeedbackController.deleteAgentFeedback)
+
 
 
 // enable and disable updated on the sales feedback  
@@ -38,9 +49,9 @@ router.delete('/enable_disable_delete_feedback_by_admin', authenticateToken, aut
 router.post('/feedback_by_qa',
      authenticateToken,
      authorizeRoles('admin'),
-     validateAddAndUpdateAgentsFeedbackByQa,
-     validateFeedbackDate,
-     validateMonthYear,
+     // validateAddAndUpdateAgentsFeedbackByQa,
+     // validateFeedbackDate,
+     // validateMonthYear,
      salesFeedbackController.addAgentsFeedbackByQa
 )
 
@@ -48,14 +59,14 @@ router.get('/feedback_by_qa/all',
      authenticateToken,
      authorizeRoles('admin','manager', 'user'),
      validateMonthYear,
-     salesFeedbackController.getAllAgentsFeedbackByQa
+     salesFeedbackController.getAllAgentsFeedbackByQaOrByAdmin
 )
 
 router.get('/feedback_by_qa/:agent_id',
      authenticateToken,
      authorizeRoles('admin','manager', 'user'),
-     validateAgentId,
-     validateMonthYear,
+     // validateAgentId,
+     // validateMonthYear,
      salesFeedbackController.getAgentsFeedbackByQa
 )
 
@@ -63,9 +74,9 @@ router.get('/feedback_by_qa/:agent_id',
 router.put('/feedback_by_qa',
      authenticateToken,
      authorizeRoles('admin'),
-     validateAddAndUpdateAgentsFeedbackByQa,
-     validateFeedbackDate,
-     validateMonthYear,
+     // validateAddAndUpdateAgentsFeedbackByQa,
+     // validateFeedbackDate,
+     // validateMonthYear,
      salesFeedbackController.updateAgentsFeedbackByQa
 )
 router.delete('/feedback_by_qa',

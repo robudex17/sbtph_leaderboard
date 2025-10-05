@@ -1,8 +1,9 @@
 <template>
     <div>
+ 
       <button
         @click="exportExcel"
-        class="flex items-center justify-center gap-2 w-full py-3 px-3 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200"
+        class="flex items-center justify-center gap-2 w-full py-1 px-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200"
       >
         <!-- <FontAwesomeIcon :icon="['fas', 'file-excel']" class="text-xl" /> -->
         <font-awesome-icon :icon="['fas', 'file-excel']" />
@@ -28,8 +29,17 @@
   token: {
     type:String , 
     required: true
+  },
+  submitted: {
+    required: true,
+    type: Number
+  },
+  incomplete: {
+    required: true,
+    type: Boolean
   }
 });
+
 
 let url = new URL(props.exportUrl)
          console.log(url)
@@ -40,6 +50,15 @@ let url = new URL(props.exportUrl)
         }
 
 const exportExcel = async () => {
+    if(props.submitted == 0){
+      alert('Cannot Export Agent Data which has not been submitted')
+      return
+    }
+    if(props.incomplete){
+     alert('Data is not complete. Please check the months that have not been submitted yet and submit them.');
+
+      return 
+    }
     try {
       const response = await fetch(url, {
         method: 'GET',

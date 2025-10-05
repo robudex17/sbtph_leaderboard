@@ -2,11 +2,11 @@ const pool = require('../config/db')
 const { validationResult } = require('express-validator')
 
 exports.recordNewTardiness = async (req,res, next) => {
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
   
     
     const agentId = req.params.agent_id
@@ -14,10 +14,33 @@ exports.recordNewTardiness = async (req,res, next) => {
     const tardinessDescription = req.body.description
     const tardinessMonth = req.body.month
     const tardinessYear = req.body.year
+
+    const evaluation  = req.body.evaluation 
+    const totalRecords = Number(req.body.total_records)
  
     
     try {
-        const query = "INSERT INTO tardiness ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+       const query = "INSERT INTO tardiness ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+        const description = `New Agent Tardiness` 
+        
+        // if the input is came from the sales evaluation 
+        if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+                await pool.execute(query, [
+                    agentId,
+                    tardinessMonth,
+                    tardinessYear,
+                    tardinessDate,
+                    description,
+            
+                ]);
+            } 
+             return   res.status(201).json({
+             message: `${totalRecords} tardiness created for agent_id: ${agentId}`
+            });
+         
+        }        
+        // const query = "INSERT INTO tardiness ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
         const [result]  = await pool.execute(query, [agentId,tardinessMonth,tardinessYear, tardinessDate,tardinessDescription ])
 
         res.status(201).json({
@@ -152,7 +175,25 @@ exports.deleteAgentTardiness = async (req, res, next) => {
     const  tardinessId = req.body.id
 
 
+    const evaluation = req.body.evaluation  
+    const totalRecords = Number(req.body.total_records)
+    const month = req.body.month
+    const year = req.body.year
+
     try {
+
+       if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+            await pool.execute(
+                `DELETE FROM tardiness WHERE agent_id=? AND month=? AND year=? LIMIT 1`,
+                [agentId, month, year]
+            );
+            }
+            return res.status(200).json({
+            message: `${totalRecords} tardiness deleted for agent_id: ${agentId}`
+        });
+
+       }          
         const query = "DELETE FROM tardiness WHERE id=? AND agent_id=?"
         const [result] = await pool.execute(query, [tardinessId, agentId])
 

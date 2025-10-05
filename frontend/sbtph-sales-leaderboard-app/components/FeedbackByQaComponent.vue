@@ -5,15 +5,15 @@
           <table class="min-w-full border border-green-500 rounded-lg">
             <thead class="bg-green-200">
               <tr>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">QA ID</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">QA DBNAME</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">AGENT ID</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">AGENT DBNAME</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">MONTH</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">YEAR</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">DATE</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900">FEEDBACK SCORE</th>
-                <th class="py-2 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center disabled:bg-gray-400 disabled:cursor-not-allowed">
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">QA ID</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">QA DBNAME</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">AGENT ID</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">AGENT DBNAME</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">MONTH</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">YEAR</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">DATE</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900">FEEDBACK SCORE</th>
+                <th class="py-1 px-4 text-left text-sm font-medium text-green-900 flex justify-between items-center disabled:bg-gray-400 disabled:cursor-not-allowed">
                   Actions      
                   <button :disabled="feedbackByQa.length >= 4 || currentUser.role == 'user'" class=" disabled:bg-gray-400 disabled:cursor-not-allowed"
                     @click="openModal('add')" 
@@ -29,15 +29,15 @@
                 v-for="(feedback, index) in feedbackByQa" 
                 :key="feedback.id + index" 
                 class="odd:bg-white even:bg-green-50">
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.qa_id }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.qa_dbname }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.agent_id }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.agent_dbname }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.month }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.year }}</td>
-                <td class="py-2 px-4 text-sm text-green-800">{{ feedback.date }}</td>
-                <td class="py-2 px-4 text-sm text-purple-800 font-bold">{{ feedback.feedback_score }}</td>
-                <td class="py-2 px-4 text-sm text-green-800 flex gap-2">
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.qa_id }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.qa_dbname }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.agent_id }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.agent_dbname }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.month }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.year }}</td>
+                <td class="py-1 px-4 text-sm text-green-800">{{ feedback.date }}</td>
+                <td class="py-1 px-4 text-sm text-purple-800 font-bold">{{ feedback.feedback_score }}</td>
+                <td class="py-1 px-4 text-sm text-green-800 flex gap-2">
                   <button :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"
                     @click="openModal('edit', index)" 
                     class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">

@@ -3,11 +3,11 @@ const { validationResult } = require('express-validator')
 
 // First Four controllers are for admin feedback
 exports.addNewFeedback = async (req, res, next) => {
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
    
   
     const feedback = req.body.feedback 
@@ -15,13 +15,20 @@ exports.addNewFeedback = async (req, res, next) => {
     const feedbackMonth = req.body.month 
     const feedbackYear = req.body.year 
 
+    const agentDbname = req.body.agent_dbname
+    const adminId = req.body.admin_id 
+    const adminDbname = req.body.admin_dbname
+    const adminRole = req.body.admin_role
+
     const agentId = req.params.agent_id
+   
+
 
    
         
     try {
-        const query = "INSERT INTO feedback ( agent_id, month,year,date,feedback) VALUES (?,?,?,?,?)"
-        const [result]  = await pool.execute(query, [agentId, feedbackMonth, feedbackYear, feedbackDate,feedback])
+        const query = "INSERT INTO feedback ( agent_id, agent_dbname, admin_id, admin_dbname, admin_role,month,year,date,feedback) VALUES (?,?,?,?,?,?,?,?,?)"
+        const [result]  = await pool.execute(query, [agentId, agentDbname, adminId, adminDbname, adminRole, feedbackMonth, feedbackYear, feedbackDate,feedback])
 
         res.status(201).json({
             message: `New Feedback Score for agent_id: ${agentId} are created or recorded`
@@ -37,26 +44,35 @@ exports.addNewFeedback = async (req, res, next) => {
  }
 
  exports.updateAgentFeedback = async (req, res, next) => {
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
    
 
   
+    const agentId = req.params.agent_id
 
     const feedback = req.body.feedback 
     const feedbackDate = req.body.date
-    const agentId = req.params.agent_id
+   
     const feedbackMonth = req.body.month 
     const feedbackYear = req.body.year 
- 
+    const agentDbname = req.body.agent_dbname
+    const adminId = req.body.admin_id 
+    const adminDbname = req.body.admin_dbname
+    const adminRole = req.body.admin_role
+
+
+
+
+    
         
     try {
-        const query = "UPDATE feedback SET  feedback=? WHERE agent_id=? AND date=?"
+        const query = "UPDATE feedback SET  admin_id=?, admin_dbname=?, admin_role=?, feedback=?  WHERE agent_id=? AND month=? AND year=?"
         
-        const [result]  = await pool.execute(query, [feedback, agentId, feedbackDate])
+        const [result]  = await pool.execute(query, [adminId, adminDbname, adminRole,feedback, agentId, feedbackMonth, feedbackYear])
         
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Agent Feedback Not Found..'})
@@ -150,9 +166,15 @@ exports.addNewFeedback = async (req, res, next) => {
     const agentId = req.params.agent_id
     const feedbackDate = req.query.date 
 
+   const feedbackMonth = req.body.month 
+    const feedbackYear = req.body.year 
+    const adminId = req.body.admin_id 
+    const adminDbname = req.body.admin_dbname
+    const adminRole = req.body.admin_role
+
     try {
-        const query = "DELETE FROM feedback WHERE  agent_id=? AND date=?"
-        const [result] = await pool.execute(query, [agentId, feedbackDate])
+        const query = "DELETE FROM feedback WHERE  agent_id=? AND month=? AND year=?"
+        const [result] = await pool.execute(query, [agentId, feedbackMonth, feedbackYear])
 
         if (result.affectedRows === 0){
             return res.status(400).json({message: 'Agent Feedback Not found'})
@@ -471,9 +493,38 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
     let error_message
     let  who_receive_feedback_table_id 
     let who_give_feedback_table_id
-    // let who_give_feedback_id
+    //  let who_give_feedback_id
     let query_feedback_month
     let query_feedback_year
+
+           // Map month names to numbers
+    const monthMap = {
+      January: "01",
+      February: "02",
+      March: "03",
+      April: "04",
+      May: "05",
+      June: "06",
+      July: "07",
+      August: "08",
+      September: "09",
+      October: "10",
+      November: "11",
+      December: "12"
+    };
+
+  
+
+ // Convert "March" -> "03"
+    const monthNumber = monthMap[givenMonth];
+    if (!monthNumber) {
+      return res.status(400).json({ error: "Invalid givenMonth format" });
+    }
+
+
+  const snapshot = `${givenYear}-${monthNumber.toString().padStart(2, '0')}`;
+
+
     if(feedback_type === "agent_by_lm"){
         feedback_table = 'feedback_agents_by_lm' 
         success_message = ``
@@ -482,40 +533,131 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         who_give_feedback_table_id = 'lm_id'
     
         
-        // get his or her manager 
+        // // get his or her manager 
         const [manager] = await pool.execute(
-            'SELECT manager_id FROM sales_agents WHERE id=?', [who_receive_feedback_id]
+            `SELECT aa.manager_id
+                FROM sales_agents2 sa
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+                WHERE sa.id = ?;`, [snapshot, snapshot,who_receive_feedback_id]
         )
         if (manager.length > 0) {
             who_give_feedback_id = manager[0].manager_id
         }
 
-        
+     
 
-        query_feedback_month =  `
-        SELECT 
-            sa.id AS  who_give_feedback_id,
-            sa.firstname,
-            sa.lastname,
-            sa.image_link,
-            sa.db_name AS who_give_feedback_name,
-            sa.manager_id,
-            COALESCE(fbalm.feedback_score, 0) AS feedback_score,
-            COALESCE(fbalm.responses, "{}") AS responses,
-            COALESCE(fbalm.month, ?) AS month,
-            COALESCE(fbalm.year, ?)  AS year,
-            fbalm.agent_id AS who_receive_feedback_id,
-            fbalm.agent_dbname,
-            fbalm.can_update
-        FROM sales_agents sa
-        LEFT JOIN feedback_agents_by_lm fbalm
-            ON sa.id = fbalm.lm_id
-        AND fbalm.month =  ?
-        AND fbalm.year =  ?
-        AND fbalm.agent_id = ?
-       WHERE sa.id = ${who_give_feedback_id}
+    //     query_feedback_month =  `
+    //     SELECT 
+    //         sa.id AS  who_give_feedback_id,
+    //         sa.firstname,
+    //         sa.lastname,
+    //         sa.image_link,
+    //         sa.db_name AS who_give_feedback_name,
+    //         sa.manager_id,
+    //         COALESCE(fbalm.feedback_score, 0) AS feedback_score,
+    //         COALESCE(fbalm.responses, "{}") AS responses,
+    //         COALESCE(fbalm.month, ?) AS month,
+    //         COALESCE(fbalm.year, ?)  AS year,
+    //         fbalm.agent_id AS who_receive_feedback_id,
+    //         fbalm.agent_dbname,
+    //         fbalm.can_update
+    //     FROM sales_agents sa
+    //     LEFT JOIN feedback_agents_by_lm fbalm
+    //         ON sa.id = fbalm.lm_id
+    //     AND fbalm.month =  ?
+    //     AND fbalm.year =  ?
+    //     AND fbalm.agent_id = ?
+    //    WHERE sa.id = ${who_give_feedback_id}
        
-      `
+    //   `
+
+
+    query_feedback_month =
+            `
+    
+                SELECT 
+                    sa.id AS who_give_feedback_id,
+                    sa.firstname,
+                    sa.lastname,
+                    sa.db_name AS who_give_feedback_name,
+                    sa.email,
+                    sa.image_link,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
+                    ae.status AS employee_status,
+                    COALESCE(fbalm.feedback_score, 0) AS feedback_score,
+                    COALESCE(fbalm.responses, "{}") AS responses,
+                    COALESCE( fbalm.month, ?) AS month,
+                    COALESCE(fbalm.year, ?) AS  year,
+                    fbalm.agent_id AS who_receive_feedback_id,
+                    fbalm.agent_dbname,
+                    fbalm.can_update  
+                FROM sales_agents2 sa
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) aa2 ON aa1.agent_id = aa2.agent_id 
+                        AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                        AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) ae2 ON ae1.agent_id = ae2.agent_id 
+                        AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                    AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                    AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
+                LEFT JOIN feedback_agents_by_lm fbalm
+                ON sa.id = fbalm.lm_id
+                AND fbalm.month = ?
+                AND fbalm.year = ?
+                AND fbalm.agent_id = ?
+                WHERE sa.id =  ${who_give_feedback_id}
+                ORDER BY fbalm.year DESC, fbalm.month DESC
+                
+           `
 
         query_feedback_year  = `
         SELECT 
@@ -550,30 +692,80 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         who_receive_feedback_table_id = 'lm_id'
         who_give_feedback_table_id = 'agent_id'
 
+
+
         query_feedback_month = `
-        SELECT 
-            sa.id AS who_give_feedback_id,
-            sa.firstname,
-            sa.lastname,
-            sa.image_link,
-            sa.db_name AS who_give_feedback_name,
-            sa.manager_id AS lm_id,
-            COALESCE(fba.feedback_score, 0) AS feedback_score,
-            COALESCE(fba.responses, "{}") AS responses,
-            COALESCE(fba.month, ?)  AS month,
-            COALESCE(fba.year,  ?)  AS year,
-             fba.percentage,
-            fba.total_score,
-            fba.lm_id AS who_receive_feedback_id,
-            fba.can_update
-        FROM sales_agents sa
-        LEFT JOIN feedback_lm_by_agents fba 
-            ON sa.id = fba.agent_id
-        AND sa.manager_id = fba.lm_id
-        AND fba.month = ?
-        AND fba.year = ?
-        WHERE sa.manager_id = ?
-        
+       
+                SELECT 
+                    sa.id AS who_give_feedback_id,
+                    sa.firstname,
+                    sa.lastname,
+                    sa.db_name  AS who_give_feedback_name,
+                    sa.email,
+                    sa.image_link,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
+                    ae.status AS employee_status,   -- ✅ always latest status
+                    COALESCE(fba.feedback_score, 0) AS feedback_score,
+                    COALESCE(fba.responses, "{}") AS responses,
+                    COALESCE(fba.month, ?)  AS month,  -- ✅ fallback to param if NULL
+                    COALESCE(fba.year,  ?)  AS year,   -- ✅ fallback to param if NULL
+                    fba.percentage,
+                    fba.total_score,
+                    fba.lm_id AS who_receive_feedback_id,
+                    fba.can_update 
+                FROM sales_agents2 sa
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                            AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) aa2 ON aa1.agent_id = aa2.agent_id 
+                        AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                            AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) ae2 ON ae1.agent_id = ae2.agent_id 
+                        AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                        AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
+                LEFT JOIN feedback_lm_by_agents fba 
+                    ON sa.id = fba.agent_id
+                AND aa.manager_id = fba.lm_id
+                AND fba.month = ?
+                AND fba.year = ?
+                WHERE aa.manager_id = ?
+                ORDER BY fba.year ASC, LPAD(fba.month, 2, '0') ASC;        
         `
 
         query_feedback_year = `
@@ -610,38 +802,103 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
        
         
                 // get his or her manager 
+               // // get his or her manager 
         const [manager] = await pool.execute(
-            'SELECT manager_id FROM sales_agents WHERE id=?', [who_receive_feedback_id]
+            `SELECT aa.manager_id
+                FROM sales_agents2 sa
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+                WHERE sa.id = ?;`, [snapshot, snapshot,who_receive_feedback_id]
         )
         if (manager.length > 0) {
             who_give_feedback_id = manager[0].manager_id
         }
+
+      
         
         query_feedback_month = `
-        SELECT 
-            sa.id AS who_give_feedback_id,
-            sa.firstname,
-            sa.lastname,
-            sa.image_link,
-            sa.db_name AS who_give_feedback_name,
-            sa.manager_id,
-            COALESCE(fblmum.feedback_score, 0) AS feedback_score,
-            COALESCE(fblmum.responses, "{}") AS responses,
-            COALESCE(fblmum.month, ?)  AS month,
-            COALESCE(fblmum.year, ?)  AS year,
-            fblmum.total_score,
-            fblmum.percentage,
-            fblmum.lm_id AS who_receive_feedback_id,
-            fblmum.lm_dbname,
-            fblmum.can_update
-        FROM sales_agents sa
-        LEFT JOIN feedback_lm_by_um fblmum
-            ON sa.id = fblmum.manager_id
-        AND fblmum.month = ?
-        AND fblmum.year = ?
-        AND fblmum.lm_id = ?
-        WHERE sa.id = ${who_give_feedback_id}
-
+        
+            SELECT 
+                sa.id AS who_give_feedback_id,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name  AS who_give_feedback_name,
+                sa.email,
+                sa.image_link,
+                aa.agent_type,
+                r.role_name AS agent_role,
+                aa.manager_id,
+                mgr.db_name AS manager_dbname,
+                mr.role_name AS manager_role,
+                m.id AS market_id,
+                m.name AS market_name,
+                t.id AS team_id,
+                t.name AS team_name,
+                COALESCE(fblmum.feedback_score, 0) AS feedback_score,
+                COALESCE(fblmum.responses, "{}") AS responses,
+                COALESCE(fblmum.month, ?)  AS month,
+                COALESCE(fblmum.year, ?)  AS year,
+                fblmum.total_score,
+                fblmum.percentage,
+                fblmum.lm_id AS who_receive_feedback_id,
+                fblmum.lm_dbname,
+                fblmum.can_update
+            FROM sales_agents2 sa
+            JOIN (
+                SELECT aa1.*
+                FROM agent_assignments aa1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_assignments
+                    WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) aa2 ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+            ) aa ON sa.id = aa.agent_id
+            JOIN (
+                SELECT ae1.*
+                FROM agent_employments ae1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_employments
+                    WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                        AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) ae2 ON ae1.agent_id = ae2.agent_id 
+                    AND ae1.id = ae2.latest_id
+            ) ae ON sa.id = ae.agent_id
+            LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+            LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+            LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+            AND maa.id = (
+                SELECT MAX(id) 
+                FROM agent_assignments 
+                WHERE agent_id = mgr.id
+                    AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                    AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+            )
+            LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+            LEFT JOIN markets m ON aa.market_id = m.id
+            LEFT JOIN teams t ON aa.team_id = t.id
+            LEFT JOIN feedback_lm_by_um fblmum
+                ON sa.id = fblmum.manager_id
+            AND fblmum.month = ?
+            AND fblmum.year = ?
+            AND fblmum.lm_id = ?
+            WHERE sa.id = ${who_give_feedback_id}
+            ORDER BY fblmum.year, fblmum.month
         `
        
        query_feedback_year = `
@@ -676,29 +933,82 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         who_receive_feedback_table_id = 'um_id'
         who_give_feedback_table_id = 'lm_id'
 
+
+
         query_feedback_month = `
-        SELECT 
-            sa.id AS who_give_feedback_id,
-            sa.firstname,
-            sa.lastname,
-            sa.image_link,
-            sa.db_name as who_give_feedback_name,
-            sa.manager_id as um_id,
-            COALESCE(fbumlm.feedback_score, 0) AS feedback_score,
-            COALESCE(fbumlm.responses, '{}') AS responses,
-            COALESCE(fbumlm.month, ?)  AS month,
-            COALESCE(fbumlm.year, ?)  AS year,
-            fbumlm.total_score,
-            fbumlm.percentage,
-            fbumlm.um_id AS who_receive_feedback_id,
-            fbumlm.can_update
-        FROM sales_agents sa
-        LEFT JOIN feedback_um_by_lm fbumlm
-            ON sa.id = fbumlm.lm_id
-        AND sa.manager_id = fbumlm.um_id
-        AND fbumlm.month = ?
-        AND fbumlm.year = ?
-        WHERE sa.manager_id = ? AND sa.id != 2394;
+        
+               SELECT 
+                    sa.id AS who_give_feedback_id,
+                    sa.firstname,
+                    sa.lastname,
+                    sa.db_name  AS who_give_feedback_name,
+                    sa.email,
+                    sa.image_link,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
+                    COALESCE(fbumlm.feedback_score, 0) AS feedback_score,
+                    COALESCE(fbumlm.responses, '{}') AS responses,
+                    COALESCE(fbumlm.month, ?)  AS month,
+                    COALESCE(fbumlm.year, ?)  AS year,
+                    fbumlm.total_score,
+                    fbumlm.percentage,
+                    fbumlm.um_id AS who_receive_feedback_id,
+                    fbumlm.can_update
+                FROM sales_agents2 sa
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                            AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) aa2 ON aa1.agent_id = aa2.agent_id 
+                        AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                            AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                        GROUP BY agent_id
+                    ) ae2 ON ae1.agent_id = ae2.agent_id 
+                        AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                        AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
+
+                LEFT JOIN feedback_um_by_lm fbumlm
+                    ON sa.id = fbumlm.lm_id
+                AND aa.manager_id = fbumlm.um_id
+                AND fbumlm.month = ?
+                AND fbumlm.year = ?
+                WHERE aa.manager_id = ? 
+                    AND sa.id != 2394 
+                ORDER BY fbumlm.year, fbumlm.month
+
         `
 
         query_feedback_year = `
@@ -797,7 +1107,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
              
                 const [result] = await pool.execute(
                 
-                query_feedback_month,[givenMonth,givenYear, givenMonth,givenYear,who_receive_feedback_id]
+                query_feedback_month,[givenMonth,givenYear, snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth,givenYear,who_receive_feedback_id]
                 )
                 // connection.release()
                 
@@ -811,7 +1121,9 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
                 }
 
               
-            }            
+            }      
+            
+    
 
         
         }
@@ -866,13 +1178,15 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
  //CONTROLLER FEEDBACK BY QA
  exports.addAgentsFeedbackByQa = async (req, res, next) => {
     
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
    
     const { qa_id , qa_dbname, agent_id, agent_dbname, role, feedback_score, date, month,year} = req.body
+
+
     
         try {
 
@@ -893,14 +1207,17 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
  exports.updateAgentsFeedbackByQa = async (req, res, next) => {
 
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
 
     const { qa_id , qa_dbname, agent_id, agent_dbname, role, feedback_score,  date, month,year} = req.body
     const agentId = req.params.agent_id
+
+  
+
          
     try {
         
@@ -994,12 +1311,15 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
     
  }
 
- exports.getAllAgentsFeedbackByQa = async (req, res, next) => {
+ exports.getAllAgentsFeedbackByQaOrByAdmin = async (req, res, next) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
+
+    const  path = req.path
+
    
 
                 // Get the month name
@@ -1049,103 +1369,175 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
 
   const snapshot = `${year}-${monthNumber.toString().padStart(2, '0')}`;
-
+  let query 
     try {
-
-         let query = 
-    `
-        SELECT 
-            sa.id AS id,
-            sa.firstname,
-            sa.lastname,
-            sa.db_name,
-            sa.email,
-            sa.image_link,
-            aa.agent_type,
-            r.role_name AS agent_role,
-            aa.manager_id,
-            mgr.db_name AS manager_dbname,
-            mr.role_name AS manager_role,
-            m.id AS market_id,
-            m.name AS market_name,
-            t.id AS team_id,
-            t.name AS team_name,
-            ae.status AS employee_status,
-            COALESCE(fbyqa.feedback_score, 'No Feedback') AS feedback,
-            COALESCE(fbyqa.month, ?) AS month,
-            COALESCE(fbyqa.year, ?) AS year,
-            fbyqa.qa_id, 
-            fbyqa.qa_dbname
-        FROM sales_agents2 sa
-        JOIN (
-            SELECT aa1.*
-            FROM agent_assignments aa1
+    if(path == '/feedback_by_qa/all'){
+        query = 
+        `
+            SELECT 
+                sa.id AS id,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.email,
+                sa.image_link,
+                aa.agent_type,
+                r.role_name AS agent_role,
+                aa.manager_id,
+                mgr.db_name AS manager_dbname,
+                mr.role_name AS manager_role,
+                m.id AS market_id,
+                m.name AS market_name,
+                t.id AS team_id,
+                t.name AS team_name,
+                ae.status AS employee_status,
+                COALESCE(fbyqa.feedback_score, 'No Feedback') AS feedback,
+                COALESCE(fbyqa.month, ?) AS month,
+                COALESCE(fbyqa.year, ?) AS year,
+                COALESCE(ses.month, ?) AS eval_month,
+                COALESCE(ses.year, ?) AS eval_year,
+                COALESCE(ses.submitted, 0) AS submitted,
+                fbyqa.qa_id, 
+                fbyqa.qa_dbname
+            FROM sales_agents2 sa
             JOIN (
-                SELECT agent_id, MAX(id) AS latest_id
-                FROM agent_assignments
-                WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
-                AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
-                GROUP BY agent_id
-            ) aa2 
-                ON aa1.agent_id = aa2.agent_id 
-            AND aa1.id = aa2.latest_id
-        ) aa ON sa.id = aa.agent_id
-        JOIN (
-            SELECT ae1.*
-            FROM agent_employments ae1
-            JOIN (
-                SELECT agent_id, MAX(id) AS latest_id
-                FROM agent_employments
-                WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
-                AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
-                GROUP BY agent_id
-            ) ae2 
-                ON ae1.agent_id = ae2.agent_id 
-            AND ae1.id = ae2.latest_id
-        ) ae ON sa.id = ae.agent_id
-        LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
-        LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
-        LEFT JOIN agent_assignments maa 
-            ON mgr.id = maa.agent_id 
-            AND maa.id = (
-                SELECT MAX(id) 
-                FROM agent_assignments 
-                WHERE agent_id = mgr.id
-                    AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                SELECT aa1.*
+                FROM agent_assignments aa1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_assignments
+                    WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
                     AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
-            )
-        LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
-        LEFT JOIN markets m ON aa.market_id = m.id
-        LEFT JOIN teams t ON aa.team_id = t.id
-        LEFT JOIN feedback_by_qa AS fbyqa 
-            ON sa.id = fbyqa.agent_id
-            AND fbyqa.month = ?
-            AND fbyqa.year = ?
-        
+                    GROUP BY agent_id
+                ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                AND aa1.id = aa2.latest_id
+            ) aa ON sa.id = aa.agent_id
+            JOIN (
+                SELECT ae1.*
+                FROM agent_employments ae1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_employments
+                    WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                    AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                AND ae1.id = ae2.latest_id
+            ) ae ON sa.id = ae.agent_id
+            LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+            LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+            LEFT JOIN agent_assignments maa 
+                ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                        AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+            LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+            LEFT JOIN markets m ON aa.market_id = m.id
+            LEFT JOIN teams t ON aa.team_id = t.id
+            LEFT JOIN feedback_by_qa AS fbyqa 
+                ON sa.id = fbyqa.agent_id
+                AND fbyqa.month = ?
+                AND fbyqa.year = ?
+            LEFT JOIN sales_evaluation_status ses 
+                ON ses.agent_id = sa.id
+                AND ses.month = ?
+                AND ses.year  = ?        
+            
 
-    `
+        `
+    }else if(path == '/feedback_by_admin/all'){
+        query = 
+        `
+            SELECT 
+                sa.id AS id,
+                sa.firstname,
+                sa.lastname,
+                sa.db_name,
+                sa.email,
+                sa.image_link,
+                aa.agent_type,
+                r.role_name AS agent_role,
+                aa.manager_id,
+                mgr.db_name AS manager_dbname,
+                mr.role_name AS manager_role,
+                m.id AS market_id,
+                m.name AS market_name,
+                t.id AS team_id,
+                t.name AS team_name,
+                ae.status AS employee_status,
+                COALESCE(fbyad.feedback, 'No Feedback') AS feedback,
+                COALESCE(fbyad.month, ?) AS month,
+                COALESCE(fbyad.year, ?) AS year,
+                COALESCE(ses.month, ?) AS eval_month,
+                COALESCE(ses.year, ?) AS eval_year,
+                COALESCE(ses.submitted, 0) AS submitted,
+                fbyad.admin_id, 
+                fbyad.admin_dbname
+            FROM sales_agents2 sa
+            JOIN (
+                SELECT aa1.*
+                FROM agent_assignments aa1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_assignments
+                    WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                    AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                AND aa1.id = aa2.latest_id
+            ) aa ON sa.id = aa.agent_id
+            JOIN (
+                SELECT ae1.*
+                FROM agent_employments ae1
+                JOIN (
+                    SELECT agent_id, MAX(id) AS latest_id
+                    FROM agent_employments
+                    WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                    AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                    GROUP BY agent_id
+                ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                AND ae1.id = ae2.latest_id
+            ) ae ON sa.id = ae.agent_id
+            LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+            LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+            LEFT JOIN agent_assignments maa 
+                ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                        AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                        AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                )
+            LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+            LEFT JOIN markets m ON aa.market_id = m.id
+            LEFT JOIN teams t ON aa.team_id = t.id
+            LEFT JOIN feedback AS fbyad 
+                ON sa.id = fbyad.agent_id
+                AND fbyad.month = ?
+                AND fbyad.year = ?
+            LEFT JOIN sales_evaluation_status ses 
+                ON ses.agent_id = sa.id
+                AND ses.month = ?
+                AND ses.year  = ?    
+            
+
+        `     
+    }
+
 
         const [result] = await pool.execute(
-            // `
-            // SELECT 
-            //     sa.*, 
-            //     COALESCE(fbyqa.feedback_score, 'No Feedback') AS feedback,
-            //     COALESCE(fbyqa.month, ?) AS month,
-            //     COALESCE(fbyqa.year, ?) AS year,
-            //     fbyqa.qa_id, 
-            //     fbyqa.qa_dbname,
-            //     market.market_name 
-            // FROM sales_agents AS sa
-            // LEFT JOIN market 
-            //    ON sa.market_id = market.id
-            // LEFT JOIN feedback_by_qa AS fbyqa
-            //     ON sa.id = fbyqa.agent_id
-            // AND fbyqa.month = ?
-            // AND fbyqa.year = ?
-            
-            // `,
+   
             query,
-            [ month, year,snapshot, snapshot, snapshot, snapshot, snapshot,snapshot, ,month, year]
+            [month,year, month, year,snapshot, snapshot, snapshot, snapshot, snapshot,snapshot ,month, year, month, year]
         )
 
         console.log(result)

@@ -5,9 +5,9 @@ exports.recordNewAbsent = async (req, res, next) => {
 
     const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
     
    
     const agentId = req.params.agent_id
@@ -16,11 +16,36 @@ exports.recordNewAbsent = async (req, res, next) => {
     const absentYear = req.body.year
     const agentAbsentDescription = req.body.description
 
+
+    const evaluation  = req.body.evaluation 
+    const totalRecords = Number(req.body.total_records)
+
    
 
     
     try {
-        const query = "INSERT INTO absences ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+
+       const query = "INSERT INTO absences ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+        const description = `New Agent Absence` 
+        
+        // if the input is came from the sales evaluation 
+        if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+                await pool.execute(query, [
+                    agentId,
+                    absentMonth,
+                    absentYear,
+                    agentAbsentDate,
+                    description,
+            
+                ]);
+            } 
+             return   res.status(201).json({
+             message: `${totalRecords} absences created for agent_id: ${agentId}`
+            });
+         
+        }
+        // const query = "INSERT INTO absences ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
         const [result]  = await pool.execute(query, [agentId, absentMonth, absentYear, agentAbsentDate,agentAbsentDescription])
 
         res.status(201).json({
@@ -156,7 +181,25 @@ exports.deleteAgentAbsent = async (req, res, next) => {
 
     const absenceId = req.body.id
 
+    const evaluation = req.body.evaluation  
+    const totalRecords = Number(req.body.total_records)
+    const month = req.body.month
+    const year = req.body.year
+
     try {
+
+       if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+            await pool.execute(
+                `DELETE FROM absences WHERE agent_id=? AND month=? AND year=? LIMIT 1`,
+                [agent_id, month, year]
+            );
+            }
+            return res.status(200).json({
+            message: `${totalRecords} absences deleted for agent_id: ${agent_id}`
+        });
+
+       }       
         const query = "DELETE FROM absences WHERE id=? AND agent_id=?"
         const [result] = await pool.execute(query, [absenceId, agent_id])
 

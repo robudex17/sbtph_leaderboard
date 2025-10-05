@@ -3,7 +3,7 @@
  
     <!-- Add Agent Button -->
     <button  :disabled="['user', 'manager'].includes(currentUser.role)"
-      class="mb-3 px-3 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+      class="mb-2 px-2 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
       @click="openAddEntityModal"
     >
       Add {{ entityType === 'market' ? 'Market' : 'Team' }}
@@ -88,9 +88,13 @@
       <table class="w-full table-auto border-collapse bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-            <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Market Id</th>
-            <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Market Name</th>
-            <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Market Status</th>
+            
+            <th class="py-2 px-3 border text-center text-xs font-bold uppercase" v-if="entityType =='market'">Market ID</th>
+            <th class="py-2 px-3 border text-center text-xs font-bold uppercase" v-if="entityType == 'market'">Market Name</th>
+            <th class="py-2 px-3 border text-center text-xs font-bold uppercase"  v-if="entityType =='market'">Market Status</th>
+           <th class="py-2 px-3 border text-center text-xs font-bold uppercase" v-if="entityType =='team'">Team ID</th>
+            <th class="py-2 px-3 border text-center text-xs font-bold uppercase" v-if="entityType == 'team'">Team Name</th>
+            <th class="py-2 px-3 border text-center text-xs font-bold uppercase"  v-if="entityType =='team'">Team Status</th>
             <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Date Created </th>
             <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Date Dismantled </th>
             <th class="py-2 px-3 border text-center text-xs font-bold uppercase">Actions</th>
@@ -130,7 +134,7 @@
             <div class="flex justify-center space-x-2">
                 <button 
                 :disabled="currentUser.role !== 'admin' || entity.status === 0"
-                class="px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600  
+                class="px-4 py-0.5 bg-green-500 text-white font-bold rounded hover:bg-green-600  
                         disabled:bg-gray-400 disabled:cursor-not-allowed"
                 @click="openEditEntityModal(entity)"
                 >

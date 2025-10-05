@@ -12,7 +12,7 @@
       <div class="mb-4 flex justify-end">
         <button v-if="leaderboardOption != 'team'"
           @click="toggleView" 
-          class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition duration-300"
+          class="bg-blue-600 text-white py-1 px-2 rounded-lg hover:bg-blue-700 transition duration-300"
         >
         <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
           Toggle to {{ isCardView ? 'Table' : 'Card' }} View
@@ -458,16 +458,23 @@ const showModalForTeam = ref(false)
 const isCardView = ref(true)
 
 const year_summary = false
+const all = false
 
 
 const route = useRoute()
+
+
+
+
 const router = useRouter()
 const query = ref({})
 const { setRatingNameColor } = useRatingColor()
+const month = ref("")
+const year = ref("")
 
 const leaderboardOption = ref("")
 
-query.value = route.query
+
 
 
 
@@ -482,25 +489,30 @@ if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
             'July', 'August', 'September', 'October', 'November', 'December'
          ]
 
-    if (!query.value.month){
-        query.value.month = months[new Date().getMonth()]
-     }
+    // if (!query.value.month){
+    //     query.value.month = months[new Date().getMonth()]
+    //  }
 
-    if (!query.value.year){
-        query.value.year =  new Date().getFullYear()
-    }
+    // if (!query.value.year){
+    //     query.value.year =  new Date().getFullYear()
+    // }
+
+  month.value = route.query.month ||  months[new Date().getMonth()]
+  year.value = route.query.year ||  new Date().getFullYear()
+
+
 
 const exportUrl = API.export.leaderboard
 const exportFileName = computed(()=> {
-  return `salesleaderboard-${query.value.month}-${query.value.year}.xlsx`
+  return `salesleaderboard-${month.value.month}-${year.value.year}.xlsx`
 })
 
 
 
 
 // Method to fetch leaderboard data
-const leaderBoardData = (query, year_summary) => {
-  leaderBoardStore.fetchLeaderboard(query, year_summary);
+const leaderBoardData = (all,query, year_summary) => {
+  leaderBoardStore.fetchLeaderboard(all ,route.query, year_summary);
 };
 
 // Show the details of the selected agent
@@ -541,7 +553,7 @@ watch(route, (newRoute) => {
   console.log('The route is change. we should react to the change..')
 
   router.push(newRoute.fullPath)
-  leaderBoardData(newRoute.query, year_summary)
+  leaderBoardData(all,newRoute.query, year_summary)
   query.value = newRoute.query
   leaderboardOption.value =  newRoute.query.leaderboardOption
 
@@ -555,9 +567,12 @@ watch(route, (newRoute) => {
 
 // Fetch leaderboard data on mount
 onMounted(() => {
-  leaderBoardData(query.value, year_summary);
+  leaderBoardData(all,query.value, year_summary);
   
 });
+
+
+    
 
 
 

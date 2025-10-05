@@ -7,18 +7,18 @@
             <tr>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent ID</th> -->
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Name</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium border">Employeee Status</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Date Hired</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Date Resigned</th>
+              <th class="py-2 px-4 text-center text-sm font-bold border">Employeee Status</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Date Hired</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Date Resigned</th>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Agent Type</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Position</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Position</th>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Manager</th> -->
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Market ID</th> -->
-               <th class="py-2 px-4 text-left text-sm font-medium  border">Manager</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border"> Market Assignment</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Team Assignment</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Assignment Date Start</th> 
-              <th class="py-2 px-4 text-left text-sm font-medium  border">Assignment Date End</th>
+               <th class="py-2 px-4 text-center text-sm font-bold  border">Manager</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border"> Market Assignment</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Team Assignment</th>
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Assignment Date Start</th> 
+              <th class="py-2 px-4 text-center text-sm font-bold  border">Assignment Date End</th>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium text-green-900">Photo</th> -->
             </tr>
           </thead>
@@ -30,22 +30,22 @@
               :class="['odd:bg-white', 'even:bg-green-50']">
               <!-- <td class="py-2 px-4 text-sm text-green-800">{{ agent.id }}</td> -->
               <!-- <td class="py-2 px-4 text-sm text-green-800 font-bold">{{ agent.firstname }} {{ agent.lastname }}</td> -->
-              <td class="py-2 px-4 text-sm  border"
+              <td class="py-2 px-4 text-sm  border text-center"
                   
                   :class="agent.employee_status == 'Hired' || agent.employee_status == 'Rehired'? 'text-green-600 font-bold text-center' : 'text-red-500 font-bold text-center'">
                 {{agent.employee_status  }}
               </td>
-              <td class="py-2 px-4 text-sm border"
+              <td class="py-2 px-4 text-sm border text-center"
         
               >{{ agent.start_date }} </td>
-              <td class="py-2 px-4 text-sm  border"
+              <td class="py-2 px-4 text-sm  text-center border"
                   :class="agent.end_date ? 'text-red-600 font-bold' : 'text-green-600 font-bold'">
                 {{ agent.end_date ? agent.end_date : 'Currently Employee' }}
               </td>
               <td class="py-2 px-4 text-sm  text-center  border ">{{ agent.agent_role }}</td>
               <td class="py-2 px-4 text-sm  text-center border" >{{ agent.manager_dbname }}</td>
               <td class="py-2 px-4 text-sm  text-center border font-bold">{{ agent.market_name.toUpperCase() }}</td>
-              <td class="py-2 px-4 text-sm  text-center border">{{ agent.team_name.toUpperCase() }}</td>
+              <td class="py-2 px-4 text-sm  text-center border font-bold">{{ agent.team_name.toUpperCase() }}</td>
               <td class="py-2 px-4 text-sm  text-center border">{{ agent.effective_from }}</td>
               <td class="py-2 px-4 text-sm  text-center border"
                   :class="agent.effective_to ? 'text-red-600  text-center font-bold' : 'text-green-600 font-bold text-center '">

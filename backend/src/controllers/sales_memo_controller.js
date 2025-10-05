@@ -3,11 +3,11 @@ const { validationResult } = require('express-validator')
 
 exports.createSalesAgentMemo = async (req, res, next) => {
 
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
 
     console.log(req.body)
 
@@ -17,10 +17,31 @@ exports.createSalesAgentMemo = async (req, res, next) => {
     const memoMonth = req.body.month
     const memoYear = req.body.year
     
- 
+    const evaluation  = req.body.evaluation 
+    const totalRecords = Number(req.body.total_records)
 
     try {
-        const query = "INSERT INTO memo ( agent_id, month, year, description,date) VALUES (?,?,?,?,?)"
+       const query = "INSERT INTO memo ( agent_id, month, year, date, description) VALUES (?,?,?,?,?)"
+        const description = `New Agent Memo` 
+        
+        // if the input is came from the sales evaluation 
+        if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+                await pool.execute(query, [
+                    agentId,
+                    memoMonth,
+                    memoYear,
+                    memoDate,
+                    description,
+            
+                ]);
+            } 
+             return   res.status(201).json({
+             message: `${totalRecords} memo created for agent_id: ${agentId}`
+            });
+         
+        }        
+        // const query = "INSERT INTO memo ( agent_id, month, year, description,date) VALUES (?,?,?,?,?)"
         const [result]  = await pool.execute(query, [agentId, memoMonth,memoYear, memoDescription,memoDate])
 
         res.status(201).json({
@@ -156,7 +177,25 @@ exports.deleteAgentMemo = async (req, res, next) => {
     const  memoId = req.body.id
  
 
+    const evaluation = req.body.evaluation  
+    const totalRecords = Number(req.body.total_records)
+    const month = req.body.month
+    const year = req.body.year
+
+
     try {
+       if(evaluation && totalRecords > 0){
+            for (let i = 0; i < totalRecords; i++) {
+            await pool.execute(
+                `DELETE FROM memo WHERE agent_id=? AND month=? AND year=? LIMIT 1`,
+                [agent_id, month, year]
+            );
+            }
+            return res.status(200).json({
+            message: `${totalRecords} memo deleted for agent_id: ${agent_id}`
+        });
+
+       }       
         const query = "DELETE FROM memo WHERE id=? AND agent_id=?"
         const [result] = await pool.execute(query, [memoId, agent_id])
 

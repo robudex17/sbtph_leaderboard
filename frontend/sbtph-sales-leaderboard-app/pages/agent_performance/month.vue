@@ -2,7 +2,7 @@
     <div>
     <div class="p-4 mt-20">
       <!-- Loading Spinner -->
-       
+     
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
@@ -18,16 +18,17 @@
           <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
             Toggle to {{ isCardView ? 'Table' : 'Card' }} View
           </button>
-          <export-to-excel-component  v-if="isAdmin && agent.target !=0" class="ml-2"
+          <export-to-excel-component  v-if="isAdmin" class="ml-2"
             :exportUrl="exportUrl"
             :exportFileName="exportFileName"
             :query="query"
             :token="token"
+            :submitted="agent.submitted"
         ></export-to-excel-component>          
         </div>
         
         <div class="text-red-700 font-bold  text-5xl" v-if="leaderBoardStore.state.error">{{ leaderBoardStore.state.error }}</div>
-        <div v-else-if="agent.target == 0 || !agent" class="text-red-700 font-bold  text-5xl">
+        <div v-else-if=" !agent" class="text-red-700 font-bold  text-5xl">
           No Available Data.
         </div>
         <div v-else>
@@ -82,7 +83,7 @@
                 <!-- Table View -->
         <div v-else class="overflow-x-auto shadow-xl rounded-lg">
           <!-- <h1 class="text-2xl font-bold mb-4 text-center">Performance Monthy Summary </h1> -->
-          <h1 class="text-2xl font-bold mb-4 text-center"> {{agent.month}} {{agent.year}} Monthly Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
+          <h1 class="text-2xl font-bold mb-2 text-center"> {{agent.month}} {{agent.year}} Monthly Performance: <span :class="setRatingNameColor(agent)">{{ agent.final_ratings }}</span> / <span :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</span> </h1>
           <leader-board-table-view :agents="[agent]"></leader-board-table-view>
           <!-- <agentDetails class="p-4 mt-5" :fullyear="false"/> -->
           <sales-metrcis-summary
@@ -256,9 +257,10 @@
   query.value = route.query 
 
   const exportUrl = API.export.agent_peformance
+  const all = true
 
   const exportFileName = computed(()=> {
-  return `agent-monthly-performance-${query.value.month}-${query.value.year}.xlsx`
+  return `${agent.value.db_name}-monthly-performance-${query.value.month}-${query.value.year}.xlsx`
 })
 
 
@@ -292,8 +294,8 @@
 
  
   // Method to fetch leaderboard data
-  const leaderBoardData = async(query) => {
-    await leaderBoardStore.fetchLeaderboard(query);
+  const leaderBoardData = async( all,query) => {
+    await leaderBoardStore.fetchLeaderboard(all,query);
   };
   
   // Show the details of the selected agent
@@ -320,7 +322,7 @@
     console.log('The route is change. we should react to the change..')
     router.push(newRoute.fullPath)
     // newRoute.query.agent_id = agentId
-    leaderBoardData(newRoute.query)
+    leaderBoardData(all,newRoute.query)
    
     query.value = newRoute.query
   })
@@ -329,7 +331,7 @@
   
   // Fetch leaderboard data on mount
   onMounted( async() => {
-    await leaderBoardData(query.value);
+    await leaderBoardData(all,query.value);
     
   });
     

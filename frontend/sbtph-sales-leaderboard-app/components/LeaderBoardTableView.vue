@@ -1,55 +1,89 @@
 <template>
     <div>
+   
+     
       <div class="overflow-x-auto" id="print-table">
         <table class="min-w-full border-collapse border border-gray-300">
           <thead>
 
             <tr class="bg-green-600 text-white">
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th colspan="2" class="border border-gray-300 px-4 py-2">Performance (80%)</th>
-              <th colspan="3" class="border border-gray-300 px-4 py-2">Attendance (10%)</th>
-              <th colspan="3" class="border border-gray-300 px-4 py-2">Memo and Feedback (10%)</th>
-              <th colspan="2" class="border border-gray-300 px-4 py-2">Additional Points (10%)</th>
-              <th class="border border-gray-300 px-4 py-2"></th>
-              <th class="border border-gray-300 px-4 py-2"></th>
+              <!-- <th class=" px-2 py-0.5"></th>
+              <th class=" px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>
+              <th class="border border-gray-300 px-2 py-0.5"></th>              
+              <th colspan="2" class="border border-gray-300 px-2 py-0.5 text-xs text-center ">Performance (80%)</th>
+                <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Attendance (10%)</th>
+              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Memo and Feedback (10%)</th>
+              <th colspan="2" class="border border-gray-300 px-2 py-0.5">Additional Points (10%)</th>
+              <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th class=" border-gray-300 px-2 py-0.5"></th>
+               <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th class=" border-gray-300 px-2 py-0.5"></th>
+              <th class=" border-gray-300 px-2 py-0.5"></th> -->
+              <th  colspan="8" class=" border border-gray-300 px-1 py-0.5 ">Agent Employments And Assignments</th>
+
+               <th colspan="2" class="border border-gray-300 px-2 py-0.5 text-xs text-center ">Performance (80%)</th>
+              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Attendance (10%)</th>
+              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Memo and Feedback (10%)</th>
+              <th colspan="2" class="border border-gray-300 px-2 py-0.5">Additional Points (10%)</th>
+               <th colspan="2" class=" px-1 py-0.5 "></th>
             </tr>
             <tr class="bg-green-500 text-white">
-              <th class="border border-gray-300 px-4 py-2">Year</th>
-              <th class="border border-gray-300 px-4 py-2">Month</th>
-              <th class="border border-gray-300 px-20 py-2">Employee Name</th>
-              <th class="border border-gray-300 px-4 py-2">Score</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Absences-score</th>
-              <th class="border border-gray-300 px-4 py-2">Tardiness-score</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Memo-score</th>
-              <th class="border border-gray-300 px-4 py-2">Feedback-score</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">New Deposit</th>
-              <th class="border border-gray-300 px-4 py-2">Total</th>
-              <th class="border border-gray-300 px-4 py-2">Grand Total</th>
-              <th class="border border-gray-300 px-4 py-2">Rating</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Year</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Month</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Name</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Status</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Position</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Manager</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Market </th>
+               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Team </th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Score</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold ">Total</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Absences-score</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Tardiness-score</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Total</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Memo-score</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Feedback-score</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Total</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">New Deposit</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Total</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Grand Total</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Rating</th>
             </tr>
           </thead>
           <tbody>
             <tr class="odd:bg-green-50 even:bg-white" v-for="agent in agents" :key="agent.id">
-              <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.year }}</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.month }}</td>
-              <td class="border border-gray-300 px-4 py-2 capitalize">{{ agent.db_name }} <span v-if="agent.tag">- (<span class="font-bold text-purple-500">{{ agent.tag }}</span>)</span></td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.shipok_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.performance_rating }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.absence_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.tardiness_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ totalTheRating(agent.absence_rating, agent.tardiness_rating) }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.memo_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.feedback_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ totalTheRating(agent.memo_rating, agent.feedback_rating) }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.deposit_score }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.additional_points }}</td>
-              <td class="border border-gray-300 px-4 py-2">{{ agent.final_ratings }}</td>
-              <td class="border border-gray-300 px-4 py-2 font-bold" :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.year }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.month }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.db_name }} <span v-if="agent.tag">- (<span class="font-bold text-purple-500">{{ agent.tag }}</span>)</span></td>
+               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center"
+               :class="agent.employee_status == 'Hired' || agent.employee_status == 'Rehired' ? 'fond-bold text-green-500': 'text-red-500 font-bold'"
+               
+               >{{ agent.employee_status }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.agent_role }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.manager_dbname }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.market_name }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.team_name }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.shipok_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.performance_rating }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.absence_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.tardiness_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.absence_rating, agent.tardiness_rating) }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.memo_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.feedback_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.memo_rating, agent.feedback_rating) }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.deposit_score }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.additional_points }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center font-bold">{{ agent.final_ratings }}</td>
+              <td class="border border-gray-300 px-2 py-0.5 font-bold text-xs text-center" :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</td>
 
             </tr>
            
@@ -101,6 +135,10 @@
 
           if (agent.ratings_name == 'POOR') {
             return 'text-red-700'
+          }
+          
+          if (agent.ratings_name == 'INCOMPLETE RATING') {
+            return 'text-orange-600'
           }
         }
 

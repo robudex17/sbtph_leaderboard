@@ -6,12 +6,12 @@
           <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
             <tr>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium ">ID</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium ">Agent ID</th>
-              <th class="py-2 px-4 text-left text-sm font-medium ">Month</th>
-              <th class="py-2 px-4 text-left text-sm font-medium ">Year</th>
+              <th class="py-2 px-2 text-center text-sm font-bold border ">Agent ID</th>
+              <th class="py-2 px-2 text-center text-sm font-bold border">Month</th>
+              <th class="py-2 px-2 text-center text-sm font-bold border">Year</th>
               <!-- <th class="py-2 px-4 text-left text-sm font-medium ">Date</th> -->
-              <th class="py-2 px-4 text-left text-sm font-medium ">Description</th>
-              <th class="py-2 px-4 text-left text-sm font-medium  flex justify-between items-center">
+              <th class="py-2 px-2 text-center text-sm font-bold border ">Description</th>
+              <th class="py-2 px-2 text-center text-sm font-bold  border flex justify-between items-center">
                 Actions
                 <!-- <button  :disabled="currentUser.role == 'user' || currentUser.agent_type == 1 || currentUser.agent_type == 0" -->
                  <button :disabled="currentUser.login_type != 'standarduser'"
@@ -29,12 +29,12 @@
               :key="attendance.id + index" 
               class="odd:bg-white even:bg-green-50">
               <!-- <td class="py-2 px-4 text-sm ">{{ attendance.id }}</td> -->
-              <td class="py-2 px-4 text-sm ">{{ attendance.agent_id }}</td>
-              <td class="py-2 px-4 text-sm ">{{ attendance.month }}</td>
-              <td class="py-2 px-4 text-sm ">{{ attendance.year }}</td>
+              <td class="py-2 px-2 text-sm text-center border">{{ attendance.agent_id }}</td>
+              <td class="py-2 px-2 text-sm text-center border">{{ attendance.month }}</td>
+              <td class="py-2 px-2 text-sm text-center border ">{{ attendance.year }}</td>
               <!-- <td class="py-2 px-4 text-sm ">{{ attendance.date }}</td> -->
-              <td class="py-2 px-4 text-sm ">{{ attendance.description }}</td>
-              <td class="py-2 px-4 text-sm  flex gap-2">
+              <td class="py-2 px-2 text-sm text-center border">{{ attendance.description }}</td>
+              <td class="py-1 px-2 text-sm  text-center border flex justify-center gap-2">
                 <button  :disabled="currentUser.role == 'user' || currentUser.role == 'manager'"
                   @click="openModal('edit', index)" 
                   class="bg-green-500 text-white py-1 px-3 rounded-lg hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed">

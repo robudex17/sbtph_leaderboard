@@ -167,7 +167,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
         try{
             const employeeStatus = req.query.employee_status
 
-            console.log(employeeStatus)
+          
             const [result] = await pool.execute(
                 // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
                 `
@@ -281,11 +281,12 @@ exports.fetchSalesAgents = async (req,res, next ) => {
 
 exports.fetchSalesAgent = async( req,res, next) => {
     const export_to_excel = req.export_to_excel
-
+   
+    let agentId 
     try {
         // const connection = await pool.getConnection()
         //const agentId = req.params.agent_id
-        let agentId 
+     
 
         if(req.params.agent_id){
             agentId = req.params.agent_id
@@ -296,25 +297,105 @@ exports.fetchSalesAgent = async( req,res, next) => {
         const [rows, fields] = await pool.execute(
             // 'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
 
-            `
-            SELECT 
-                sa.id AS id,
-                sa.manager_id,
-                sa.agent_type,
-                sa.firstname,
-                sa.lastname,
-                sa.db_name,
-                sa.image_link,
-                sa.market_id,
-                sa.status,
-                market.market_name,
-                managers.db_name AS manager_name
-            FROM sales_agents sa
-            JOIN market ON sa.market_id = market.id
-            JOIN managers ON sa.manager_id = managers.id
-            WHERE sa.status = ?  AND sa.id=?
+            // `
+            // SELECT 
+            //     sa.id AS id,
+            //     sa.manager_id,
+            //     sa.agent_type,
+            //     sa.firstname,
+            //     sa.lastname,
+            //     sa.db_name,
+            //     sa.image_link,
+            //     sa.market_id,
+            //     sa.status,
+            //     market.market_name,
+            //     managers.db_name AS manager_name
+            // FROM sales_agents sa
+            // JOIN market ON sa.market_id = market.id
+            // JOIN managers ON sa.manager_id = managers.id
+            // WHERE sa.status = ?  AND sa.id=?
 
-            `,['active', agentId]
+            // `,['active', agentId]
+
+     `
+        SELECT 
+            sa.id AS id,
+            sa.firstname,
+            sa.lastname,
+            sa.db_name,
+            sa.email,
+            sa.image_link,
+            aa.id AS assignment_id,
+            aa.agent_type,
+            r.role_name AS agent_role,
+            aa.manager_id,
+            mgr.db_name AS manager_dbname,
+            mr.role_name AS manager_role,
+            m.id AS market_id,
+            m.name AS market_name,
+            t.id AS team_id,
+            t.name AS team_name,
+            sales_agents_login.username,
+            sales_agents_login.status as login_status,
+            sales_agents_login.role,
+            
+            DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+            DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+            DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+            DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+            CASE  
+                WHEN ae.status = 'Hired' 
+                    AND EXISTS (
+                        SELECT 1
+                        FROM agent_employments ae2
+                        WHERE ae2.agent_id = sa.id
+                        AND ae2.status = 'Resigned'
+                        AND ae2.id < ae.id
+                    )
+                THEN 'Rehired'
+                ELSE ae.status
+            END AS employee_status
+
+        FROM sales_agents2 sa
+
+        -- get ALL employments
+        JOIN agent_employments ae 
+            ON sa.id = ae.agent_id
+
+        -- get ALL assignments that overlap with the employment period
+        JOIN agent_assignments aa 
+            ON sa.id = aa.agent_id
+        AND (
+                (ae.end_date IS NULL AND aa.effective_from >= ae.start_date)
+                OR
+                (ae.end_date IS NOT NULL 
+                AND aa.effective_from BETWEEN ae.start_date AND ae.end_date)
+        )
+
+        -- agent role
+        LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+        -- manager details
+        LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+        LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+        AND maa.id = (
+            SELECT MAX(id) 
+            FROM agent_assignments 
+            WHERE agent_id = mgr.id
+        )
+        LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+        -- market and team
+        LEFT JOIN markets m ON aa.market_id = m.id
+        LEFT JOIN teams t ON aa.team_id = t.id
+        LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+
+        WHERE sa.id = ?   -- 🔹 filter for your agent
+
+        ORDER BY aa.effective_from DESC;
+
+            
+     `,[agentId]
         )
     
         if(export_to_excel){
@@ -322,6 +403,8 @@ exports.fetchSalesAgent = async( req,res, next) => {
             req.agent_type = rows[0].agent_type
             next()
         }else{
+            
+          
             res.json(rows)
         }
       
@@ -444,12 +527,9 @@ exports.updateSalesAgent = async (req, res, next) => {
     //there is file change info into true
 
     const messageArray = []
-    console.log(changed_assignment)
-    console.log(changed_date_hire)
-    console.log(typeof changed_info)
-    console.log(employee_status)
-    console.log(typeof active_agent)
-
+  
+    // console.log(req.body)
+    // return
 
   try {
         await connection.beginTransaction();
@@ -521,7 +601,7 @@ exports.updateSalesAgent = async (req, res, next) => {
                 `UPDATE agent_assignments 
                 SET effective_to=? 
                 WHERE agent_id=? AND effective_to IS NULL`,
-                [effective_from, id]
+                [effective_to, id]
             );
 
             // Insert new assignment

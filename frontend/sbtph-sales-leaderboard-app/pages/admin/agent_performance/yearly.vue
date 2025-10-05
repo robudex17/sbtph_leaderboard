@@ -1,11 +1,13 @@
 <template>
-  <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen  mt-20">
+  <!-- <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen  mt-20"> -->
+  <div class="mt-20  p-4">
+  
        <!-- Loading Spinner -->
   <div v-if="leaderBoardStore.state.loading">
     <spinner></spinner>
   </div>
-
-    <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Sales Agents Yearly Performance  Information</h1>
+  
+    <h1 class="text-2xl font-extrabold text-gray-800 mb-2 text-center">Sales Agents Yearly Performance  Information</h1>
    <div v-if="leaderBoardStore.state.leaderboard.length === 0"  class="text-red-700 font-bold  text-5xl">
      No Available Data.
    </div>
@@ -15,14 +17,13 @@
       <table class="w-full table-auto border-collapse bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-            <th class="py-4 px-6 border font-semibold uppercase">ID</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Database Name</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Agent</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Year</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Rating</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Rating Name</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Image</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Details</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">ID</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Name</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Year</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Rating</th>
+            <th class="py-2 px-1 border text-center text-xs font-bold">Rating Name</th>
+            <th class="py-2 px-1 border text-center text-xs font-bold">Image</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Details</th>
           </tr>
         </thead>
         <tbody>
@@ -31,38 +32,38 @@
             :key="agent.id"
             class="even:bg-blue-50 odd:bg-white"
           >
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700">
               {{ agent.id }}
             </td>
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700">
               {{ agent.db_name }}
             </td>
 
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700">
               {{ agent.year }}
             </td> 
-            <td class="py-4 px-6 border text-center text-gray-700 font-bold" :class="setRatingColor(agent)">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700" :class="setRatingColor(agent)">
               {{ agent.final_ratings }}
             </td>  
-            <td class="py-4 px-6 border text-center text-gray-700 font-bold" :class="setRatingNameColor(agent)">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700" :class="setRatingNameColor(agent)">
               {{ agent.ratings_name }}
             </td>                                       
-            <td class="py-4 px-6 border text-center">
+            <td class="py-1 px-1 border text-center text-xs">
               <img
                 :src="updateImageLink(agent.image_link)"
                 alt="Agent Image"
-                class="h-12 w-12 rounded-full mx-auto border border-blue-200"
+                class="h-10 w-10 rounded-full mx-auto border border-blue-200"
               />
             </td>
-            <td class="py-4 px-6 border text-center">
-              <div v-if="agent.ratings_name =='No Ratings' " class="flex justify-center space-x-2" >NO Details</div>
-              <div v-else class="flex justify-center space-x-2" >
+            <td class="py-1 px-1 border text-center text-xs">
+              <div v-if="parseFloat(agent.final_ratings) <= 0" class="flex justify-center space-x-2 text-red-500 font-bold" >NO  Yearly Performance Details</div>
+              <div v-else class="flex justify-center" >
                 <NuxtLink 
                   :to="{
                     path: `/agent_performance/year?`, query: { agent_type: agent.agent_type, fullyear: true , agent_id: agent.id, year:agent.year, withTrucks: true}
                     
                   }"
-                  class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-2 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Yearly Performance Details
                 </NuxtLink>
@@ -123,6 +124,7 @@ const leaderBoardStore = useLeaderBoardStore()
 
 
  const year_summary = true
+ const all = true
 
 
   // const agent = computed(() => {
@@ -134,9 +136,9 @@ const leaderBoardStore = useLeaderBoardStore()
 console.log('agent year', agentYear.value)
 
 // Method to fetch leaderboard data
-const leaderBoardData = async (query, year_summary) => {
+const leaderBoardData = async (all,query, year_summary) => {
 
-leaderBoardStore.fetchLeaderboard(query, year_summary);
+leaderBoardStore.fetchLeaderboard(all ,query, year_summary);
 };
 
 const itemsPerPage = 10;
@@ -210,7 +212,7 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
  // Fetch leaderboard data on mount
  onMounted( async() => {
   
-    await leaderBoardData(query, year_summary);
+    await leaderBoardData(all,query, year_summary);
    
     
   })
@@ -219,7 +221,7 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
 watch(route, (newRoute) => {
 console.log('The route is change. we should react to the change..')
 router.push(newRoute.fullPath)
-leaderBoardData(newRoute.query, year_summary)
+leaderBoardData(all,newRoute.query, year_summary)
 
 })
 

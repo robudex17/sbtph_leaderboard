@@ -10,7 +10,7 @@ router.post('/agent_deposit/:agent_id', authenticateToken, authorizeRoles('admin
 
 router.get('/agent_deposit/:agent_id', authenticateToken, validateMonthYear,salesNewDepositController.fetchAgentNewDeposit )
 
-router.put('/agent_deposit/:agent_id',authenticateToken, authorizeRoles('admin', 'manager'), validateNewDeposit, salesNewDepositController.updateAgentNewDeposit )
+router.put('/agent_deposit/:agent_id',authenticateToken, authorizeRoles('admin', 'manager'),  salesNewDepositController.updateAgentNewDeposit )
 
 router.delete('/agent_deposit/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesNewDepositController.deleteAgentNewDeposit )
 

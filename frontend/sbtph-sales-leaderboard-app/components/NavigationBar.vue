@@ -184,7 +184,14 @@
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
     ];
-    const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i);
+
+    const startYear = 2020;
+    const currentYear = new Date().getFullYear();
+    const years = Array.from(
+      { length: currentYear - startYear + 1 },
+      (_, i) => startYear + i
+    );
+    // const years = Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - i);
 
     const router = useRouter()
     const route = useRoute()
@@ -423,13 +430,24 @@
 
     };
 
+    // onMounted(() =>{
+    //   alert('this is mounted')
+    //   selectedMonth.value = ""
+    //   selectedYear.value = ""
+    // })
+
+
+
       //If Click I to other menu  selectedMonth and selectedYear will be empty
     watch(route, (newRoute, oldRoute)=> {
          urlPath.value = newRoute.fullPath
+  
          
         if (Object.keys(newRoute.query).length == 0  ) {
+          //  alert(JSON.stringify(newRoute.query))
             selectedMonth.value = ""
             selectedYear.value =  ""
+            salesEmployementStatus.value = "Hired"
             if (currentUser.agent_type == 2){
                  dashboardOption.value = "team"
             }else{
@@ -438,6 +456,11 @@
         
             leaderboardOption.value = "agent"
             
+        }else{
+          //  alert(JSON.stringify(newRoute.query))
+            // selectedMonth.value = ""
+            // selectedYear.value =  ""
+            // salesEmployementStatus.value = "Hired"
         }
         console.log('navigation query is',newRoute.query)
       
