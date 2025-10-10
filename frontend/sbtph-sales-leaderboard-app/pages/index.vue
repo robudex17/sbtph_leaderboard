@@ -511,8 +511,8 @@ const exportFileName = computed(()=> {
 
 
 // Method to fetch leaderboard data
-const leaderBoardData = (all,query, year_summary) => {
-  leaderBoardStore.fetchLeaderboard(all ,route.query, year_summary);
+const leaderBoardData = (leaderboardOption,query, year_summary) => {
+  leaderBoardStore.fetchLeaderboard(false ,route.query, year_summary);
 };
 
 // Show the details of the selected agent
@@ -553,7 +553,7 @@ watch(route, (newRoute) => {
   console.log('The route is change. we should react to the change..')
 
   router.push(newRoute.fullPath)
-  leaderBoardData(all,newRoute.query, year_summary)
+  leaderBoardData(false,newRoute.query, year_summary)
   query.value = newRoute.query
   leaderboardOption.value =  newRoute.query.leaderboardOption
 

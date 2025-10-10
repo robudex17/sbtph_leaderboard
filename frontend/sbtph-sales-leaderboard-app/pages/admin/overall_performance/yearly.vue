@@ -1,11 +1,12 @@
-<template>
+pages/admin/agent_performance/monthly.vue<template>
     <!-- <div class="p-4 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen  mt-20"> -->
     <div class="mt-20 p-4">
          <!-- Loading Spinner -->
+
     <div v-if="leaderBoardStore.state.loading">
       <spinner></spinner>
     </div>
-      <h1 class="text-2xl font-extrabold text-gray-800 mb-3 text-center">Sales Agents Montly Performance  Information</h1>
+      <h1 class="text-2xl font-extrabold text-gray-800 mb-3 text-center">Overall Yearly Performance  Information</h1>
      <div v-if="leaderBoardStore.state.leaderboard.length === 0"  class="text-red-700 font-bold  text-2xl">
        No Available Data.
      </div>
@@ -16,14 +17,9 @@
         <table class="w-full table-auto border-collapse bg-white">
           <thead>
             <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-              <th class="py-2 px-2  border text-center text-xs font-bold ">ID</th>
-              <th class="py-2 px-2  border text-center text-xs font-bold ">Name</th>
-              <th class="py-2 px-2  border text-center text-xs font-bold ">Employee Status</th>
-              <th class="py-2 px-2  border text-center text-xs font-bold ">Position</th>
+              <th class="py-2 px-2  border text-center text-xs font-bold ">Team Name</th>
                <th class="py-2 px-2  border text-center text-xs font-bold ">Manager</th>
-               <th class="py-2 px-2  border text-center text-xs font-bold ">Market</th>
-               <th class="py-2 px-2  border text-center text-xs font-bold ">Team</th>
-              <th class="py-2 px-2 border text-center text-xs font-bold ">Month</th>
+              <!-- <th class="py-2 px-2 border text-center text-xs font-bold ">Month</th> -->
               <th class="py-2 px-2 border text-center text-xs font-bold ">Year</th>
               <th class="py-2 px-2  border text-center text-xs font-bold ">Rating</th>
               <th class="py-2 px-2  border text-center text-xs font-bold ">Rating Name</th>
@@ -38,31 +34,15 @@
               class="even:bg-blue-50 odd:bg-white"
             >
               <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent.id }}
+                {{ agent.team_name }}
               </td>
               <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent.db_name }}
+                {{ agent.team_leader_name }}
               </td>
-              <td class="py-1 px-2 border text-center text-xs text-gray-700"
-              :class="agent.employee_status == 'Hired' || agent.employee_status=='Rehired' ? 'text-green-600 font-bold' : 'text-red-600 font-bold'"
-              >
-                {{ agent.employee_status }}
-              </td>     
-              <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent.agent_role }}
-              </td>  
-              <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent.manager_dbname }}
-              </td>               
-              <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent.market_name }}
-              </td> 
-              <td class="py-1 px-2 border text-center text-xs text-gray-700">
-                {{ agent?.team_name }}
-              </td>                                                  
+<!--                                            
               <td class="py-1 px-2 border text-center text-xs text-gray-700">
                 {{ agent.month }}
-              </td>
+              </td> -->
               <td class="py-1 px-2 border text-center text-xs text-gray-700">
                 {{ agent.year }}
               </td> 
@@ -74,7 +54,7 @@
               </td>                                       
               <td class="py-1 px-2 border text-center text-xs">
                 <img
-                  :src="updateImageLink(agent.image_link)"
+                  :src="updateImageLink(agent.team_image)"
                   alt="Agent Image"
                   class="h-10 w-12 rounded-full mx-auto border border-blue-200"
                 />
@@ -82,18 +62,15 @@
               <td class="py-0.5 px-2 border text-center text-xs">
                 <div class="flex justify-center space-x-2" v-if="parseFloat(agent.final_ratings) > 0">
                   <NuxtLink 
-                    :to="{
-                      path: `/agent_performance/month`, query: { agent_type: agent.agent_type, agent_id: agent.id, month:agent.month, year:agent.year, withTrucks: true}
-                      
-                    }"
+                    @click.prevent="SelectedTeamMembers(agent)"
                     class="px-2 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
-                    Monthly Performance Details
+                    Team Year Performance Details
                   </NuxtLink>
 
 
                 </div>
-                 <span v-else class="text-red-500 font-bold">NO  Monthly Performance Details</span>
+                 <span v-else class="text-red-500 font-bold">NO  Team Yearly Performance Details</span>
               </td>
             </tr>
           </tbody>
@@ -136,18 +113,23 @@ import { parse } from 'vue/compiler-sfc';
 
   const router = useRouter()
   const route = useRoute()
-  const query = route.query
 
-  const year_summary = false
-  const leaderboardOption = 'all'
+  
+  
+
+  const year_summary = true
+  const leaderboardOption = 'overall'
   
   
   const leaderBoardStore = useLeaderBoardStore()
+  const dataStorage = useDataStore()
+
+   dataStorage.state.team_members_monthly = []
   
 
   // Method to fetch leaderboard data
-const leaderBoardData = (leaderboardOption, query, year_summary) => {
-  leaderBoardStore.fetchLeaderboard(leaderboardOption, query, year_summary);
+const leaderBoardData = (leaderboardOption,query, year_summary) => {
+  leaderBoardStore.fetchLeaderboard(leaderboardOption,query, year_summary);
 };
 
   const itemsPerPage = 10;
@@ -157,6 +139,8 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
 //   const agents = computed(() => manageSalesAgentStore.state.salesAgents);
 
   const agents = computed(() => leaderBoardStore.state.leaderboard);
+
+  // const teamMember = computed(() => dataStorage.state.team_members_monthly)
  
   const totalPages = computed(() =>
     Math.ceil(agents.value.length / itemsPerPage)
@@ -173,6 +157,12 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
 
   const updateImageLink = (imageLink) => {
         return `${config.public.imageBaseUrl}${imageLink}`
+  }
+
+  const SelectedTeamMembers = (team) => {
+   
+     navigateTo({path:'/overall_performance/year', query: {team_id: team.team_id, year: team.year, leaderboardOption: 'overall' }})
+  
   }
 
 
@@ -226,7 +216,7 @@ const setRatingColor = (agent) => {
 
   onMounted(() => {
 
-    leaderBoardData(leaderboardOption,route.query, year_summary)
+    leaderBoardData(leaderboardOption, route.query, year_summary)
 
   });
 

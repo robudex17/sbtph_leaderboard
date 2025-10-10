@@ -33,7 +33,7 @@
       <div v-else>
         <!-- CARD VIEW -->
           
-           <div v-if="isCardView"  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div v-if="isCardView && route.query.leaderboardOption == 'overall'"  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
               v-for="(team, index) in teams"
               :key="index"
@@ -87,15 +87,13 @@
               </div>
             </div>            
             
-          </div> 
-
+          </div>    
 
 
           <div v-else class="overflow-x-auto shadow-xl rounded-lg">
-              <leader-board-table-view-team :agents="teams" viewType="teams" :isMonthhy="false"
-               title="Team Yearly Performance  Information"
-               memberTitle="Team Meamber Information"
-              
+              <leader-board-table-view-team :agents="teams" viewType="overall" :isMonthhy="false"
+                title="Overall Yearly Performance  Information"
+                 memberTitle="Team  Information"
               ></leader-board-table-view-team>
           
           </div>
@@ -149,11 +147,9 @@
           <table class="min-w-full table-auto border-collapse border border-gray-700">
             <thead>
               <tr>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Team Members</th>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Market</th>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Month</th>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Year</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-left">Rating</th>
+                <th class="px-2 py-2 border bg-gray-800 text-white text-center">Team</th>
+                <th class="px-2 py-2 border bg-gray-800 text-white text-center">Manager</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-center">Rating</th>
               </tr>
             </thead>
             <tbody>
@@ -161,23 +157,17 @@
                 <td class="border px-4 py-2">
                   <div class="flex items-center space-x-2">
                     <img
-                      v-if="member && member.image_link"
-                      :src="updateImageLink(member.image_link)"
+                      v-if="member && member.team_image"
+                      :src="updateImageLink(member.team_image)"
                       alt="Agent Image"
                       class="w-10 h-10 rounded-full object-cover"
                     />
-                    <span>{{ member.db_name }}</span> <span v-if="member.agent_type==1" class="text-blue-600 font-bold">- LM</span>
+                    <span>{{ member.team_name }}</span> 
                   </div>
                 </td>
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
-                  {{ member.market_name.toUpperCase() }}
-                </td>   
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
-                  {{ member.month }}
-                </td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
-                  {{ member.year }}
-                </td>                                             
+                  {{ member.team_leader_name.toUpperCase() }}
+                </td>                
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
                   {{ member.final_ratings }}
                 </td>
@@ -188,9 +178,9 @@
           <table class="min-w-full table-auto mt-6">
             <thead>
               <tr>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-center">Team Target</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-center">Team ShipOK</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-center">Percentage(%)</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Overall Target</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Overall ShipOK</th>
+                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Percentage(%)</th>
 
               </tr>
             </thead>
@@ -240,7 +230,7 @@ const router = useRouter()
 
 
 
-const teams = computed(() => leaderBoardStore.state.leaderboard.filter(agent => agent.team_id == teamId.value)) 
+const teams = computed(() => leaderBoardStore.state.leaderboard) 
 
 
 
@@ -263,9 +253,7 @@ const month = ref("")
 const year = ref("")
 
 const year_summary = true
-const leaderboardOption = 'team'
-
-const teamId = ref("")
+const leaderboardOption = 'overall'
 
 
 
@@ -274,15 +262,14 @@ const { setRatingNameColor } = useRatingColor()
 
 
 
-  if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin') || (currentUser.login_type == 'salesagentuser' && currentUser.agent_type == 2)){
+if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
     isAdmin.value = true
-    teamId.value = route.query.team_id
     
  }
 
- if(currentUser.login_type == 'salesagentuser' && currentUser.agent_type == 1){
-      teamId.value = currentUser.team_id
- }
+//  if(currentUser.login_type == 'salesagent' && currentUser.agent_type == 1){
+//       route.query.team_id = currentUser.team_id
+//  }
 
 
  const months = [
@@ -301,6 +288,7 @@ const exportUrl = API.export.leaderboard
 const exportFileName = computed(()=> {
   return `salesleaderboard-${month.value.month}-${year.value.year}.xlsx`
 })
+
 
 
 
@@ -333,25 +321,16 @@ const  toggleView = () => {
 
 watch(route, async(oldRoute, newRoute) => {
  
-
-      if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin') || (currentUser.login_type == 'salesagentuser' && currentUser.agent_type == 2)){
-          isAdmin.value = true
-          teamId.value = route.query.team_id
-          
-      }
-
-      if(currentUser.login_type == 'salesagentuser' && currentUser.agent_type == 1){
-            teamId.value = currentUser.team_id
-      }
-
+  console.log('The route is change. we should react to the change..')
+  
    
      router.push(newRoute.fullPath)
-      await leaderBoardStore.fetchLeaderboard(leaderboardOption, newRoute.query, year_summary);
+    await leaderBoardStore.fetchLeaderboard(leaderboardOption, newRoute.query, year_summary);
     
      console.log('the leadeobard is', leaderBoardStore.state.leaderboard )
      
 
-  
+    //   leaderBoardStore.state.leaderboard.filter(agent => agent.team_id == newRoute.query.team_id)
 
     
    

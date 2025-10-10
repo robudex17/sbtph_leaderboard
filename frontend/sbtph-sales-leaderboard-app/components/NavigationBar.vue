@@ -215,8 +215,12 @@
        '/admin/upload_sales_evaluation_data',
        '/admin/markets_and_teams',
 
-
        '/admin/agent2/manage_sales_agents',
+       '/overall_performance/year.vue',
+      '/admin/overall_performance/yearly',
+      '/admin/team_performance/yearly',
+      '/overall_performance/year'
+
 
     ])
 
@@ -246,9 +250,19 @@
       '/admin/sales_evaluation',
       '/',
        '/admin/markets_and_teams',
+       '/team_performance/year',
 
 
        '/admin/agent2/manage_sales_agents',
+       '/admin/team_performance/monthly',
+       '/admin/team_performance/yearly',
+        '/team_performance/month',
+       '/team_performance/yearl',
+       '/admin/overall_performance/yearly',
+       '/admin/overall_performance/monthly',
+        '/overall_performance/year',
+        '/overall_performance/month',
+
 
     ])
 
@@ -386,7 +400,10 @@
           route.path == '/dashboard/dashboard_year_view' || 
           route.path == '/agent_performance/analytics' ||  
           route.path == '/team_performance/analytics' ||
-          route.path == '/admin/agent_performance/yearly'
+          route.path == '/admin/agent_performance/yearly' ||
+          route.path == '/admin/overall_performance/yearly' ||
+          route.path == '/overall_performance/year' ||
+          route.path == '/admin/team_performance/yearly'
         
         ){
             if (!validateInputYearDates(selectedYear.value)){

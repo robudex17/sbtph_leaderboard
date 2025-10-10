@@ -1,5 +1,6 @@
 <template>
-    <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20">
+    <!-- <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20"> -->
+    <div class="p-4 mt-20">
       <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Sales Agents Information</h1>
   
 
@@ -8,15 +9,15 @@
         <table class="w-full table-auto border-collapse bg-white">
           <thead>
             <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-              <th class="py-4 px-6 border font-semibold uppercase">ID</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Manager Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Agent Type</th>
-              <th class="py-4 px-6 border font-semibold uppercase">First Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Last Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Database Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Market</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Image</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Actions</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">ID</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Manager Name</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Agent Type</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">First Name</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Last Name</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Database Name</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Market</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Image</th>
+              <th class="py-2 px-3 border text-sm font-semibold uppercase">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -25,35 +26,35 @@
               :key="agent.id"
               class="even:bg-blue-50 odd:bg-white"
             >
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.id }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
-                {{ agent.manager_name }}
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
+                {{ agent.manager_dbname }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.agent_type }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.firstname }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.lastname }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.db_name }}
               </td>
-              <td class="py-4 px-6 border text-center text-gray-700">
+              <td class="py-1 px-3 border text-center text-gray-700 text-sm">
                 {{ agent.market_name }}
               </td>
-              <td class="py-4 px-6 border text-center">
+              <td class="py-1 px-3 border text-center text-sm">
                 <img
                   :src="updateImageLink(agent.image_link)"
                   alt="Agent Image"
                   class="h-12 w-12 rounded-full mx-auto border border-blue-200"
                 />
               </td>
-              <td class="py-4 px-6 border text-center">
+              <td class="py-1 px-3 border text-center text-sm">
                 <div class="flex justify-center space-x-2">
                   <NuxtLink 
                     :to="{
@@ -65,7 +66,7 @@
                              who_give_feedback_db_name: currentUser.db_name, feedback_type: feedbackType }
 
                     }"
-                    class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    class="px-2 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     Give Feedback
                   </NuxtLink>
@@ -116,7 +117,7 @@
 
   feedbackType.value = route.query.feedback_type
 
-  const manageSalesAgentStore = useManageSalesAgentStore()
+  const manageSalesAgentStore = useManageSalesAgentStore2()
 
   
 

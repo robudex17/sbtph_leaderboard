@@ -3,31 +3,12 @@
    
      
       <div class="overflow-x-auto" id="print-table">
-        <table class="min-w-full border-collapse border border-gray-300">
+
+        <table class="min-w-full border-collapse border border-gray-300" >
           <thead>
 
             <tr class="bg-green-600 text-white">
-              <!-- <th class=" px-2 py-0.5"></th>
-              <th class=" px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>
-              <th class="border border-gray-300 px-2 py-0.5"></th>              
-              <th colspan="2" class="border border-gray-300 px-2 py-0.5 text-xs text-center ">Performance (80%)</th>
-                <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Attendance (10%)</th>
-              <th colspan="3" class="border border-gray-300 px-2 py-0.5">Memo and Feedback (10%)</th>
-              <th colspan="2" class="border border-gray-300 px-2 py-0.5">Additional Points (10%)</th>
-              <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th class=" border-gray-300 px-2 py-0.5"></th>
-               <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th class=" border-gray-300 px-2 py-0.5"></th>
-              <th class=" border-gray-300 px-2 py-0.5"></th> -->
+
               <th  colspan="8" class=" border border-gray-300 px-1 py-0.5 ">Agent Employments And Assignments</th>
 
                <th colspan="2" class="border border-gray-300 px-2 py-0.5 text-xs text-center ">Performance (80%)</th>
@@ -89,7 +70,9 @@
            
             <!-- Additional rows can be added here -->
           </tbody>
-        </table>
+        </table>        
+
+
       </div>
     </div>
   </template>
@@ -109,6 +92,10 @@
       const props = defineProps({
             agents : {
                 type: Array
+            },
+            viewType: {
+              type: String,
+              required: true
             }
         })
 

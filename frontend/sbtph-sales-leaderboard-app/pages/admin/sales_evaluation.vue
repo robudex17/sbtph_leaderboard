@@ -4,6 +4,7 @@
     <!-- <div v-if="useFeedbackStore.state.loading">
       <spinner></spinner>
     </div> -->
+ 
     <div >
 
         <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">SALES AGENTS EVALUATION</h1>
@@ -175,8 +176,45 @@
                     </td>
                    
                     <!-- Actions -->
-                    <td class="py-0.5 px-4 text-center border">
-                    <div class="flex justify-center space-x-2">
+                    <td class="py-0.5 px-4 text-center border" >
+                    <div class="flex justify-center space-x-2" v-if="agent.agent_type == 2">
+
+                  <!-- Submit All button -->
+                            <button
+                              v-if="!submittedAll"
+                              @click="submitAllSalesEvaluation"
+                              :disabled="!canSubmitAll || !agent.ready_to_submit"
+                              :class="[
+                                'py-0.5 px-3 rounded-lg flex items-center gap-2 text-sm',
+                                canSubmitAll
+                                  ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                  : 'bg-gray-400 text-white cursor-not-allowed'
+                              ]"
+                            >
+                              Submit
+                            </button>
+
+                            <!-- Submitted All button (disabled + gray) -->
+                            <button
+                              v-else
+                              disabled
+                              class="bg-gray-400 text-white cursor-not-allowed text-sm rounded-lg px-3"
+                            >
+                              Submitted 
+                            </button>
+
+                            <!-- Review All button (purple) -->
+                            <button
+                              v-if="submittedAll"
+                              @click="reviewAllSalesEvaluation"
+                              class="bg-purple-500 text-white py-0.5 px-3 rounded-lg hover:bg-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm"
+                            >
+                              Review 
+                            </button>
+
+                    </div>
+
+                        <div class="flex justify-center space-x-2" v-else>
 
                         <!-- Submit / Submitted Button -->
                         <button
@@ -203,7 +241,7 @@
                         Review
                         </button>
 
-                    </div>
+                    </div>                    
                     </td>
 
 
@@ -333,21 +371,43 @@
             </button>
           </div>
 
-        <!-- Centered Submit All Button -->
-        <div class="flex justify-center items-center my-6">
-        <button
+                <!-- Centered Submit All Button -->
+        <div class="flex justify-center items-center my-6 space-x-4">
+          <!-- Submit All button -->
+          <button
+            v-if="!submittedAll"
             @click="submitAllSalesEvaluation"
             :disabled="!canSubmitAll"
             :class="[
-            'py-2 px-6 rounded-lg text-lg font-semibold transition-colors',
-            canSubmitAll
+              'py-2 px-6 rounded-lg text-lg font-semibold transition-colors',
+              canSubmitAll
                 ? 'bg-blue-500 text-white hover:bg-blue-600'
                 : 'bg-gray-400 text-white cursor-not-allowed'
             ]"
-        >
+          >
             Submit All
-        </button>
+          </button>
+
+          <!-- Submitted All button (disabled + gray) -->
+          <button
+            v-else
+            disabled
+            class="py-2 px-6 rounded-lg text-lg font-semibold bg-gray-400 text-white cursor-default"
+          >
+            Submitted All
+          </button>
+
+          <!-- Review All button (purple) -->
+          <button
+            v-if="submittedAll"
+            @click="reviewAllSalesEvaluation"
+            class="py-2 px-6 rounded-lg text-lg font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+          >
+            Review All
+          </button>
         </div>
+
+
 
 
     </div>
@@ -451,6 +511,11 @@
               modalMeticsTypeMessage.value = [ "Add  Target/Shipok", "Edit Target/Shipok`"]
             if(selectedAgent.agent_type== 2){
               alert('Cannot Update the agent directly')
+              return
+            }
+
+            if(Number(selectedAgent.target) == 0 && currentUser.login_type !== 'standarduser'){
+              alert('Cannot Update shipok on Agent that has zero (0) Target')
               return
             }
             if(Number(selectedAgent.target) > 0){
@@ -695,6 +760,11 @@
     //   agent.submitted = 0; // Toggle back (just for demo)
     // }
 
+      if(currentUser.role != 'admin' && currentUser.login_type != 'standarduser'){
+        alert('No allowed to submit Sales Evaluation')
+        return
+     }
+    
     await useManageSalesStore.submitSalesEvaluation(agent.id, {
         agent_id: agent.id,
         agent_dbname: agent.db_name,
@@ -706,28 +776,52 @@
   }
 
 const submitAllSalesEvaluation = async() => {
-  agents.value.forEach(agent => {
-    if (agent.ready_to_submit && agent.submitted === 0) {
-      agent.submitted = 1;
+    if(currentUser.role != 'admin' && currentUser.login_type != 'standarduser'){
+      alert('No allowed to submit Sales Evaluation')
+      return
     }
-  });
+    agents.value.forEach(agent => {
+      if (agent.ready_to_submit && agent.submitted === 0) {
+        agent.submitted = 1;
+      }
+    });
 
-   const payload = agents.value.map(agent => ({
-        agent_id: agent.id,
-        agent_dbname: agent.db_name,
-        month: agent.month,
-        year: agent.year,
-        date: date,
-        submitted: 1
-    }));
+    const payload = agents.value.map(agent => ({
+          agent_id: agent.id,
+          agent_dbname: agent.db_name,
+          month: agent.eval_month,
+          year: agent.eval_year,
+          date: date,
+          submitted: 1
+      }));
 
-    await useManageSalesStore.submitSalesEvaluation('all', payload
-);
+      await useManageSalesStore.submitSalesEvaluation('all', payload
+  );
 };
 
 
+
+const reviewAllSalesEvaluation = async() => {
+   if(currentUser.role != 'admin' && currentUser.login_type != 'standarduser'){
+        alert('No allowed to review Sales Evaluation')
+        return
+     }
+
+   // Call the store action to review sales evaluation
+   await useManageSalesStore.reviewSalesEvaluation('all', {
+       month: agents.value[0].eval_month,
+       year: agents.value[0].eval_year
+   });
+};
+
+
+
 const  reviewSalesEvaluation = async (agent) => {
- 
+
+   if(currentUser.role != 'admin' && currentUser.login_type != 'standarduser'){
+        alert('No allowed to review Sales Evaluation')
+        return
+     }
 
    // Call the store action to review sales evaluation
    await useManageSalesStore.reviewSalesEvaluation(agent.id, {
@@ -773,10 +867,20 @@ const openModal = ( data) => {
   });
 
 // Computed: enable button only if all agents are ready
-    const canSubmitAll = computed(() =>
-    agents.value.length > 0 &&
-    agents.value.every(agent => agent.ready_to_submit )
-    );
+  const canSubmitAll = computed(() => {
+    // only true if ALL agents are ready_to_submit
+const agentReadyToSubmit = agents.value
+  .filter(agent => agent.agent_type != 3)
+  .map(agent => agent.ready_to_submit);
+    return agents.value.length > 0 &&  agentReadyToSubmit.every(Boolean)
+  });
+
+  const submittedAll = computed(() => {
+    // true if all agents have been submitted
+
+    const agentIsAllSubmitted = agents.value.filter(agent => agent.agent_type !=3).map(agent => agent.submitted)
+    return agents.value.length > 0 && agentIsAllSubmitted.every(submitted => submitted === 1)
+  });
 
    
 

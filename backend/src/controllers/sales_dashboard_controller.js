@@ -15,6 +15,9 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
     const loginUser = req.user
 
+  
+    
+
            // Get the month name
     const monthNames = [
             "January", "February", "March", "April", "May", "June",
@@ -134,7 +137,6 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 AND ts.month = ?
                 AND ts.year = ?
             WHERE aa.agent_type  != 2
-
     `
 
 
@@ -383,17 +385,19 @@ exports.fetchAgentDashboard = async (req,res,next) => {
              individualTargets  = result     
            
          }else{
-            queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
-
+            
+            //queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
+            //  console.log( `${dashboarddMasterQuery} AND sa.id=?`)
+            //  return
                const [result] = await pool.execute(
-                `${dashboarddMasterQuery} AND  sa.id=?`
+                `${dashboarddMasterQuery} AND sa.id=?`,
               [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.login_id]
             )   
-                 
+                individualTargets  = result  
          }
   
 
-     
+      
 
         // transform total_target and total_ship_ok value of null to 0
         dashboard.data = individualTargets.map(item => ({

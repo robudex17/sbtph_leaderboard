@@ -618,15 +618,12 @@
                 <i class="fas fa-edit"></i>
                   Edit
                 </button>
-                <NuxtLink  
-                  :to="{
-                    path: `/admin/agent2/${agent.id}/details`, query: { agent_type: agent.agent_type,  manager_id: agent.manager_id, agent_role: agent.role , agent_dbname: agent.db_nam, employee_status: agent.employee_status}
-                    
-                  }"
+                <button
+                  @click="handleViewDetails(agent)"
                   class="px-1 py-1 bg-blue-500 text-white text-center text-sm font-bold rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Details
-                </NuxtLink>
+                </button>
                 <button :disabled="currentUser.role !=='admin'" v-if="agentEmployeeStatus == 'Hired'"
                   class="px-2 py-1 bg-gray-500 text-white text-center text-sm font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditAgentLoginModal({login_id: agent.id, role: agent.role, status: agent.login_status, username: agent.username, agent_type: agent.agent_type})"
@@ -851,6 +848,27 @@
 
 
     //method or functions
+
+      const handleViewDetails = (agent) => {
+
+        
+        let month = null
+        let year = null
+    
+       if(agent.employee_status == 'Resigned'){
+          const date = new Date(agent.end_date)
+          month = date.toLocaleString('default', {month: 'long'})
+          year = date.getFullYear()
+
+       } 
+       
+           navigateTo({
+            path: `/admin/agent2/${agent.id}/details`,
+            query: { agent_id: agent.id , month, year, employee_status: agent.employee_status, start_date: agent.start_date, end_date: agent.end_date, agent_type: agent.agent_type, role: agent.agent_role },
+          });
+  
+      };
+
     const updateImageLink = (imageLink) => {
         return `${config.public.imageBaseUrl}${imageLink}`
     }
@@ -931,7 +949,8 @@
         currentAgent.value.start_date = today   // auto set hire date to today
         currentAgent.value.end_date = null      // clear resignation date
         currentAgent.value.effective_from = today
-      }else if(currentAgent.value.employee_status === 'Resigned'  ){
+      }else if(currentAgent.value.employee_status === 'Resigned' ){
+      
         currentAgent.value.end_date = originalAssignment.value.end_date
         
         currentAgent.value.changed_assignment = false
@@ -949,7 +968,10 @@
         currentAgent.value.agent_type = originalAssignment.value.agent_type
         currentAgent.value.team_id = originalAssignment.value.team_id
         currentAgent.value.effective_from = originalAssignment.value.effective_from
+        
         currentAgent.value.market_id = originalAssignment.value.market_id
+
+        
 
         
 
@@ -1159,77 +1181,90 @@
             alert('No changes detected.')
             return
           }
-          
-          //CHECKING Further 
-      
-          // Extract YYYY-MM from both dates
-          const newDate = new Date(currentAgent.value.effective_from);
-          const oldDate = new Date(originalAssignment.value.effective_from);
+        if(currentAgent.value.changed_assignment == false) {
+          alert('Please Choose Agent Assignments')
+          return
+        }
 
-          const newYearMonth = `${newDate.getFullYear()}-${newDate.getMonth()}`;
-          const oldYearMonth = `${oldDate.getFullYear()}-${oldDate.getMonth()}`;
+          if(currentAgent.value.changed_assignment){
+                //CHECKING Further 
+            
+                // Extract YYYY-MM from both dates
+                const newDate = new Date(currentAgent.value.effective_from);
+                const oldDate = new Date(originalAssignment.value.effective_from);
 
-          if (newYearMonth === oldYearMonth) {
-            alert('Cannot assign in the same month and year as the previous assignment. Please choose another date.');
-            currentAgent.value.changed_assignment = false;
-            return;
-          }
-              // && currentAgent.value.agent_type == originalAssignment.value.agent_type  
-              // && currentAgent.value.manager_id == originalAssignment.value.manager_id 
-              // && currentAgent.value.market_id == originalAssignment.value.market_id 
-              // && currentAgent.value.team_id == originalAssignment.value.team_id  ){
+                const newYearMonth = `${newDate.getFullYear()}-${newDate.getMonth()}`;
+                const oldYearMonth = `${oldDate.getFullYear()}-${oldDate.getMonth()}`;
 
-          if(new Date(currentAgent.value.effective_from).getTime() < new Date(originalAssignment.value.effective_from).getTime()){
-            alert('Cannot assign date assignment earlier than the previous assigmrnt. Please choose another date.');
-            currentAgent.value.changed_assignment = false;        
-            return
-          }
-          
-          // IF CURRENTLY HIRED DONT ALLOW TO ASSIGN TO SAME SET OF ASSIGNMENT 
-          // OR IF REHIRED AND ALREADY active_status is already true
-          if(currentAgent.value.employee_status == 'Hired' || (currentAgent.value.employee_status == 'Rehired' && currentAgent.active_agent)) {
+                if (newYearMonth === oldYearMonth) {
+                  alert('Cannot assign in the same month and year as the previous assignment. Please choose another date.');
+                  currentAgent.value.changed_assignment = false;
+                  return;
+                }
+                    // && currentAgent.value.agent_type == originalAssignment.value.agent_type  
+                    // && currentAgent.value.manager_id == originalAssignment.value.manager_id 
+                    // && currentAgent.value.market_id == originalAssignment.value.market_id 
+                    // && currentAgent.value.team_id == originalAssignment.value.team_id  ){
 
-              if(currentAgent.value.agent_type == originalAssignment.value.agent_type &&  currentAgent.value.manager_id == originalAssignment.value.manager_id 
-                && currentAgent.value.market_id == originalAssignment.value.market_id  &&  currentAgent.value.team_id == originalAssignment.value.team_id 
-
-              ){
-                alert('The same set of Assignment. Please create new set of assigments')
-                  currentAgent.value.changed_assignment = false 
+                if(new Date(currentAgent.value.effective_from).getTime() < new Date(originalAssignment.value.effective_from).getTime()){
+                  alert('Cannot assign date assignment earlier than the previous assigmrnt. Please choose another date.');
+                  currentAgent.value.changed_assignment = false;        
                   return
+                }
+                
+                // IF CURRENTLY HIRED DONT ALLOW TO ASSIGN TO SAME SET OF ASSIGNMENT 
+                // OR IF REHIRED AND ALREADY active_status is already true
+                if(currentAgent.value.employee_status == 'Hired' || (currentAgent.value.employee_status == 'Rehired' && currentAgent.active_agent)) {
 
-           }
+                    if(currentAgent.value.agent_type == originalAssignment.value.agent_type &&  currentAgent.value.manager_id == originalAssignment.value.manager_id 
+                      && currentAgent.value.market_id == originalAssignment.value.market_id  &&  currentAgent.value.team_id == originalAssignment.value.team_id 
+
+                    ){
+                      alert('The same set of Assignment. Please create new set of assigments')
+                        currentAgent.value.changed_assignment = false 
+                        return
+
+                }
+
+
+                }
+
+
+                currentAgent.value.effective_to = setEffectiveToDate(currentAgent.value.effective_from)
+                currentAgent.value.changed_assignment = true
+            
           }
-
-
-          currentAgent.value.effective_to = setEffectiveToDate(currentAgent.value.effective_from)
-          currentAgent.value.changed_assignment = true
-         
-
+          
 
           if(new Date(currentAgent.value.start_date).getTime() == new Date(originalAssignment.value.start_date).getTime()){
-            currentAgent.value.changed_date_hire = false
-          }else{
-            currentAgent.value.changed_date_hire = true
+                currentAgent.value.changed_date_hire = false
+              }else{
+                currentAgent.value.changed_date_hire = true
           }
 
-     
-          if(currentAgent.value.firstname == originalAssignment.value.firstname && currentAgent.value.lastname == originalAssignment.value.lastname && 
-            currentAgent.value.email == originalAssignment.value.email  &&  currentAgent.value.image_link == originalAssignment.value.image_link && 
-            currentAgent.value.db_name == originalAssignment.value.db_name  && !(currentAgent.value.image instanceof File)
+        
+        if(currentAgent.value.firstname == originalAssignment.value.firstname && currentAgent.value.lastname == originalAssignment.value.lastname && 
+                currentAgent.value.email == originalAssignment.value.email  &&  currentAgent.value.image_link == originalAssignment.value.image_link && 
+                currentAgent.value.db_name == originalAssignment.value.db_name  && !(currentAgent.value.image instanceof File)
 
           ){
-            currentAgent.value.changed_info = false
-        
+                currentAgent.value.changed_info = false
+            
           }else{
-            currentAgent.value.changed_info = true
-          
-          }
+                currentAgent.value.changed_info = true
+              
+         }
 
 
 
+      }else{
+        if(currentAgent.value.end_date == null){
+          alert('Please Choose Resigned Date')
+          return
+        }
+        currentAgent.value.effective_to =  currentAgent.value.end_date
       }
-
- 
+     
         
       await manageSalesAgentStore.updateSalesAgent(currentAgent.value, route.query);
         // fetchSalesAgents()

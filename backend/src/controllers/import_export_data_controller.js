@@ -1534,10 +1534,13 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                       
                       if(table == 'new_deposit'){
                         console.log('first new deposit')
+                       
+                        const givenDate = new Date(`${month} 1, ${year}`);
+                        const formatted = givenDate.toISOString().split('T')[0];
                         await pool.execute(
                         `INSERT INTO new_deposit (agent_id, month, year, date, new_deposit, description)
                         VALUES (?, ?, ?, ?, ?, ?)`,
-                        [agent_id, toCapitalized(month), year,  `${year}-${month}-${k+1}` , 100000, `New Deposit For New Customer - ${month} ${year}`]
+                        [agent_id, toCapitalized(month), year,  `${formatted}` , 100000, `New Deposit For New Customer - ${month} ${year}`]
                        )
                       }else{
                         await pool.execute(

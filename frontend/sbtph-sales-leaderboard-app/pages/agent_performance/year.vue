@@ -3,6 +3,7 @@
     <div class="p-4 mt-20">
       <!-- <div>{{ leaderBoardStore.state.agentYearPerformance.yearAverage }}</div> -->
       <!-- Loading Spinner -->
+      
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
@@ -116,7 +117,7 @@
           <div class="text-center">
             <h3 class="text-3xl font-semibold">{{ selectedAgent ? selectedAgent.db_name : 'No agent selected' }}</h3>
             <h3 class="text-xl font-semibold">AgentID: {{ selectedAgent ? selectedAgent.id : 'Agent has no ID' }}</h3>
-            <p class="text-lg text-gray-600 font-bold" :class="ratingClassModal">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
+            <p class="text-lg  font-bold" :class="setRatingNameColor(selectedAgent)">{{ selectedAgent ? selectedAgent.ratings_name : '' }}</p>
   
             <div class="flex items-center mt-2">
               <template v-for="i in 5" :key="i">
@@ -158,23 +159,39 @@
 
               <tr v-if="selectedAgent">
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Absence(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.absence_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{ selectedAgent.hasIncomplete ? 'INCOMPLETE': selectedAgent.absence_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{ selectedAgent.hasIncomplete ? 'INCOMPLETE': selectedAgent.absence_rating }}</td>
               </tr>
               <tr v-if="selectedAgent">
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Tardiness(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.tardiness_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{ selectedAgent.hasIncomplete ? 'INCOMPLETE':  selectedAgent.tardiness_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{  selectedAgent.hasIncomplete ? 'INCOMPLETE': selectedAgent.tardiness_rating }}</td>
               </tr>
               <tr v-if="selectedAgent">
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Memo(5%) </td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.memo_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{selectedAgent.hasIncomplete ? 'INCOMPLETE':  selectedAgent.memo_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{selectedAgent.hasIncomplete ? 'INCOMPLETE':  selectedAgent.memo_rating }}</td>
               </tr>
               <tr v-if="selectedAgent">
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">Feedback(5%)</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_score }}</td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center">{{ selectedAgent.feedback_rating }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{ selectedAgent.hasIncomplete ? 'INCOMPLETE': selectedAgent.feedback_score }}</td>
+                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100  text-center"
+                :class="selectedAgent.hasIncomplete ? 'text-red-600 font-bold': 'text-gray-100' "
+                >{{ selectedAgent.hasIncomplete ? 'INCOMPLETE': selectedAgent.feedback_rating }}</td>
               </tr>
               <tr v-if="selectedAgent">
                 <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100">New Deposit(10%)</td>
@@ -284,7 +301,7 @@
 
   let agentId;
    if (query.value.agent_id) {
-    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin' || (currentUser.login_type == 'salesagentuser' && currentUser.login_type == 2)){
        agentId = query.value.agent_id
        
     }

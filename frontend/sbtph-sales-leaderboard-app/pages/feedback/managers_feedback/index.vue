@@ -1,5 +1,5 @@
 <template>
-    <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20">
+    <div class="p-4 mt-20">
       <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Manager Information</h1>
   
 
@@ -8,15 +8,15 @@
         <table class="w-full table-auto border-collapse bg-white">
           <thead>
             <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-              <th class="py-4 px-6 border font-semibold uppercase">ID</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Manager Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Agent Type</th>
-              <th class="py-4 px-6 border font-semibold uppercase">First Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Last Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Database Name</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Market</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Image</th>
-              <th class="py-4 px-6 border font-semibold uppercase">Actions</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">ID</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Manager Name</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Agent Type</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">First Name</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Last Name</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Database Name</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Market</th>
+              <th class="py-4 px-6 border text-sm font-semibold uppercase">Image</th>
+              <th class="py-4 px-6 border  text-sm font-semibold uppercase">Actions</th>
             </tr>
           </thead>
           <tbody>

@@ -141,7 +141,7 @@ exports.loginUser = async(req,res, next) => {
 
         `
                 SELECT 
-                sa.id AS id,
+                sa.id AS login_id,
                 sa.firstname,
                 sa.lastname,
                 sa.db_name,

@@ -678,7 +678,7 @@ for (const agent of sales_agents) {
     // Final override: if feedback_admin > 0 → ready_to_submit = true
     if (Number(agent.feedback_admin) > 0) {
       isReady = true
-    }
+    } 
 
     agent.ready_to_submit = isReady
 }
@@ -756,7 +756,7 @@ exports.addSalesEvaluationData= async (req, res, next) => {
      // then insert new records
       const payload = req.body; // array of agents
 
-     
+    
       
       if (!Array.isArray(payload) || payload.length === 0) {
         return res.status(400).json({ error: "Invalid payload" });
@@ -775,8 +775,8 @@ exports.addSalesEvaluationData= async (req, res, next) => {
           const values = payload.map(agent => [
             agent.agent_id,
             agent.agent_dbname,
-            agent.eval_month,
-            agent.eval_year,
+            agent.month,
+            agent.year,
             agent.date,
             agent.submitted
           ]);
@@ -824,13 +824,27 @@ exports.addSalesEvaluationData= async (req, res, next) => {
 
 
 exports.deleteSalesEvaluationData = async (req, res, next) => {
+
+ 
     
    const agent_id  = req.params.agent_id 
    const { month, year } = req.body
-
-   console.log(req.body)
+   
+   let successMessage
+   if(agent_id == 'all'){
+    successMessage = `Sales Evaluation Data for all agents are marked for review`
+   }else{
+    successMessage = `Sales Evaluation Data for ${agent_id} is marked for review`
+   }
+  
 
     try {
+        if(agent_id == 'all'){
+            const query = "DELETE FROM sales_evaluation_status WHERE  month=? AND year=?"
+            const [result] = await pool.execute(query, [ month, year])
+            return res.status(200).send({ message: successMessage });
+    
+        }
         const query = "DELETE FROM sales_evaluation_status WHERE agent_id=? AND month=? AND year=? "
         const [result] = await pool.execute(query, [agent_id, month, year])
 
@@ -838,13 +852,17 @@ exports.deleteSalesEvaluationData = async (req, res, next) => {
             return res.status(400).json({message: 'Agent Target Not found'})
         }
 
-        res.status(200).send({ message: `Sales Evaluation Data for ${agent_id} is marked for review` });
+        res.status(200).send({ message:  successMessage });
     }
     catch(error) {
         console.error('Error marked for review:', error)
         res.status(500).json({error: 'Database Error, Cannot marked for review'})
     }
 }
+
+
+
+
 
 
 

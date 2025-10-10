@@ -32,7 +32,7 @@
                         <div class="mb-4"  >
                               <label class="block text-sm font-medium mb-2">ShipOk</label>
                               <input v-if="currentUser.login_type == 'standarduser'" v-model="form.shipok" type="text" class="w-full border rounded-lg p-2" />
-                              <input v-else v-model="newUserEntry" type="text" class="w-full border rounded-lg p-2"  />
+                              <input v-else v-model="userEntry" type="text" class="w-full border rounded-lg p-2"  />
                               <p v-if="errorOtherMetrics" class="text-red-500 text-sm mt-2">{{ errorOtherMetrics }}</p>
                         </div>   
                     </div>
@@ -414,9 +414,9 @@
             total_memo: newVal.total_memo || 0,
             feedback: newVal.feedback || "",
         }
-        if(props.metricsType == 'targetShipok'){
-           userEntry.value = newVal.shipok || ""
-        }
+        // if(props.metricsType == 'targetShipok'){
+        //    userEntry.value = newVal.shipok || ""
+        // }
        
         }
     },

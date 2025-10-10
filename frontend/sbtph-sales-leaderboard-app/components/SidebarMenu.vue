@@ -104,10 +104,20 @@
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [
-              { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
-              { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
+              { name: 'Team_Monthly', route: '/admin/team_performance/monthly', icon: ['fas', 'users'] },
+              { name: 'Team_Yearly', route: '/admin/team_performance/yearly', icon: ['fas', 'users'] },
               ]
             },
+
+            { 
+              name: 'Overall Performance', 
+              route: null, 
+              icon: ['fas', 'cog'],
+              subMenu: [
+              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+              ]
+            },            
 
             { 
               name: 'Analytics', 
@@ -146,7 +156,7 @@
                 // { name: 'export', route: '/admin/export_to_excel', icon: ['fas', 'fa-file-excel'] },
 
 
-               { name: 'Manage Sales Agents', route: '/admin/agent2/manage_sales_agents?employee_status=Hired', icon: ['fas', 'user-tie'] },
+               { name: 'Manage Sales Agents', route: '/admin/agent2/manage_sales_agents', icon: ['fas', 'user-tie'] },
 
               ]
             }
@@ -170,9 +180,9 @@
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [
-                { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
-                { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
-                { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
+                { name: 'Agent_Monthly', route: '/admin/agent_performance/monthly', icon: ['fas', 'user'] },
+                { name: 'Agent_Yearly', route: '/admin/agent_performance/yearly', icon: ['fas', 'user'] },
+                // { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
               ]
             },
             { 
@@ -180,11 +190,22 @@
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [
-                { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
-                { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
-                { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
+                { name: 'Team_Monthly', route: '/admin/team_performance/monthly', icon: ['fas', 'users'] },
+                { name: 'Team_Yearly', route: '/admin/team_performance/yearly', icon: ['fas', 'users'] },
+                // { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
               ]
             },
+
+            { 
+              name: 'Overall Performance', 
+              route: null, 
+              icon: ['fas', 'cog'],
+              subMenu: [
+              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+              ]
+            },            
+
 
             { 
               name: 'Feedback', 
@@ -197,16 +218,16 @@
               ] 
             },
 
-            { 
-              name: 'Analytics', 
-              route: null, icon: ['fas', 'chart-bar'],
-              subMenu:[
-                { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
-                { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
-                { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
-              ] 
+            // { 
+            //   name: 'Analytics', 
+            //   route: null, icon: ['fas', 'chart-bar'],
+            //   subMenu:[
+            //     { name: 'Overall', route: '/analytics/overall', icon: ['fas', 'users']  },
+            //     { name: 'Market', route: '/analytics/market', icon: ['fas', 'users']  },
+            //     { name: 'Agents', route: '/analytics/agents', icon: ['fas', 'user']}
+            //   ] 
             
-            },           
+            // },           
 
             { 
               name: 'Admin Panel',
@@ -215,8 +236,8 @@
               subMenu: [
                 // { name: 'Manage Standard Users', route: '/admin/manage_standard_users', icon: ['fas', 'user'] },
                 { name: 'Manage Sales Agents', route: '/admin/agent2/manage_sales_agents', icon: ['fas', 'user-tie'] },
-              
-
+                 { name: 'Sales Evaluation', route: '/admin/sales_evaluation', icon: ['fas', 'user-tie'] },
+ 
               ]
             }
           ];
@@ -241,7 +262,7 @@
               subMenu: [
                 { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
                 { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
-                { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
+                // { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
               ]
             },
             { 
@@ -251,7 +272,7 @@
               subMenu: [
                 { name: 'Team_Monthly', route: '/team_performance/month', icon: ['fas', 'users'] },
                 { name: 'Team_Yearly', route: '/team_performance/year', icon: ['fas', 'users'] },
-                { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
+                // { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
               ]
             },
 
@@ -397,6 +418,31 @@
             activeMenu.value = "Agent_Yearly";
             return;         
         }
+
+         if(currentRoute == "/team_performance/month"){
+            submenuStates.value["Team Performance"] = true; // Open the Team Performance  submenu
+            activeMenu.value = "Team_Monthly";
+            return;         
+        }        
+
+         if(currentRoute == "/team_performance/year"){
+            submenuStates.value["Team Performance"] = true; // Open the Team Performance  submenu
+            activeMenu.value = "Team_Yearly";
+            return;         
+        }
+
+         if(currentRoute == "/overall_performance/month"){
+            submenuStates.value["Overall Performance"] = true; // Open the Overall Performance  submenu
+            activeMenu.value = "Overall_Monthly";
+            return;         
+        }        
+
+
+         if(currentRoute == "/overall_performance/year"){
+            submenuStates.value["Overall Performance"] = true; // Open the Overall Performance  submenu
+            activeMenu.value = "Overall_Yearly";
+            return;         
+        }        
 
         for (const item of menuItems) {
           if (item.route === currentRoute) {

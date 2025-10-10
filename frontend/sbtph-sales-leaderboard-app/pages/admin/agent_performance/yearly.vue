@@ -124,7 +124,7 @@ const leaderBoardStore = useLeaderBoardStore()
 
 
  const year_summary = true
- const all = true
+ const leaderboardOption = 'all'
 
 
   // const agent = computed(() => {
@@ -136,9 +136,9 @@ const leaderBoardStore = useLeaderBoardStore()
 console.log('agent year', agentYear.value)
 
 // Method to fetch leaderboard data
-const leaderBoardData = async (all,query, year_summary) => {
+const leaderBoardData = async (leaderboardOption,query, year_summary) => {
 
-leaderBoardStore.fetchLeaderboard(all ,query, year_summary);
+  leaderBoardStore.fetchLeaderboard(leaderboardOption ,query, year_summary);
 };
 
 const itemsPerPage = 10;
@@ -212,7 +212,7 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
  // Fetch leaderboard data on mount
  onMounted( async() => {
   
-    await leaderBoardData(all,query, year_summary);
+    await leaderBoardData(leaderboardOption,route.query, year_summary);
    
     
   })
@@ -221,7 +221,7 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
 watch(route, (newRoute) => {
 console.log('The route is change. we should react to the change..')
 router.push(newRoute.fullPath)
-leaderBoardData(all,newRoute.query, year_summary)
+leaderBoardData(leaderboardOption,newRoute.query, year_summary)
 
 })
 

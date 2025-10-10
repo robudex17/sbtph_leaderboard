@@ -1,8 +1,8 @@
 // const { agent, agent } = require('supertest');
+const { agent } = require('supertest');
 const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
-
 
 let leaderboardMasterQuery = 
 
@@ -109,9 +109,7 @@ let leaderboardMasterQuery =
                 GROUP BY agent_id, year, month
             ) mm ON mm.agent_id = sa.id 
               AND mm.month =?
-              AND mm.year =? 
-              
-          
+              AND mm.year =?         
 `
 
 exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, leaderboardOption,path, leaderboardMasterQuery ) => {
@@ -148,151 +146,160 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
   const snapshot = `${givenYear}-${monthNumber.toString().padStart(2, '0')}`;
 
 
+  let sales_agents
 
-//  WHERE aa.agent_type  != 2   
-
-let sales_agents
-
-if (agent_id != ""){
-  
-
-  const [sales_agents_result] = await pool.execute(
-    `${leaderboardMasterQuery} WHERE sa.id=?`,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,agent_id]  
-  )
-
-   leaderboardOption = ""
-
-   if(sales_agents_result[0].agent_type == 1 ||  sales_agents_result[0].agent_type == 2){
-       console.log('for lm and um')
-       
-       const [allAgents] = await pool.execute(
-
-            leaderboardMasterQuery,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
-            givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-            givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,]
-       )
-      if(sales_agents_result[0].agent_type == 2){
-          const resultUm =  sales_agents_result.map(manager =>{
-
-          const totaTarget = allAgents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-          const totalShipOk = allAgents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
-
-          return {
-            ...manager,
-            target: totaTarget,
-            shipok: totalShipOk
-          }
-          })
-
-          sales_agents = resultUm
-      }else if(sales_agents_result[0].agent_type == 1){
-
-
-            // const resultLms= allAgents.map(manager => {
-            // const agent = allAgents.filter(agent => agent.manager_id === manager.id)
-            // const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-            // const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
-
-            const resultLms =  sales_agents_result.map(manager => {
-                const agents = allAgents.filter(agent => agent.manager_id === manager.id)
-                const totaTarget = agents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-                const totalShipOk = agents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
-
-                return {
-                ...manager, 
-                target: totaTarget, 
-                shipok: totalShipOk
-              }
-            })
-
-
-        sales_agents = resultLms
-
-      }
-
-   }else if(sales_agents_result[0].agent_type == 0){
+  if (agent_id != ""){
     
-      sales_agents = sales_agents_result
-
-      
-    
-   }
-  
-  
-  
-}else{
-
-  if (withTrucks === "true" || withTrucks === true){
     const [sales_agents_result] = await pool.execute(
-      leaderboardMasterQuery,[
-     givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-      ]  
+      `${leaderboardMasterQuery} WHERE sa.id=?`,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
+      givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+      givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,agent_id]  
     )
-    if(path == '/sales_leaderboard/all'){
-    
-        leaderboardOption = ""
-        const lms = sales_agents_result.filter(agent => agent.agent_type == 1)
-        const agents = sales_agents_result.filter(agent => agent.agent_type == 0)
-        const um =  sales_agents_result.filter(agent => agent.agent_type == 2)
 
-  
-        const resultLms= lms.map(manager => {
-            const agent = agents.filter(agent => agent.manager_id === manager.id)
-            const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-            const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+    leaderboardOption = "single"
+
+    if(sales_agents_result[0].agent_type == 1 ||  sales_agents_result[0].agent_type == 2){
+        
+        
+        const [allAgents] = await pool.execute(
+
+              leaderboardMasterQuery,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
+              givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+              givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,]
+        )
+        if(sales_agents_result[0].agent_type == 2){
+            const resultUm =  sales_agents_result.map(manager =>{
+
+            const totaTarget = allAgents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+            const totalShipOk = allAgents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
 
             return {
-              ...manager, 
-              target: totaTarget, 
+              ...manager,
+              target: totaTarget,
               shipok: totalShipOk
             }
-        })
+            })
 
- 
+            sales_agents = resultUm
+        }else if(sales_agents_result[0].agent_type == 1){
 
-        const resultUm =  um.map(manager =>{
 
-        const totaTarget = sales_agents_result.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-        const totalShipOk = sales_agents_result.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+              const resultLms =  sales_agents_result.map(manager => {
+                  const agents = allAgents.filter(agent => agent.manager_id === manager.id)
+                  const totaTarget = agents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+                  const totalShipOk = agents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
 
-        return {
-          ...manager,
-          target: totaTarget,
-          shipok: totalShipOk
+                  return {
+                  ...manager, 
+                  target: totaTarget, 
+                  shipok: totalShipOk
+                }
+              })
+
+
+          sales_agents = resultLms
+
         }
-        })
 
-  
-        sales_agents = [...agents, ...resultLms, ...resultUm]
+      }else if(sales_agents_result[0].agent_type == 0){
+      
+        sales_agents = sales_agents_result   
+      
+      }
+    
+    
+  }else{
+
+      if (withTrucks === "true" || withTrucks === true){
+        const [sales_agents_result] = await pool.execute(
+          leaderboardMasterQuery,[
+        givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
+        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+          ]  
+        )
+        sales_agents = sales_agents_result
+      }  
+      else{
+          const [sales_agents_result] = await pool.execute(
+            `${leaderboardMasterQuery} AND m.name=?`, [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
+          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, 'trucks']  
+        )
+          sales_agents = sales_agents_result
+      }  
+
+
+      const lms = sales_agents.filter(agent => agent.agent_type == 1)
+      const agents = sales_agents.filter(agent => agent.agent_type == 0)
+      const um =  sales_agents.filter(agent => agent.agent_type == 2)
+
+      if (leaderboardOption == 'overall' || leaderboardOption == 'all'){
+
+            const resultLms= lms.map(manager => {
+                const agent = agents.filter(agent => agent.manager_id === manager.id)
+                const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+                const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+
+                return {
+                  ...manager, 
+                  target: totaTarget, 
+                  shipok: totalShipOk
+                }
+            })
 
     
-      }else{
-           sales_agents = sales_agents_result 
+
+            const resultUm =  um.map(manager =>{
+
+            const totaTarget = sales_agents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+            const totalShipOk = sales_agents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+
+            return {
+              ...manager,
+              target: totaTarget,
+              shipok: totalShipOk
+            }
+            })
+
+      
+            sales_agents = [...agents, ...resultLms, ...resultUm]
+
+
+      }else if(leaderboardOption == 'lm'){
+            const resultLms= lms.map(manager => {
+                const agent = agents.filter(agent => agent.manager_id === manager.id)
+                const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+                const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+
+                return {
+                  ...manager, 
+                  target: totaTarget, 
+                  shipok: totalShipOk
+                }
+            })
+            sales_agents = resultLms
+
+      }else if(leaderboardOption == 'team'){
+            const resultLms= lms.map(manager => {
+                const agent = agents.filter(agent => agent.manager_id === manager.id)
+                const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+                const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+
+                return {
+                  ...manager, 
+                  target: totaTarget, 
+                  shipok: totalShipOk
+                }
+            })
+        sales_agents = [...resultLms, ...agents]
+      }else if(leaderboardOption == 'agent'){
+        sales_agents = agents
       }
 
-     
-  }else {
-    
-    const [sales_agents_result] = await pool.execute(
-      `${leaderboardMasterQuery} AND m.name=?`, [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-     givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, 'trucks']  
-  )
-
-    if(path == '/sales_leaderboard/all'){
-      leaderboardOption = ""
-        sales_agents = sales_agents_result
-    }
-
-       sales_agents = sales_agents_result
-
   }
-}
 
+  
 
    //fetch  evaluation_criteria value and save it to evalulation_criteria 
    const [evaluation_criteria_array] = await pool.execute(
@@ -300,37 +307,6 @@ if (agent_id != ""){
    )
    
    const evaluation_criteria = evaluation_criteria_array[0]
-
-  
-  if (leaderboardOption == 'lm'){
-     
-    // step 1: Find local managers
-     const lms = sales_agents.filter(agent => agent.agent_type ===1)
-    
-    // step 2: sum agents' values into their local manager
-    const result = lms.map(manager => {
-    const agent = sales_agents.filter(agent => agent.manager_id === manager.id)
-    const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-    const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
-
-      return {
-        ...manager, 
-        target: totaTarget, 
-        shipok: totalShipOk
-      }
-    })
-
-    sales_agents = result
-
-  
-
-  
-   }else if(leaderboardOption == 'agent'){
-
-     const agents = sales_agents.filter(agent => agent.agent_type ===0)
-     sales_agents = agents;
-   }
-
 
    for (const agent of sales_agents){
       
@@ -582,6 +558,155 @@ if (agent_id != ""){
 }
 
 
+exports.groupedByTeam = async (agentMetircs, leaderboardOption) => {
+
+           //remove agent target is equal to zero
+
+          //  agentMetircs = agentMetircs.filter(agent => agent.target != 0)
+          
+           const groupType = {
+              'team': { agent_type: 1},
+              'overall' : { agent_type: 2, team_name: 'Overall', team_id: 99, team_image: '/images/sbtlogo.png', team_leader_name: 'Rustan'}
+            }
+      
+           const groupedByTeam = {}
+
+            if(leaderboardOption == 'team'){
+               agentMetircs = agentMetircs.filter(agent => agent.agent_type !=2 ) // the senior manager first
+            
+             }
+
+            
+           
+            agentMetircs.forEach(agent => {
+               const team_name = groupType[leaderboardOption].team_name || agent.team_name 
+               const team_id  = groupType[leaderboardOption].team_id || agent.team_id
+  
+              if(!groupedByTeam[team_name]){
+              
+                  groupedByTeam[team_name] = {
+                    team_name: team_name,
+                    team_id:  team_id,
+                    team_leader_name: '',
+                    deposit_score: 0,
+                    target: 0,
+                    shipok: 0,
+                    total_rating: 0,
+                    rating_count: 0,
+                    month: agent.month ,
+                    year: agent.year,
+                    teams: [],
+                    submitted_array: [],
+                    isCompleted: false
+
+                  }
+               } 
+
+                if(agent.agent_type == groupType[leaderboardOption].agent_type){
+                  team_image = groupType[leaderboardOption].team_image || agent.image_link
+                  team_leader_name = groupType[leaderboardOption].team_leader_name ||  agent.db_name
+                  
+                  groupedByTeam[team_name].team_image = team_image
+                  groupedByTeam[team_name].team_leader_name = team_leader_name 
+                  groupedByTeam[team_name].target += parseFloat(agent.target) 
+                  groupedByTeam[team_name].shipok += parseFloat(agent.shipok) 
+                  // groupedByTeam[team_name].target  += parseFloat(agent.target)
+                  // groupedByTeam[team_name].shipok  += parseFloat(agent.shipok)  
+                  // groupedByTeam[team_name].shipok_percent = +agent.shipok_percent
+                  // groupedByTeam[team_name].submitted_array.push(agent.submitted)
+                }
+
+                groupedByTeam[team_name].deposit_score  += parseFloat(agent.deposit_score) 
+                // groupedByTeam[team_name].target += parseFloat(agent.target) 
+                // groupedByTeam[team_name].shipok += parseFloat(agent.shipok) 
+               
+                groupedByTeam[team_name].total_rating += parseFloat(agent.final_ratings)
+                groupedByTeam[team_name].rating_count += 1 
+                groupedByTeam[team_name].submitted_array.push(agent.submitted)
+                groupedByTeam[team_name].teams.push(agent)
+
+                // console.log(agent)
+
+            })
+
+            //compute the average and clean up
+
+            for (const team in groupedByTeam){
+              groupedByTeam[team].final_ratings = parseFloat((groupedByTeam[team].total_rating / groupedByTeam[team].rating_count)).toFixed(4)
+              // groupedByTeam[team].shipok_percent = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
+              delete groupedByTeam[team].total_rating
+              delete groupedByTeam[team].rating_count
+
+              groupedByTeam[team].isCompleted = !groupedByTeam[team].submitted_array   // return false if there's atleast 0 in the array true if all values are 1
+
+                if(groupedByTeam[team].target > 0 && groupedByTeam[team].target  != null && groupedByTeam[team].shipok > 0  && groupedByTeam[team].shipok != null) {
+
+                    const percentShipOk = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
+                    
+                    //get the agent score performance
+                    const [scoreShipOk] = await pool.execute(
+                      'SELECT score FROM `performance_score`WHERE ? BETWEEN `min_value` AND `max_value`', [percentShipOk]
+                    ) 
+                    groupedByTeam[team].shipok_percent = percentShipOk
+                    groupedByTeam[team].shipok_score  = scoreShipOk[0].score
+
+              }else{
+                    groupedByTeam[team].shipok_percent = 0
+                    groupedByTeam[team].shipok_score  = 0
+              }
+
+
+              if(!groupedByTeam[team].isCompleted){
+                    groupedByTeam[team].ratings_name  = "INCOMPLETE RATING"
+              }else{
+                  const [ratings] = await pool.execute(
+                            'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[groupedByTeam[team].final_ratings]
+                            )
+                  groupedByTeam[team].ratings_name  = ratings[0].ratings_name
+              }
+          }
+
+            //final transform 
+
+            const groupedByTeamArray = []
+
+            for (const team in groupedByTeam){
+               groupedByTeamArray.push(groupedByTeam[team])
+            }
+
+            // console.log(groupedByTeamArray)
+
+              // Step 1: Get the top final_ratings
+              const topRating = Math.max(...groupedByTeamArray.map(team => parseFloat(team.final_ratings)))
+              
+              // Step 2: Add the tag conditionally based on final_ratings and agent_type
+              const groupedByTeamArrayWithRating = groupedByTeamArray.map(team => ({
+                ...team,
+                tag: team.isCompleted ? 
+                  parseFloat(team.final_ratings) === topRating ? 'BEST TEAM' : '' 
+                  : ''   
+              })) 
+
+            groupedByTeamArrayWithRating.sort((a, b) => parseFloat(b.final_ratings) - parseFloat(a.final_ratings))
+
+            for (const team of groupedByTeamArrayWithRating){
+               team.teams.sort((a,b) => b.agent_type - a.agent_type)
+            
+            }
+
+           
+
+            // res.status(200).json(groupedByTeamArrayWithRating)
+
+            return groupedByTeamArrayWithRating
+
+
+
+
+
+}
+
+
 
 exports.fetchAgentLeaderBoard = async (req, res, next) => {
     //check if there is a month and year in the query string
@@ -649,14 +774,18 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
 
     
-    if(!req.query.leaderboardOption  || req.query.leaderboardOption  == ''){
-       leaderboardOption = 'agent'
-    }else{
-        leaderboardOption  = req.query.leaderboardOption
-    }
+    // if(!req.query.leaderboardOption  || req.query.leaderboardOption  == ''){
+    //    leaderboardOption = 'agent'
+    // }else{
+    //     leaderboardOption  = req.query.leaderboardOption
+    // }
 
+    
 
+    leaderboardOption = req.params.leaderboardOption || req.query.leaderboardOption || 'agent'
     const path = req.path
+
+    
 
  
 
@@ -804,123 +933,22 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         }  
         else{
           
-          if(leaderboardOption == 'team'){
-
-            const groupedByTeam = {}
+          if(leaderboardOption == 'team' || leaderboardOption == 'overall'){
            
-            agentMetircs.forEach(agent => {
-              const team_name = agent.team_name
-              let team_image 
+           const teams = await this.groupedByTeam(agentMetircs, leaderboardOption)
 
-  
-              if(!groupedByTeam[team_name]){
-              
-                  groupedByTeam[team_name] = {
-                    team_name: team_name,
-                    target: 0,
-                    shipok: 0,
-                    total_rating: 0,
-                    rating_count: 0,
-                    month: agent.month ,
-                    year: agent.year,
-                    teams: [],
-                    submitted_array: [],
-                    isCompleted: false
-
-                  }
-               } 
-
-                if(agent.agent_type == 1){
-                  team_image = agent.image_link
-                  
-                  groupedByTeam[team_name].team_image = team_image
-                  // groupedByTeam[team_name].target  += parseFloat(agent.target)
-                  // groupedByTeam[team_name].shipok  += parseFloat(agent.shipok)  
-                  // groupedByTeam[team_name].shipok_percent = +agent.shipok_percent
-                  // groupedByTeam[team_name].submitted_array.push(agent.submitted)
-                }
+           //calculate again for team
+           if(leaderboardOption == 'overall') {
+              teams[0].teams = await this.groupedByTeam(teams[0].teams, 'team')
+              teams[0].teams.forEach(team =>{
+                delete team.teams
+              })
+           }
 
 
-                groupedByTeam[team_name].target += parseFloat(agent.target) 
-                groupedByTeam[team_name].shipok += parseFloat(agent.shipok) 
-               
-                groupedByTeam[team_name].total_rating += parseFloat(agent.final_ratings)
-                groupedByTeam[team_name].rating_count += 1 
-                groupedByTeam[team_name].submitted_array.push(agent.submitted)
-                groupedByTeam[team_name].teams.push(agent)
-
-                // console.log(agent)
-
-            })
-
-            //compute the average and clean up
-
-            for (const team in groupedByTeam){
-              groupedByTeam[team].final_ratings = parseFloat((groupedByTeam[team].total_rating / groupedByTeam[team].rating_count)).toFixed(4)
-              // groupedByTeam[team].shipok_percent = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
-              delete groupedByTeam[team].total_rating
-              delete groupedByTeam[team].rating_count
-
-              groupedByTeam[team].isCompleted = !groupedByTeam[team].submitted_array   // return false if there's atleast 0 in the array true if all values are 1
-
-                if(groupedByTeam[team].target > 0 && groupedByTeam[team].target  != null && groupedByTeam[team].shipok > 0  && groupedByTeam[team].shipok != null) {
-
-                    const percentShipOk = Math.round(Number(groupedByTeam[team].shipok)/Number(groupedByTeam[team].target) * 100)
-                    
-                    //get the agent score performance
-                    const [scoreShipOk] = await pool.execute(
-                      'SELECT score FROM `performance_score`WHERE ? BETWEEN `min_value` AND `max_value`', [percentShipOk]
-                    ) 
-                    groupedByTeam[team].shipok_percent = percentShipOk
-                    groupedByTeam[team].shipok_score  = scoreShipOk[0].score
-
-              }else{
-                    groupedByTeam[team].shipok_percent = 0
-                    groupedByTeam[team].shipok_score  = 0
-              }
+           return res.status(200).json(teams)
 
 
-              if(!groupedByTeam[team].isCompleted){
-                    groupedByTeam[team].ratings_name  = "INCOMPLETE RATING"
-              }else{
-                  const [ratings] = await pool.execute(
-                            'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',[groupedByTeam[team].final_ratings]
-                            )
-                  groupedByTeam[team].ratings_name  = ratings[0].ratings_name
-              }
-          }
-
-            //final transform 
-
-            const groupedByTeamArray = []
-
-            for (const team in groupedByTeam){
-               groupedByTeamArray.push(groupedByTeam[team])
-            }
-
-            // console.log(groupedByTeamArray)
-
-              // Step 1: Get the top final_ratings
-              const topRating = Math.max(...groupedByTeamArray.map(team => parseFloat(team.final_ratings)))
-              
-              // Step 2: Add the tag conditionally based on final_ratings and agent_type
-              const groupedByTeamArrayWithRating = groupedByTeamArray.map(team => ({
-                ...team,
-                tag: team.isCompleted ? 
-                  parseFloat(team.final_ratings) === topRating ? 'BEST TEAM' : '' 
-                  : ''   
-              })) 
-
-            groupedByTeamArrayWithRating.sort((a, b) => parseFloat(b.final_ratings) - parseFloat(a.final_ratings))
-
-            for (const team of groupedByTeamArrayWithRating){
-               team.teams.sort((a,b) => b.agent_type - a.agent_type)
-            
-            }
-
-           
-
-            res.status(200).json(groupedByTeamArrayWithRating)
           }else{
               // Step 1: Get the top final_ratings
               const topRating = Math.max(...agentMetircs.map(agent => parseFloat(agent.final_ratings)))
@@ -946,7 +974,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
       // For Yearly Performance 
       }else {
     
-          const fullYearAgentPerformances = [];
+          let fullYearAgentPerformances = [];
           const currentYear = new Date().getFullYear()
           const currentMonth = new Date().getMonth()  // 0=Jan , 9 October ,
 
@@ -972,12 +1000,39 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
           // 1. Fetch all months in parallel
           const monthQueries = monthsToProcess.map(month =>
-            this.getAgentsMetrics("", month, givenYear, withTrucks, "", path, leaderboardMasterQuery)
+            this.getAgentsMetrics("", month, givenYear, withTrucks, leaderboardOption, path, leaderboardMasterQuery)
           );
           const monthResults = await Promise.all(monthQueries);
 
           // Flatten results
-          monthResults.forEach(result => fullYearAgentPerformances.push(...result));
+          monthResults.forEach(result => fullYearAgentPerformances.push(...result))
+       
+          // fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.agent_type !=2)
+
+          if(leaderboardOption == 'team'  || leaderboardOption == 'overall'){
+           
+            const teams_year = await this.groupedByTeam(fullYearAgentPerformances, leaderboardOption)
+
+
+           
+            teams_year.map(team => {
+
+              team.teams.sort((a,b ) => b.agent_type !== a.agent_type).sort((a, b)=> monthNames.indexOf(a.eval_month) - monthNames.indexOf(b.eval_month))
+           
+            })
+
+            //calculate again for team
+           if(leaderboardOption == 'overall') {
+              teams_year[0].teams = await this.groupedByTeam(teams_year[0].teams, 'team')
+              teams_year[0].teams.forEach(team =>{
+                delete team.teams
+              })
+           }
+
+
+            
+            return res.status(200).json(teams_year)
+          }
 
           // 2. Group by agent using Map
           const agentsMap = new Map();
@@ -1008,7 +1063,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
           for (const [agentId, records] of agentsMap) {
 
-            console.log(records)
             const yearAverage = calculateAverages(records);
 
             Object.assign(yearAverage, {

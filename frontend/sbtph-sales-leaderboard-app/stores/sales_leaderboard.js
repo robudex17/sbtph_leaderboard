@@ -31,13 +31,13 @@ export const useLeaderBoardStore = defineStore('leaderboard', () => {
     })
 
     // Action to fetch sales leaderboard
-    const fetchLeaderboard = async ( all,queryString, year_summary) => {
+    const fetchLeaderboard = async ( leaderboardOpton ,queryString, year_summary) => {
         state.loading = true
         state.error = null
         let url = API.fethSalesLearderboard
         
-        if(all){
-                url = `${url}/all`
+        if(leaderboardOpton){
+                url = `${url}/${leaderboardOpton}`
             }
 
 

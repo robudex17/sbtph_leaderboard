@@ -8,15 +8,17 @@ exports.addAgentNewTarget = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
     
+  
  
     const target = req.body.target
     const shipok = req.body.shipok
-    const targetDate = req.body.date
-    const month = req.body.month 
-    const year = req.body.year
+    const targetDate = req.body.date 
+    const month = req.body.month  || req.body.eval_month
+    const year = req.body.year  || req.body.eval_year
 
     const agentId = req.params.agent_id
     console.log(req.body)
+
     
 
    if(Number(target) <= 0){

@@ -10,34 +10,122 @@ exports.fetchSalesAgents = async (req,res, next ) => {
 
     //query his/her manager or senior manager
     if (req.user.role == 'manager' && req.user.agent_type == 1 && req.query.feedback_type == 'um_by_lm'){
+        
         try{
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
                 // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                `
+                // `
+                // SELECT 
+                //     sa.id AS id,
+                //     sa.manager_id,
+                //     sa.agent_type,
+                //     sa.firstname,
+                //     sa.lastname,
+                //     sa.db_name,
+                //     sa.image_link,
+                //     sa.market_id,
+                //     sa.status as agent_status,
+                //     market.market_name,
+                //     managers.db_name AS manager_name,
+                //     sales_agents_login.username,
+                //     sales_agents_login.status as login_status,
+                //     sales_agents_login.role
+                // FROM sales_agents sa
+                // JOIN market ON sa.market_id = market.id
+                // JOIN managers ON sa.manager_id = managers.id
+                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                // WHERE sa.status = ? AND sa.id = ?
+    
+                // `,['active', req.user.manager_id]
+
+                     `
                 SELECT 
                     sa.id AS id,
-                    sa.manager_id,
-                    sa.agent_type,
                     sa.firstname,
                     sa.lastname,
                     sa.db_name,
+                    sa.email,
                     sa.image_link,
-                    sa.market_id,
-                    sa.status as agent_status,
-                    market.market_name,
-                    managers.db_name AS manager_name,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
                     sales_agents_login.username,
                     sales_agents_login.status as login_status,
-                    sales_agents_login.role
-                FROM sales_agents sa
-                JOIN market ON sa.market_id = market.id
-                JOIN managers ON sa.manager_id = managers.id
+                    sales_agents_login.role,
+                    DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+                    DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+                    DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+                    CASE  
+                        WHEN ae.status = 'Hired' 
+                            AND EXISTS (
+                                SELECT 1
+                                FROM agent_employments ae2
+                                WHERE ae2.agent_id = sa.id
+                                AND ae2.status = 'Resigned'
+                                AND ae2.id < ae.id
+                            )
+                        THEN 'Rehired'
+                        ELSE ae.status
+                    END AS employee_status
+                    
+                FROM sales_agents2 sa
+                -- latest assignment per agent (by id)
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+
+                -- latest employment per agent (by id)
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        GROUP BY agent_id
+                    ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                    AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+
+                -- agent role
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+                -- manager details (self-join + role)
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+                -- market and team
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
                 LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                WHERE sa.status = ? AND sa.id = ?
-    
-                `,['active', req.user.manager_id]
+
+                -- only currently Hired (or Rehired)
+                 WHERE ae.status = 'Hired'  AND sa.id =?;
+
+                `,[req.user.manager_id]
             )
             // connection.release()
             res.json(rows)
@@ -54,29 +142,117 @@ exports.fetchSalesAgents = async (req,res, next ) => {
     
             const [rows, fields] = await pool.execute(
                 // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                `
+                // `
+                // SELECT 
+                //     sa.id AS id,
+                //     sa.manager_id,
+                //     sa.agent_type,
+                //     sa.firstname,
+                //     sa.lastname,
+                //     sa.db_name,
+                //     sa.image_link,
+                //     sa.market_id,
+                //     sa.status as agent_status,
+                //     market.market_name,
+                //     managers.db_name AS manager_name,
+                //     sales_agents_login.username,
+                //     sales_agents_login.status as login_status,
+                //     sales_agents_login.role
+                // FROM sales_agents sa
+                // JOIN market ON sa.market_id = market.id
+                // JOIN managers ON sa.manager_id = managers.id
+                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                // WHERE sa.status = ? AND sa.manager_id =?
+    
+                // `,['active', req.user.login_id]
+
+                     `
                 SELECT 
                     sa.id AS id,
-                    sa.manager_id,
-                    sa.agent_type,
                     sa.firstname,
                     sa.lastname,
                     sa.db_name,
+                    sa.email,
                     sa.image_link,
-                    sa.market_id,
-                    sa.status as agent_status,
-                    market.market_name,
-                    managers.db_name AS manager_name,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
                     sales_agents_login.username,
                     sales_agents_login.status as login_status,
-                    sales_agents_login.role
-                FROM sales_agents sa
-                JOIN market ON sa.market_id = market.id
-                JOIN managers ON sa.manager_id = managers.id
+                    sales_agents_login.role,
+                    DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+                    DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+                    DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+                    CASE  
+                        WHEN ae.status = 'Hired' 
+                            AND EXISTS (
+                                SELECT 1
+                                FROM agent_employments ae2
+                                WHERE ae2.agent_id = sa.id
+                                AND ae2.status = 'Resigned'
+                                AND ae2.id < ae.id
+                            )
+                        THEN 'Rehired'
+                        ELSE ae.status
+                    END AS employee_status
+                    
+                FROM sales_agents2 sa
+                -- latest assignment per agent (by id)
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+
+                -- latest employment per agent (by id)
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        GROUP BY agent_id
+                    ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                    AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+
+                -- agent role
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+                -- manager details (self-join + role)
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+                -- market and team
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
                 LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                WHERE sa.status = ? AND sa.manager_id =?
-    
-                `,['active', req.user.login_id]
+
+                -- only currently Hired (or Rehired)
+                 WHERE ae.status = 'Hired'  AND  aa.manager_id=?;
+
+                `,[req.user.login_id]
+
             )
             // connection.release()
             res.json(rows)
@@ -88,35 +264,122 @@ exports.fetchSalesAgents = async (req,res, next ) => {
     
     }
     //query only his/her local manager agents are not included
-    else if (req.user.role == 'manager' && req.user.agent_type == 2 && req.query.give_feedback =='lm'){
+    else if (req.user.role == 'manager' && req.user.agent_type == 2 && req.query.feedback_type =='lm_by_um'){
         try{
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
                 // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                `
+                // `
+                // SELECT 
+                //     sa.id AS id,
+                //     sa.manager_id,
+                //     sa.agent_type,
+                //     sa.firstname,
+                //     sa.lastname,
+                //     sa.db_name,
+                //     sa.image_link,
+                //     sa.market_id,
+                //     sa.status as agent_status,
+                //     market.market_name,
+                //     managers.db_name AS manager_name,
+                //     sales_agents_login.username,
+                //     sales_agents_login.status as login_status,
+                //     sales_agents_login.role
+                // FROM sales_agents sa
+                // JOIN market ON sa.market_id = market.id
+                // JOIN managers ON sa.manager_id = managers.id
+                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                // WHERE sa.status = ? AND sa.manager_id =?  AND sa.id !=?
+    
+                // `,['active', req.user.login_id, req.user.login_id]
+
+                                     `
                 SELECT 
                     sa.id AS id,
-                    sa.manager_id,
-                    sa.agent_type,
                     sa.firstname,
                     sa.lastname,
                     sa.db_name,
+                    sa.email,
                     sa.image_link,
-                    sa.market_id,
-                    sa.status as agent_status,
-                    market.market_name,
-                    managers.db_name AS manager_name,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
                     sales_agents_login.username,
                     sales_agents_login.status as login_status,
-                    sales_agents_login.role
-                FROM sales_agents sa
-                JOIN market ON sa.market_id = market.id
-                JOIN managers ON sa.manager_id = managers.id
+                    sales_agents_login.role,
+                    DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+                    DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+                    DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+                    CASE  
+                        WHEN ae.status = 'Hired' 
+                            AND EXISTS (
+                                SELECT 1
+                                FROM agent_employments ae2
+                                WHERE ae2.agent_id = sa.id
+                                AND ae2.status = 'Resigned'
+                                AND ae2.id < ae.id
+                            )
+                        THEN 'Rehired'
+                        ELSE ae.status
+                    END AS employee_status
+                    
+                FROM sales_agents2 sa
+                -- latest assignment per agent (by id)
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+
+                -- latest employment per agent (by id)
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        GROUP BY agent_id
+                    ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                    AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+
+                -- agent role
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+                -- manager details (self-join + role)
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+                -- market and team
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
                 LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                WHERE sa.status = ? AND sa.manager_id =?  AND sa.id !=?
-    
-                `,['active', req.user.login_id, req.user.login_id]
+
+                -- only currently Hired (or Rehired)
+                 WHERE ae.status = 'Hired'  AND  aa.manager_id=? AND sa.id !=?
+
+                `,[req.user.login_id, req.user.login_id]
             )
             // connection.release()
             res.json(rows)
@@ -132,29 +395,116 @@ exports.fetchSalesAgents = async (req,res, next ) => {
     
             const [rows, fields] = await pool.execute(
                 // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                `
+                // `
+                // SELECT 
+                //     sa.id AS id,
+                //     sa.manager_id,
+                //     sa.agent_type,
+                //     sa.firstname,
+                //     sa.lastname,
+                //     sa.db_name,
+                //     sa.image_link,
+                //     sa.market_id,
+                //     sa.status as agent_status,
+                //     market.market_name,
+                //     managers.db_name AS manager_name,
+                //     sales_agents_login.username,
+                //     sales_agents_login.status as login_status,
+                //     sales_agents_login.role
+                // FROM sales_agents sa
+                // JOIN market ON sa.market_id = market.id
+                // JOIN managers ON sa.manager_id = managers.id
+                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
+                // WHERE sa.status = ? AND sa.id=?
+    
+                // `,['active', req.user.manager_id]
+
+                                  `
                 SELECT 
                     sa.id AS id,
-                    sa.manager_id,
-                    sa.agent_type,
                     sa.firstname,
                     sa.lastname,
                     sa.db_name,
+                    sa.email,
                     sa.image_link,
-                    sa.market_id,
-                    sa.status as agent_status,
-                    market.market_name,
-                    managers.db_name AS manager_name,
+                    aa.agent_type,
+                    r.role_name AS agent_role,
+                    aa.manager_id,
+                    mgr.db_name AS manager_dbname,
+                    mr.role_name AS manager_role,
+                    m.id AS market_id,
+                    m.name AS market_name,
+                    t.id AS team_id,
+                    t.name AS team_name,
                     sales_agents_login.username,
                     sales_agents_login.status as login_status,
-                    sales_agents_login.role
-                FROM sales_agents sa
-                JOIN market ON sa.market_id = market.id
-                JOIN managers ON sa.manager_id = managers.id
+                    sales_agents_login.role,
+                    DATE_FORMAT(aa.effective_from, '%Y-%m-%d') AS effective_from,
+                    DATE_FORMAT(aa.effective_to, '%Y-%m-%d') AS effective_to,  
+                    DATE_FORMAT(ae.start_date, '%Y-%m-%d') AS start_date,
+                    DATE_FORMAT(ae.end_date, '%Y-%m-%d') AS end_date,
+                    CASE  
+                        WHEN ae.status = 'Hired' 
+                            AND EXISTS (
+                                SELECT 1
+                                FROM agent_employments ae2
+                                WHERE ae2.agent_id = sa.id
+                                AND ae2.status = 'Resigned'
+                                AND ae2.id < ae.id
+                            )
+                        THEN 'Rehired'
+                        ELSE ae.status
+                    END AS employee_status
+                    
+                FROM sales_agents2 sa
+                -- latest assignment per agent (by id)
+                JOIN (
+                    SELECT aa1.*
+                    FROM agent_assignments aa1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_assignments
+                        GROUP BY agent_id
+                    ) aa2 
+                    ON aa1.agent_id = aa2.agent_id 
+                    AND aa1.id = aa2.latest_id
+                ) aa ON sa.id = aa.agent_id
+
+                -- latest employment per agent (by id)
+                JOIN (
+                    SELECT ae1.*
+                    FROM agent_employments ae1
+                    JOIN (
+                        SELECT agent_id, MAX(id) AS latest_id
+                        FROM agent_employments
+                        GROUP BY agent_id
+                    ) ae2 
+                    ON ae1.agent_id = ae2.agent_id 
+                    AND ae1.id = ae2.latest_id
+                ) ae ON sa.id = ae.agent_id
+
+                -- agent role
+                LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+
+                -- manager details (self-join + role)
+                LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+                LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+                AND maa.id = (
+                    SELECT MAX(id) 
+                    FROM agent_assignments 
+                    WHERE agent_id = mgr.id
+                )
+                LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+
+                -- market and team
+                LEFT JOIN markets m ON aa.market_id = m.id
+                LEFT JOIN teams t ON aa.team_id = t.id
                 LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                WHERE sa.status = ? AND sa.id=?
-    
-                `,['active', req.user.manager_id]
+
+                -- only currently Hired (or Rehired)
+                 WHERE ae.status = 'Hired'  AND  sa.id=?;
+
+                 `,[req.user.manager_id]
             )
             // connection.release()
             res.json(rows)
@@ -165,7 +515,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
     }
     else if(req.user.role=='admin' || (req.user.role == 'manager' && req.user.agent_type ==2)) {
         try{
-            const employeeStatus = req.query.employee_status
+            const employeeStatus = req.query.employee_status || 'Hired'
 
           
             const [result] = await pool.execute(
@@ -567,15 +917,17 @@ exports.updateSalesAgent = async (req, res, next) => {
         }
    
    
-        
+       
         // Case 1: Resignation
         if (employee_status === 'Resigned' && end_date && effective_to && active_agent == 'true' ) {
+            
+   
         // Close current employment
         await connection.execute(
             `UPDATE agent_employments 
             SET status=?, end_date=? 
             WHERE agent_id=? AND end_date IS NULL`,
-            [employee_status, end_date, id]
+            [employee_status, effective_to, id]
         );
 
         // Close current assignment

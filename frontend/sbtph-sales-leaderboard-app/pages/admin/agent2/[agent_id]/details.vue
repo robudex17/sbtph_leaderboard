@@ -622,6 +622,7 @@ const useFeedbackStore  = feedbackStore()
 
 
   onMounted(async()=> {
+    
          // Reset the feedback data
     useFeedbackStore.state.agent_by_lm = [];
     useFeedbackStore.state.lm_by_agent = [];
@@ -663,10 +664,85 @@ const useFeedbackStore  = feedbackStore()
 
 
   watch(route, async (newRoute) => {
+        month.value = newRoute.query.month 
+        year.value =  newRoute.query.year 
+        let givenDate = new Date(`${month.value} 1, ${year.value}`)
+
+        let startDate = new Date(newRoute.query.start_date) || null 
+        let endDate = new Date (newRoute.query.end_date ) || null 
+        let employeeStatus = newRoute.query.employee_status 
+
+        let startDateMonth = null 
+        let starDateYear  = null 
+        let endDateMonth = null 
+        let endDateYear = null
+
+        if(employeeStatus == 'Hired'){
+          startDateMonth = startDate.toLocaleString('default', { month: 'long' });
+          starDateYear = startDate.getFullYear() 
+
+          let startDateReference = new Date(`${startDateMonth} 1, ${starDateYear}`)
+
+          if(givenDate < startDateReference){
+            alert(`Agent ${newRoute.query.agent_id} has not been hired yet on this date.`);
+
+
+                  // Reset the feedback data
+            useFeedbackStore.state.agent_by_lm = [];
+            useFeedbackStore.state.lm_by_agent = [];
+            useFeedbackStore.state.lm_by_um = [];
+            useFeedbackStore.state.um_by_lm = [];
+            useManageSalesStore.state.salesAgentTargetShipok = []
+            useManageSalesStore.state.salesAgentNewDeposit = []
+            useManageSalesStore.state.salesAgentAbsences = []
+            useManageSalesStore.state.salesAgentMemo = []
+            useManageSalesStore.state.salesAgentTardiness = []
+            useManageSalesStore.state.salesAgentFeedback = []
+            return
+          }
+
+        }
+        
+        if (employeeStatus == 'Resigned'){
+
+          startDateMonth = startDate.toLocaleString('default', { month: 'long' });
+          starDateYear = startDate.getFullYear() 
+          
+          endDateMonth = endDate.toLocaleString('default', { month: 'long' });
+          endDateYear = endDate.getFullYear()
+
+
+          let startDateReference = new Date(`${startDateMonth} 1, ${starDateYear}`)
+          let endDateReference = new Date(`${endDateMonth} 1, ${endDateYear}`)
+
+          if(givenDate < startDateReference ) {
+            alert(`Agent ${newRoute.query.agent_id} has not been hired yet on this date.`);
+          } 
+          if(givenDate > endDateReference) {
+
+            alert(`Agent ${newRoute.query.agent_id} has resigned or left on this date.`);
+
+          }
+
+                  // Reset the feedback data
+            useFeedbackStore.state.agent_by_lm = [];
+            useFeedbackStore.state.lm_by_agent = [];
+            useFeedbackStore.state.lm_by_um = [];
+            useFeedbackStore.state.um_by_lm = [];
+            useManageSalesStore.state.salesAgentTargetShipok = []
+            useManageSalesStore.state.salesAgentNewDeposit = []
+            useManageSalesStore.state.salesAgentAbsences = []
+            useManageSalesStore.state.salesAgentMemo = []
+            useManageSalesStore.state.salesAgentTardiness = []
+            useManageSalesStore.state.salesAgentFeedback = []
+            return            
+        
+
+        }
 
         if(currentUser.agent_type == 2 && currentUser.role == 'manager'){
             isSalesAdmin.value = true
-            query.is_sales_admin = isSalesAdmin.value 
+            newRoute.query.is_sales_admin = isSalesAdmin.value 
             
         }
 

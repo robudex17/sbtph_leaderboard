@@ -137,32 +137,32 @@
               <!-- <td class="py-2 px-4 text-sm text-green-800">
                 <span :class="['status', agents[0].status]">{{ agents[0].status }}</span>
               </td> -->
-              <td class="py-2 px-4 text-sm text-green-800">
+              <td class="py-2 px-4 text-sm text-green-800 border text-center">
                 {{ feedback.month }}
               </td>  
-              <td class="py-2 px-4 text-sm text-green-800">
+              <td class="py-2 px-4 text-sm text-green-800 border text-center">
                 {{ feedback.year }}   
               </td>  
-              <td  class="py-2 px-4 text-sm  text-center font-bold text-red-600"
+              <td  class="py-2 px-4 text-sm  text-center font-bold text-red-600 border"
                  
                   v-if="agents[0].agent_type == 0 ">  No Feedback
               </td>
 
-              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600" 
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600 border" 
                
                 v-if="agents[0].agent_type == 1 "> No Feedback
               </td>
               <td  
-              class="py-2 px-4 text-sm text-center font-bold text-red-600" 
+              class="py-2 px-4 text-sm text-center font-bold text-red-600 border " 
              
               v-if="agents[0].agent_type == 1 ">No Feedback
 
               </td>
-              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600"
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600 border"
              
               v-if="agents[0].agent_type == 2">No Feedback</td>
 
-              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600"
+              <td  class="py-2 px-4 text-sm text-center font-bold text-red-600 border"
                
               >
                 No Feedback
@@ -170,7 +170,7 @@
 
               
               <td 
-                class="py-2 px-4  text-sm text-center font-bold text-purple-800"
+                class="py-2 px-4  text-sm text-center font-bold text-purple-800 border"
       
               >{{ feedbackByAdmin[0].feedback }}</td>
               

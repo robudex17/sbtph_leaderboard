@@ -183,7 +183,7 @@
         id: agent_id,
         eval_month: month.value,
         eval_year:  year.value,
-        date: '',
+        date: date,
         target: '',
         shipok: '',
         market_id: '',

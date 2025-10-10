@@ -7,8 +7,8 @@
     </div>
     <div v-else>
         <div v-if="dashboardoption =='individual'">
-                <p class="text-gray-800 font-bold text-5xl mb-10">Individual Results</p>
-                <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+                <p class="text-gray-800 font-bold text-4xl mb-5">Individual Results</p>
+                <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.market_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.db_name }} - {{ target_shipok.market_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
@@ -38,8 +38,8 @@
           <div v-else-if="dashboardoption =='team'">
               
                
-                <p class="text-gray-800 font-bold text-5xl mb-10">Team Results</p>
-                <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+                <p class="text-gray-800 font-bold text-4xl mb-5">Team Results</p>
+                <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.team_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.team_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
@@ -125,8 +125,8 @@
             </div>     -->
             <div v-else-if="dashboardoption=='overall'">
    
-                <p class="text-gray-800 font-bold text-5xl mb-10 ">Overall PH Office Results</p>
-                <p  class="text-gray-800 font-bold text-4xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+                <p class="text-gray-800 font-bold text-4xl mb-5 ">Overall PH Office Results</p>
+                <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
                     <div class="grid grid-cols-4 gap-4">
@@ -301,19 +301,44 @@ const data = computed(() => dashBoardStore.state.dashboard.data)
 const activeMarketId = ref(null)         // for team view
 const activeOverallBreakdown = ref(false) // for 'overall' view only
 
-const fetchDashboardData = async () => {
+const fetchDashboardData = async (query) => {
   activeMarketId.value = null
   activeOverallBreakdown.value = false
   await dashBoardStore.fetchDashboard(route.query)
 }
 
-onMounted(fetchDashboardData)
+onMounted( async() => {
+ await fetchDashboardData(route.query)
 
-watch(() => route.query.dashboardoption, async (newOption) => {
-  dashboardoption.value = newOption
-  activeMarketId.value = null
-  activeOverallBreakdown.value = false
-  await fetchDashboardData()
+})
+
+// watch(() => route.query.dashboardoption, async (newOption) => {
+//   dashboardoption.value = newOption
+//   activeMarketId.value = null
+//   activeOverallBreakdown.value = false
+//   await fetchDashboardData({dashboardoption: newOption})
+// })
+
+watch(route, async(oldRoute, newRoute) => {
+    if( currentUser.agent_type == 2){
+      dashboardoption.value = "team"
+    }else{
+          dashboardoption.value = "individual"
+    }
+
+    if(!newRoute.query.dashboardoption && currentUser.agent_type != 2){
+      newRoute.query.dashboardoption = 'individual'
+    }
+
+    if(!newRoute.query.dashboardoption && currentUser.agent_type == 2){
+      newRoute.query.dashboardoption = 'team'
+    }
+
+    dashboardoption.value = newRoute.query.dashboardoption
+    activeMarketId.value = null
+    activeOverallBreakdown.value = false
+   await fetchDashboardData(newRoute.query) 
+  
 })
 
 // Toggle logic
