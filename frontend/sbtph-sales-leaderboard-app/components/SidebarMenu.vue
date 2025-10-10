@@ -137,6 +137,7 @@
               subMenu:[
                 { name: 'BY QA', route: '/feedback/feedback_by_qa', icon: ['fas', 'users']  },
                 { name: 'BY Admin', route: '/feedback/feedback_by_admin', icon: ['fas', 'users']  },
+               
               ] 
             
             },            
@@ -442,7 +443,29 @@
             submenuStates.value["Overall Performance"] = true; // Open the Overall Performance  submenu
             activeMenu.value = "Overall_Yearly";
             return;         
-        }        
+        }    
+        
+         if((currentRoute == "/feedback/feedback_by_sales/um_by_lm") ||(currentRoute == "/feedback/feedback_by_sales/lm_by_agent") 
+            || (currentRoute =="/feedback/feedback_by_sales" && route.query.feedback_type == 'um_by_lm') ||
+              (currentRoute =="/feedback/feedback_by_sales" && route.query.feedback_type == 'lm_by_agent')
+           ){
+            submenuStates.value["Feedback"] = true; 
+            activeMenu.value = "MANAGER";
+            return;         
+        }
+        
+         if((currentRoute == "/feedback/feedback_by_sales/agent_by_lm")|| (currentRoute =="/feedback/feedback_by_sales" && route.query.feedback_type == 'agent_by_lm')){
+            submenuStates.value["Feedback"] = true; 
+            activeMenu.value = "AGENTS";
+            return;         
+        }
+
+         if((currentRoute == "/feedback/feedback_by_sales/lm_by_um")|| (currentRoute =="/feedback/feedback_by_sales" && route.query.feedback_type == 'lm_by_um')){
+            submenuStates.value["Feedback"] = true; 
+            activeMenu.value = "LOCAL MANAGER";
+            return;         
+        }
+
 
         for (const item of menuItems) {
           if (item.route === currentRoute) {

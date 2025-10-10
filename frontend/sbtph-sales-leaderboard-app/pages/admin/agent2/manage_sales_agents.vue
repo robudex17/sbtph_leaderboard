@@ -1,8 +1,7 @@
 <template>
   <!-- <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen"> -->
-  <div class="p-6 min-h-screen">
+  <div class="p-6 mt-20 min-h-screen">
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Sales Agents Information</h1>
-
 
 
     <!-- Add Agent Button -->
@@ -851,25 +850,32 @@
 
       const handleViewDetails = (agent) => {
 
-        
         let month = null
         let year = null
-    
-       if(agent.employee_status == 'Resigned'){
-          const date = new Date(agent.end_date)
-          month = date.toLocaleString('default', {month: 'long'})
-          year = date.getFullYear()
+      
+        if(agent.employee_status == 'Resigned'){
+            const date = new Date(agent.end_date)
+            month = date.toLocaleString('default', {month: 'long'})
+            year = date.getFullYear()
 
-       } 
-       
-           navigateTo({
-            path: `/admin/agent2/${agent.id}/details`,
-            query: { agent_id: agent.id , month, year, employee_status: agent.employee_status, start_date: agent.start_date, end_date: agent.end_date, agent_type: agent.agent_type, role: agent.agent_role },
-          });
-  
+        } 
+        
+            navigateTo({
+              path: `/admin/agent2/${agent.id}/details`,
+              query: { agent_id: agent.id , month, year, employee_status: agent.employee_status, start_date: agent.start_date, end_date: agent.end_date, agent_type: agent.agent_type, role: agent.agent_role },
+            });
+    
       };
 
     const updateImageLink = (imageLink) => {
+         if (!imageLink) return ''
+  
+        // ✅ If it's already a base64 Data URL, just return it directly
+        if (imageLink.startsWith('data:image')) {
+          return imageLink
+        }
+
+        // ✅ Otherwise, assume it's a server path
         return `${config.public.imageBaseUrl}${imageLink}`
     }
 

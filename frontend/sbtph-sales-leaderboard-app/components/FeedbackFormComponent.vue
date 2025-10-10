@@ -1,8 +1,10 @@
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100 p-4 mt-20">
+     
       <div class="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-semibold text-gray-800 text-center"> {{ feedbackTitle }} FOR <span class="uppercase text-blue-700 font-bold"> ({{ who_receive_feedback_db_name }})</span></h2>
+        <h2 class="text-2xl font-semibold text-gray-800 text-center"> {{ feedbackTitle }} FOR <span class="uppercase text-blue-700 font-bold"> ({{ who_receive_feedback_db_name }}) by <span class="text-purple-700">{{ who_give_feedback_db_name }}</span> </span></h2>
         <p class="text-gray-600 text-center mb-6"> {{ feedbackSubtitle }}</p>
+        <h2 class="text-center text-red-600 font-bold text-2xl" v-if="admin_view_only">(VIEW ONLY)</h2>
         <!-- <div>
           {{   feedback.length}}
         </div> -->
@@ -56,6 +58,7 @@
 
 <script setup>
     import { ref, computed, watch, onMounted, defineEmits } from "vue";
+import admin from "~/middleware/admin";
 
     const props = defineProps({
       questions: {
@@ -76,6 +79,10 @@
       },
       feedbackType: {
         type: String,
+        required: true
+      },
+      admin_view_only: {
+        type: Boolean,
         required: true
       }
     });
@@ -143,6 +150,11 @@
     // Submit or update feedback (Prevent submission if any question is unanswered)
     const submitFeedback = async () => {
 
+      if(props.admin_view_only){
+          alert('View Only Mode. Cannot perform update')
+          return
+       }
+
       // Ensure all questions are answered by comparing lengths
       const allQuestionsAnswered = Object.keys(responses.value).length === props.questions.length;
 
@@ -166,60 +178,8 @@
           feedback_type: props.feedbackType
         };
       
-      // if (props.feedbackType == 'agent_by_lm'){
-      //   feedbackData = {
-          
-      //     responses: responses.value,
-      //     total_score: totalScore.value,
-      //     percentage: percentage.value,
-      //     feedback_score: feedbackScore.value,
-      //     lm_id: who_give_feedback_id,
-      //     lm_dbname: who_give_feedback_db_name,
-      //     agent_id: who_receive_feedback_id,
-      //     agent_dbname: who_receive_feedback_db_name
-      //   };
 
-      // }else if (props.feedbackType == 'lm_by_agent'){
-      //   feedbackData = {
-          
-      //     responses: responses.value,
-      //     total_score: totalScore.value,
-      //     percentage: percentage.value,
-      //     feedback_score: feedbackScore.value,
-      //     agent_id: who_give_feedback_id,
-      //     agent_dbname: who_give_feedback_db_name,
-      //     lm_id: who_receive_feedback_id,
-      //     lm_dbname: who_receive_feedback_db_name
-
-      //   };
-      // }else if (props.feedbackType == 'um_by_lm'){
-      //   feedbackData = {
-          
-      //     responses: responses.value,
-      //     total_score: totalScore.value,
-      //     percentage: percentage.value,
-      //     feedback_score: feedbackScore.value,
-      //     lm_id: who_give_feedback_id,
-      //     lm_dbname: who_give_feedback_db_name,
-      //     manager_id: who_receive_feedback_id,
-      //     manager_dbname: who_receive_feedback_db_name
-          
-      //   };
-      // }else if (props.feedbackType == 'lm_by_um'){
-      //   feedbackData = {
-          
-      //     responses: responses.value,
-      //     total_score: totalScore.value,
-      //     percentage: percentage.value,
-      //     feedback_score: feedbackScore.value,
-      //     manager_id: who_give_feedback_id,
-      //     lm_dbname: who_give_feedback_db_name,
-      //     lm_id: who_receive_feedback_id,
-      //     lm_dbname: who_receive_feedback_db_name
-          
-      //   };
-      // }
-
+  
       if (isUpdating.value){
         if (props.feedback[0].can_update == 0){
           alert('You are not allowed to update or change your response, if you want to update it please contact your manager')

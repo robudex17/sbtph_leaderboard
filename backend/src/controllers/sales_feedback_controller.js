@@ -926,6 +926,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         
         `
     }else if(feedback_type === "um_by_lm"){
+     
        
         feedback_table = 'feedback_um_by_lm' 
         success_message = ``
@@ -1085,7 +1086,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
         // monthly only not full year
         }else {
-            if(req.user.login_type == 'salesagentuser' && !req.query.is_sales_admin){
+            if((req.user.login_type == 'salesagentuser' && !req.query.is_sales_admin) || req.query.admin_view_only == 'true'){
             
                 const [result] = await pool.execute(
                 `SELECT * FROM  ${feedback_table} WHERE ${who_give_feedback_table_id}=? AND ${who_receive_feedback_table_id}=?  AND month=? AND year=?`,[who_give_feedback_id,who_receive_feedback_id,givenMonth,givenYear]  
@@ -1096,15 +1097,15 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
                 if(export_to_excel){
                     return result
                 }else{
-                    
-                    res.json(result)
+                  
+                  return  res.json(result)
                     
                 
                 }
             }
 
             if(req.user.login_type == 'standarduser' || (req.query.is_sales_admin && req.user.agent_type ==2)){
-             
+               
                 const [result] = await pool.execute(
                 
                 query_feedback_month,[givenMonth,givenYear, snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth,givenYear,who_receive_feedback_id]
@@ -1114,7 +1115,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
                 if(export_to_excel){
                     return result
                 }else{
-                    
+                   
                     res.json(result)
                     
                 

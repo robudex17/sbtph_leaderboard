@@ -220,7 +220,7 @@ exports.loginUser = async(req,res, next) => {
 
 
        if(user[0].employee_status == 'Resigned'){
-        return  res.status(401).json({message: `${user[0].firstname} ${user[0].lastname} is already Resigned. You are not allowed to login..`})
+        return  res.status(401).json({message: `${user[0].firstname} ${user[0].lastname} is already Resigned. Resigned Staff is not allowed to login..`})
        }
         
        if(user[0].role == 'user' && loginas != 'salesagent'){

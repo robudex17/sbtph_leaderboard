@@ -3,7 +3,6 @@
       <h1 class="text-2xl font-bold mb-4 text-center">Agent Feedback Information</h1>    
    
       <div class="overflow-x-auto">
-      
       <table class="w-full table-auto border-collapse bg-white">
           <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">
             <tr>
@@ -210,11 +209,11 @@
             <table class="min-w-full table-fixed border-collapse">
               <thead>
                 <tr class="bg-gray-200 text-gray-700" v-if="modalData.length > 0">
-                  <th class="w-1/4 px-4 py-2 text-left font-semibold">Feedback By</th>
-                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Month</th>
-                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Year</th>
-                  <th class="w-1/6 px-4 py-2 text-left font-semibold">Feedback Score</th>
-                  <th class="w-1/4 px-4 py-2 text-left font-semibold" v-if="modalType !== 'qa'">Actions</th>
+                  <th class="w-1/4 px-2 py-1 text-center font-semibold border ">Feedback By</th>
+                  <th class="w-1/6 px-2 py-1 text-center font-semibold border">Month</th>
+                  <th class="w-1/6 px-2 py-1 text-center font-semibold border">Year</th>
+                  <th class="w-1/6 px-2 py-1 text-center font-semibold border">Feedback Score</th>
+                  <th class="w-1/4 px-2 py-1 text-center font-semibold border"  v-if="modalType !== 'qa'">Actions</th>
                 </tr>
                 <tr v-else>
                    <th class="w-1/6 px-4 py-2 text-left font-semibold">Description</th>
@@ -227,7 +226,7 @@
                   class="border-b hover:bg-gray-100 transition"
                 >
                   <!-- Feedback By -->
-                  <td class="px-4 py-3 flex items-center space-x-3">
+                  <td class="px-2 py-0.5 flex items-center space-x-3">
                     <img
                       v-if="data && data.image_link"
                       :src="updateImageLink(data.image_link)"
@@ -240,13 +239,13 @@
                   </td>
 
                   <!-- Month -->
-                  <td class="px-4 py-3 font-semibold">{{ data.month }}</td>
+                  <td class="px-2 py-1 font-semibold border">{{ data.month }}</td>
 
                   <!-- Year -->
-                  <td class="px-4 py-3 font-semibold">{{ data.year }}</td>
+                  <td class="px-2 py-1 font-semibold border">{{ data.year }}</td>
 
                   <!-- Score -->
-                <td class="border px-4 py-2 text-center">
+                <td class=" px-2 py- text-center border">
                   <span
                     v-if="parseFloat(data.feedback_score) > 0"
                     class="text-gray-800 font-medium"
@@ -261,13 +260,13 @@
                   </span>
                 </td>
 
-                <td class="border px-4 py-2 text-center space-x-2" v-if="Number(data.feedback_score) && modalType !== 'qa'">
+                <td class=" px-1 py-1 text-center text-xs flex justify-center items-center h-10 space-x-2" v-if="Number(data.feedback_score) && modalType !== 'qa'">
                   <!-- Toggle Enable/Disable Update -->
                   <button
                     v-if="data.can_update === 0"
                     @click="toggleUpdate(data)"
                     :disabled="disabledRows[data.who_give_feedback_id]"
-                    class="text-white px-3 py-1 rounded-lg shadow-md transition duration-300"
+                    class="text-white font-bold px-2 py-2  rounded-2xl shadow-md transition duration-300"
                     :class="disabledRows[data.who_give_feedback_id]
                       ?  'bg-gray-400 cursor-not-allowed'
                       :  'bg-yellow-500 hover:bg-yellow-600 '"
@@ -278,7 +277,7 @@
                     v-else
                     @click="toggleUpdate(data)"
                     :disabled="disabledRows[data.who_give_feedback_id]"
-                    class="text-white px-3 py-1 rounded-lg shadow-md transition duration-300"
+                    class="text-white font-bold px-2 py-2 rounded-2xl shadow-md transition duration-300"
                     :class="disabledRows[data.who_give_feedback_id]
                       ?  'bg-gray-400 cursor-not-allowed'
                       : ' bg-green-500 hover:bg-green-600 '"
@@ -290,7 +289,7 @@
                   <button 
                     @click="deleteAgentFeedback(data)"
                     :disabled="disabledRows[data.who_give_feedback_id]"
-                    class="px-3 py-1 rounded-lg shadow-md transition duration-300 text-white"
+                    class="px-2 py-2 font-bold rounded-2xl shadow-md transition duration-300 text-white"
                     :class="disabledRows[data.who_give_feedback_id]
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-red-500 hover:bg-red-600'"
@@ -298,6 +297,28 @@
                     <span v-if="disabledRows[data.who_give_feedback_id]">Deleted</span>
                     <span v-else>Delete</span>
                   </button>
+                  <NuxtLink  v-if="!disabledRows[data.who_give_feedback_id]"
+                    :to="{
+                      path: `/feedback/feedback_by_sales/${data.feedback_type}`,
+                      query: {
+                        who_receive_feedback_id: agents[0].id,
+                        who_receive_feedback_db_name: agents[0].db_name,
+                        who_give_feedback_id: data.who_give_feedback_id,
+                        who_give_feedback_db_name: data.who_give_feedback_name,
+                        who_give_feedback_agent_type: data.agent_type,
+                        feedback_type: data.feedback_type,
+                        month: data.month,
+                        year: data.year,
+                        admin_view_only: true
+                      }
+                    }"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class=" rounded-2xl px-2 py-2 bg-blue-500 text-white font-bold  hover:bg-blue-600"
+                  >
+                    View Feedback 
+                  </NuxtLink>
+
                 </td>
       
                 </tr>
@@ -316,7 +337,7 @@
           <!-- Footer -->
           <div class="px-6 py-4 bg-gray-100 text-right">
             <button
-              @click="closeModal"
+              @click="closeModal()"
               class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 hover:scale-105 transition duration-300"
             >
               Close
@@ -346,6 +367,9 @@
         
           const modalData = ref(null);
           const disabledRows = ref({}) // object: { [id]: true/false }
+
+          //  disabledRows.value = {...props.disabledRows}
+      
 
         const props = defineProps({
 
@@ -415,20 +439,22 @@
            submitted: {
              type: Number,
              required: true
+           }, 
+           disabledRows: {
+            type: Object, 
+            required: true
            }
 
       });
 
-      const test = () => {
-        alert('I click')
-        router.replace({ path: '/feedback/feedback_by_qa' })
-        
-      };
+      //  disabledRows.value = props.disabledRows
+          
 
-
+   
        const emit = defineEmits(['passSalesEnableDisableFeedback', 'passSalesDeleteFeedback'])
 
       const openModal = ( data, feedbackType) => {
+
         modalType.value = feedbackType;
         showModal.value = true;
 
@@ -443,14 +469,16 @@
           item.feedback_type = feedbackType; // Add feedback_type property
         });
 
-        console.log(data)
+       
 
         modalData.value = data;
       };
       
-      const closeModal = () => {
+      const closeModal = (data) => {
         showModal.value = false;
         modalType.value = null
+        disabledRows.value = {}
+        
       };      
 
        //get image url from the .env file
@@ -462,6 +490,11 @@
 
 
       const toggleUpdate = (data) => {
+
+      if(props.agents.employee_status == 'Resigned'){
+         alert(`User is not allowed to enable or disable update feedback which already resigned. `)
+        return
+      }
         
         if(props.submitted == 1){
           alert('User is not allowed to enable or disable update feedback which already submitted.')
@@ -483,15 +516,29 @@
 
       const deleteAgentFeedback = (data) => {
 
-       if(currentUser.login_type != 'standarduser'){
-          alert('User is not allowed to delete feedback')
-          return
-         }
-      disabledRows.value[data.who_give_feedback_id] = true
+          if(props.agents.employee_status == 'Resigned'){
+            alert(`User is not allowed to delete  feedback which already  already resigned. `)
+            return
+          }
+
+          if(props.submitted == 1){
+              alert('User is not allowed to delete  feedback which already submitted.')
+              return
+            }  
+
+          if(currentUser.login_type != 'standarduser'){
+              alert('User is not allowed to delete feedback')
+              return
+            }
+         
+            disabledRows.value[data.who_give_feedback_id] = true
 
 
-      emit('passSalesDeleteFeedback', data)
-    }
+            emit('passSalesDeleteFeedback', data)
+
+        
+          // delete disabledRows.value[data.who_give_feedback_id]
+      }
 
     //   const hasFeedback = computed(() => {
     //   return  currentUser.login_type != 'standarduser' || (props.overallAverageFeedback == null || props.overallAverageFeedback == "" ) //if already has feedback

@@ -75,6 +75,7 @@
            :umFeedbackByLm="umFeedbackByLm"
            :feedbackByQa="feedbackByQa"
            :feedbackByAdmin="salesAgentFeedback"
+           :disabledRows="{}"
 
 
           @passSalesEnableDisableFeedback="enableDisableSalesFeedback"

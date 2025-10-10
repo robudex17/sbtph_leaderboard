@@ -1,5 +1,6 @@
 <template>
-  <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20">
+  <!-- <div class=" bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen p-4 mt-20"> -->
+  <div class="p-4 mt-20">
     <!-- Loading Spinner -->
     <!-- <div v-if="useFeedbackStore.state.loading">
       <spinner></spinner>

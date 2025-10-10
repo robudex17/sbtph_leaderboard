@@ -5,6 +5,7 @@
         :questions="questions" :feedbackTitle="feedbackTitle" 
          :feedbackSubtitle="feedbackSubtitle"
          :feedback="agentFeedback" :feedbackType="feedbackType"
+         :admin_view_only="admin_view_only"
          @passFeedbackData="addUpdateDeleteFeedback">
 
         </feedback-form-component>
@@ -12,6 +13,7 @@
          :questions="questions" :feedbackTitle="feedbackTitle"
          :feedbackSubtitle="feedbackSubtitle"
          :feedback="[]" :feedbackType="feedbackType"
+         :admin_view_only="admin_view_only"
          @passFeedbackData="addUpdateDeleteFeedback">
 
         </feedback-form-component>
@@ -35,10 +37,10 @@
      const month = ref(null)
      const year = ref(null)
 
-    
-    const { who_receive_feedback_id } = query
+     const admin_view_only = route.query.admin_view_only=='true'
 
-  
+     const {who_receive_feedback_id } = query
+
 
     // Months for the dropdown
     const months = [
@@ -71,6 +73,22 @@
     const currentUser = authStore.state.user 
     const  feedbackType = route.params.feedback_type
 
+
+    //make sure that no one will give  feedback on for other user
+     if(currentUser.login_type != 'standarduser'){
+       
+        if(Number(currentUser.login_id) !== Number(route.query.who_give_feedback_id)){
+            alert(`Your are not ${route.query.who_give_feedback_db_name} your not allowed to give or update feedback on  ${route.query.who_give_feedback_db_name}'s behalf`)
+           
+        }
+       
+    }
+
+  
+    const who_give_feedback_agent_type = currentUser.login_type == 'standarduser' ? route.query.who_give_feedback_agent_type : currentUser.agent_type
+
+
+
     console.log('the feedback type is', feedbackType)
     const feedbackTitle = ref('')
     const feedbackSubtitle = ref('')
@@ -89,7 +107,9 @@
         feedbackSubtitle.value = 'Rate your local-Manager based on the following questions.'
     }
 
-    const { questions } = useFeedbackQuestions(currentUser.agent_type, feedbackType)
+    const { questions } =   useFeedbackQuestions(Number(who_give_feedback_agent_type), feedbackType)
+
+
 
      //get agent_id
     //  const agentId = route.params.id
@@ -102,6 +122,17 @@
    
 
     const addUpdateDeleteFeedback  = async(feedbackResponse, httpMethod)  => {
+        //make sure that no one will give  feedback on for other user
+            if(currentUser.login_type != 'standarduser'){
+            
+            
+                if(Number(currentUser.login_id) !== Number(route.query.who_give_feedback_id)){
+                    alert(`Your are not ${route.query.who_give_feedback_db_name} your not allowed to give or update feedback on  ${route.query.who_give_feedback_db_name}'s behalf`)
+                   return
+                }
+            
+            }
+
         feedbackResponse.date = date 
         feedbackResponse.month = month.value 
         feedbackResponse.year = year.value
@@ -129,6 +160,7 @@
 
 
     watch(route, async (newRoute) => {
+    alert(`chaange to ${newRoute.query.month} ${newRoute.query.year}`)
     month.value = newRoute.query.month
     year.value = newRoute.query.year
     router.push(newRoute.fullPath);

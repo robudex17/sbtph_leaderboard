@@ -1,10 +1,11 @@
 <template>
-  <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen">
+  <!-- <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen"> -->
+  <div class="p-4 mt-20">  
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Standard Users Information</h1>
 
     <!-- Add Agent Button -->
     <button  :disabled="['user', 'manager'].includes(currentUser.role)"
-      class="mb-6 px-6 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+      class="mb-6 px-2 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
       @click="openAddAgentModal"
     >
       Add Standard User
@@ -230,12 +231,12 @@
       <table class="w-full table-auto border-collapse bg-white">
         <thead>
           <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-            <th class="py-4 px-6 border font-semibold uppercase">ID</th>
-            <th class="py-4 px-6 border font-semibold uppercase">First Name</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Last Name</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Database Name</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Image</th>
-            <th class="py-4 px-6 border font-semibold uppercase">Actions</th>
+            <th class="py-2 px-3 border font-semibold uppercase">ID</th>
+            <th class="py-2 px-3 border font-semibold uppercase">First Name</th>
+            <th class="py-2 px-3 border font-semibold uppercase">Last Name</th>
+            <th class="py-2 px-3 border font-semibold uppercase">Database Name</th>
+            <th class="py-2 px-3 border font-semibold uppercase">Image</th>
+            <th class="py-2 px-3 border font-semibold uppercase">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -244,44 +245,44 @@
             :key="user.id"
             class="even:bg-blue-50 odd:bg-white"
           >
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-2 px-3 border text-center text-gray-700">
               {{ user.id }}
             </td>
        
-           <td class="py-4 px-6 border text-center text-gray-700">
+           <td class="py-2 px-3 border text-center text-gray-700">
               {{ user.firstname }}
             </td>
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-2 px-3 border text-center text-gray-700">
               {{ user.lastname }}
             </td>
-            <td class="py-4 px-6 border text-center text-gray-700">
+            <td class="py-2 px-3 border text-center text-gray-700">
               {{ user.db_name }}
             </td>
       
-            <td class="py-4 px-6 border text-center">
+            <td class="py-2 px-3 border text-center">
               <img
                 :src="updateImageLink(user.image_link)"
                 alt="Standar User Image"
                 class="h-12 w-12 rounded-full mx-auto border border-blue-200"
               />
             </td>
-            <td class="py-4 px-6 border text-center">
+            <td class="py-2 px-3 border text-center">
               <div class="flex justify-center space-x-2">
                 <button :disabled="currentUser.role !=='admin'"
-                  class="px-4 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-2 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditStandardUserModal(user)"
                 >
                 <i class="fas fa-edit"></i>
                   Edit
                 </button>
                 <button :disabled="currentUser.role !=='admin'"
-                  class="px-4 py-2 bg-gray-500 text-white font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-2 py-2 bg-gray-500 text-white font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditStandUserLoginModal({login_id: user.id, role: user.role, status: user.login_status, username: user.username})"
                 >
                   Login
                 </button>
                 <button :disabled="currentUser.role !=='admin'"
-                  class="px-4 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  class="px-2 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                    @click="deleteStandardUser(user.id)"
                 >
                   Delete

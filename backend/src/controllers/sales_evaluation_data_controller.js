@@ -634,14 +634,18 @@ for (const agent of sales_agents) {
         // --- compute averages with 4 decimals ---
   const computeAverage = (feedbackList) => {
     if (!feedbackList || feedbackList.length === 0) return null
+  
+    let feedbackListwithFeedbackScore = feedbackList.filter(agent => agent.feedback_score != 0)
+    
     const total = feedbackList.reduce((sum, fb) => sum + (Number(fb.feedback_score) || 0), 0)
-    const avg = total / feedbackList.length
+   
+    const avg = total/feedbackListwithFeedbackScore.length || 0
     return avg.toFixed(4)   // number with 4 decimal places
   }
 
-  agent.ave_feedback_by_agents = computeAverage(agent.feedback_by_agents)
-  agent.ave_feedback_by_um = computeAverage(agent.feedback_by_um)
-  agent.ave_feedback_by_lm = computeAverage(agent.feedback_by_lm)
+  agent.ave_feedback_by_agents = computeAverage(agent.feedback_by_agents) 
+  agent.ave_feedback_by_um = computeAverage(agent.feedback_by_um) 
+  agent.ave_feedback_by_lm = computeAverage(agent.feedback_by_lm) 
 
 
     let feedbackArrays = []

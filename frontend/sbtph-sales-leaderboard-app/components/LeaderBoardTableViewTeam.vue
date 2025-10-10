@@ -47,19 +47,19 @@
 
             <tr class="bg-green-600 text-white">
 
-              <th  colspan="8" class=" border border-gray-300 px-1 py-0.5 ">Agent Employments And Assignments</th>
+              <th  colspan="9" class=" border border-gray-300 px-1 py-0.5 ">Agent Employments And Assignments</th>
 
                <th colspan="2" class="border border-gray-300 px-2 py-0.5 text-xs text-center ">Performance (80%)</th>
               <th colspan="3" class="border border-gray-300 px-2 py-0.5">Attendance (10%)</th>
               <th colspan="3" class="border border-gray-300 px-2 py-0.5">Memo and Feedback (10%)</th>
               <th colspan="2" class="border border-gray-300 px-2 py-0.5">Additional Points (10%)</th>
-               <th colspan="4" class=" px-1 py-0.5 "></th>
+               <th colspan="4" class=" px-1 py-0.5 ">Ratings</th>
             </tr>
             <tr class="bg-green-500 text-white">
               <th class="border border-gray-300 px-1 py- text-center text-xs font-bold">Year</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold" >Month</th>
-              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Name</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Id</th>
+              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Name</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Employee Status</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Position</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Manager</th>
@@ -75,7 +75,7 @@
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Total</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">New Deposit</th>
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Total</th>
-              <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Grand Total</th>
+              <!-- <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold">Grand Total</th> -->
               <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold ">Rating</th>
                 <th class="border border-gray-300 px-1 py-0.5 text-center text-xs font-bold ">Rating Equivalent</th>
             </tr>
@@ -85,9 +85,8 @@
               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.year }}</td>
               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center" >{{ agent.month }}</td>
                <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center" >{{ agent.id }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center" >{{ agent.employee_status }}</td>
               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.db_name }} <span v-if="agent.tag">- (<span class="font-bold text-purple-500">{{ agent.tag }}</span>)</span></td>
-               <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center"
+              <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center"
                :class="agent.employee_status == 'Hired' || agent.employee_status == 'Rehired' ? 'fond-bold text-green-500': 'text-red-500 font-bold'"
                
                >{{ agent.employee_status }}</td>

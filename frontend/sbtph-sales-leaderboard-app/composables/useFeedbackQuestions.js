@@ -460,10 +460,12 @@ export function useFeedbackQuestions(agentType, direction) {
 
   // Decide which set to return
   const questions = computed(() => {
+    
     if (agentType === 0 && direction == 'lm_by_agent') return agentQuestions
     if (agentType === 1 && direction == 'agent_by_lm') return  managerQuestions
-    if (agentType === 1 && direction == 'um_by_lm') return  agentQuestions
+    if (agentType === 1 && direction == 'um_by_lm')  return  agentQuestions
     if(agentType === 2 && direction == 'lm_by_um') return  smManagerQuestions
+    
     return []
   })
 
