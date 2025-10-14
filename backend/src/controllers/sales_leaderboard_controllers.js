@@ -229,7 +229,8 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
           sales_agents = sales_agents_result
       }  
 
-
+      sales_agents = sales_agents.filter(agent => agent.target != 0 || agent.agent_type == 2) // include only agent target is not zero and  senior manager
+ 
       const lms = sales_agents.filter(agent => agent.agent_type == 1)
       const agents = sales_agents.filter(agent => agent.agent_type == 0)
       const um =  sales_agents.filter(agent => agent.agent_type == 2)
@@ -282,7 +283,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
       }else if(leaderboardOption == 'team'){
             const resultLms= lms.map(manager => {
-                const agent = agents.filter(agent => agent.manager_id === manager.id)
+                const agent = agents.filter(agent => agent.manager_id === manager.id )
                 const totaTarget = agent.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
                 const totalShipOk = agent.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
 
@@ -443,8 +444,10 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
             }
             // for senior manager.
             if (agent.agent_type == 2){
+              
+               
                 const [managers_feedback_result] = await pool.execute(
-                  'SELECT * FROM  `feedback_um_by_lm` WHERE manager_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
+                  'SELECT * FROM  `feedback_um_by_lm` WHERE um_id=?  AND month=? AND year=?',[ agent.id,givenMonth,givenYear]  
                 )
                 averageUmFeedbackByLm = getAverageFeedback(managers_feedback_result)
             }
@@ -637,7 +640,7 @@ exports.groupedByTeam = async (agentMetircs, leaderboardOption) => {
               delete groupedByTeam[team].total_rating
               delete groupedByTeam[team].rating_count
 
-              groupedByTeam[team].isCompleted = !groupedByTeam[team].submitted_array   // return false if there's atleast 0 in the array true if all values are 1
+              groupedByTeam[team].isCompleted = groupedByTeam[team].submitted_array.every(item => item === 1)   // return false if there's atleast 0 in the array true if all values are 1
 
                 if(groupedByTeam[team].target > 0 && groupedByTeam[team].target  != null && groupedByTeam[team].shipok > 0  && groupedByTeam[team].shipok != null) {
 
@@ -876,7 +879,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         // Flatten results (all months for this agent)
         const fullYearAgentPerformances = monthResults.flat();
 
-        console.log(fullYearAgentPerformances)
+        
 
         // Yearly averages
         const yearAverage = calculateAverages(fullYearAgentPerformances);
@@ -944,30 +947,48 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
                 delete team.teams
               })
            }
-
-
+           console.log(teams)
            return res.status(200).json(teams)
 
 
           }else{
-              // Step 1: Get the top final_ratings
-              const topRating = Math.max(...agentMetircs.map(agent => parseFloat(agent.final_ratings)))
+              if(leaderboardOption == 'agent' || leaderboardOption== 'lm'){
+                  // Step 1: Get the top final_ratings
+                  const topRating = Math.max(...agentMetircs.map(agent => parseFloat(agent.final_ratings)))
 
-              // Step 2: Add the tag conditionally based on final_ratings and agent_type
-              const agentMetircsWithRating = agentMetircs.map(agent => ({
-                ...agent,
-                tag: agent.submitted == 1 
-                 ? parseFloat(agent.final_ratings) === topRating
-                    ? agent.agent_type === 0
+                  // Step 2: Add the tag conditionally based on final_ratings and agent_type
+                  const agentMetircsWithRating = agentMetircs.map(agent => ({
+                    ...agent,
+                    tag: agent.submitted == 1 
+                    ? parseFloat(agent.final_ratings) === topRating
+                        ? agent.agent_type === 0
+                          ? 'TOP AGENT'
+                          : agent.agent_type === 1
+                          ? 'TOP LM'
+                          : ''
+                        : ''
+                      : ''  
+                  }))
+                console.log('this top rating is for agent and lm')
+                 return res.status(200).json(agentMetircsWithRating)               
+            }else if(leaderboardOption == 'all'){
+                const lmTopRating = Math.max(...agentMetircs.filter(agent => agent.agent_type == 1).map(agent => parseFloat(agent.final_ratings)))
+                const  agentTopRating = Math.max(...agentMetircs.filter(agent => agent.agent_type == 0).map(agent => parseFloat(agent.final_ratings)))
+
+                // Add tag for both types
+                const agentMetircsWithRating  = agentMetircs.map(agent => ({
+                  ...agent,
+                  tag: agent.submitted == 1 
+                    ? agent.agent_type === 0 && parseFloat(agent.final_ratings) === agentTopRating
                       ? 'TOP AGENT'
-                      : agent.agent_type === 1
+                      : agent.agent_type === 1 && parseFloat(agent.final_ratings) === lmTopRating
                       ? 'TOP LM'
                       : ''
                     : ''
-                   : ''  
-              }))
+                }))
               console.log(agentMetircsWithRating)
-              res.status(200).json(agentMetircsWithRating)
+               return res.status(200).json(agentMetircsWithRating) 
+            }
           }
 
         }
@@ -1034,14 +1055,19 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
             return res.status(200).json(teams_year)
           }
 
-          // 2. Group by agent using Map
-          const agentsMap = new Map();
-          for (const agent of fullYearAgentPerformances) {
-            if (!agentsMap.has(agent.id)) {
-              agentsMap.set(agent.id, []);
+            // 2. Group by agent using Map
+            const agentsMap = new Map();
+
+            for (const agent of fullYearAgentPerformances) {
+              // Skip agents with target = 0
+              if (agent.target === 0) continue;
+
+              if (!agentsMap.has(agent.id)) {
+                agentsMap.set(agent.id, []);
+              }
+              agentsMap.get(agent.id).push(agent);
             }
-            agentsMap.get(agent.id).push(agent);
-          }
+
 
           // 3. Helper: get rating names (optimize by caching)
           const getRatingName = async (rating) => {
@@ -1067,6 +1093,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
             Object.assign(yearAverage, {
               id: records[0].id,
+              agent_type: records[0].agent_type,
               db_name: records[0].db_name,
               image_link: records[0].image_link,
               year: givenYear
@@ -1090,12 +1117,56 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
              
           }
 
-        if(exportToExcel){
-          req.performance= agentYearlyMetrics 
-          next()
-        }else{
-          res.status(200).json(agentYearlyMetrics)
-        }
+
+          if(leaderboardOption == 'agent' || leaderboardOption== 'lm'){
+                  // Step 1: Get the top final_ratings
+                  const topRating = Math.max(...agentYearlyMetrics.map(agent => parseFloat(agent.final_ratings)))
+
+                  // Step 2: Add the tag conditionally based on final_ratings and agent_type
+                  const agentYearlyMetricsWithRating = agentYearlyMetrics.map(agent => ({
+                    ...agent,
+                    tag: agent.hasIncomplete === false
+                    ? parseFloat(agent.final_ratings) === topRating
+                        ? agent.agent_type === 0
+                          ? 'TOP AGENT'
+                          : agent.agent_type === 1
+                          ? 'TOP LM'
+                          : ''
+                        : ''
+                      : ''  
+                  }))
+                
+                 return res.status(200).json(agentYearlyMetricsWithRating)               
+            }else if(leaderboardOption == 'all'){
+                const lmTopRating = Math.max(...agentYearlyMetrics.filter(agent => agent.agent_type == 1).map(agent => parseFloat(agent.final_ratings)))
+                const  agentTopRating = Math.max(...agentYearlyMetrics.filter(agent => agent.agent_type == 0).map(agent => parseFloat(agent.final_ratings)))
+
+                // Add tag for both types
+                const agentYearlyMetricsWithRating  = agentYearlyMetrics.map(agent => ({
+                  ...agent,
+                  tag: agent.hasIncomplete === false
+                    ? agent.agent_type === 0 && parseFloat(agent.final_ratings) === agentTopRating
+                      ? 'TOP AGENT'
+                      : agent.agent_type === 1 && parseFloat(agent.final_ratings) === lmTopRating
+                      ? 'TOP LM'
+                      : ''
+                    : ''
+                }))
+              
+              if(exportToExcel){
+                req.performance = agentYearlyMetricsWithRating 
+                next()
+              }
+               return res.status(200).json(agentYearlyMetricsWithRating) 
+            }        
+
+         
+        // if(exportToExcel){
+        //   req.performance= agentYearlyMetricsWithRating
+        //   next()
+        // }else{
+        //   res.status(200).json(agentYearlyMetricsWithRating)
+        // }
        
         
       }
@@ -1104,7 +1175,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
       
     // connection.release()
     
-   
     
     }
     catch(error){
