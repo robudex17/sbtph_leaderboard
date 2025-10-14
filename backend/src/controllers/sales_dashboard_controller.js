@@ -67,9 +67,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       return res.status(400).json({ error: "Invalid givenMonth format" });
     }
 
-
   const snapshot = `${givenYear}-${monthNumber.toString().padStart(2, '0')}`;  
-
 
   let dashboarddMasterQuery = 
     `
@@ -372,7 +370,12 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             //get the values only
             team_targets = Object.values(team_targets)
 
-            return team_targets
+            const arrangedTeamTargets = [
+                ...team_targets.filter(a => a.market_name.toLowerCase() !== 'trucks'),
+                ...team_targets.filter(a => a.market_name.toLowerCase() === 'trucks')
+            ]
+
+            return arrangedTeamTargets
     }
      let individualTargets
       if (dashboarOption == 'individual'){
@@ -382,8 +385,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 dashboarddMasterQuery,
               [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
             )
-             individualTargets  = result     
-           
+                const arranged = [
+                ...result.filter(a => a.market_name.toLowerCase() !== 'trucks'),
+                ...result.filter(a => a.market_name.toLowerCase() === 'trucks')
+                ]
+
+             individualTargets  = arranged
+
          }else{
             
             //queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
@@ -451,6 +459,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         
         let teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
 
+       
+
         targetWithTrucks = teamTargets.map(({ teammembers, ...rest}) => rest).reduce((acc, team) => {
             let overTeam = 'overall'
             
@@ -472,8 +482,12 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             return acc
         },{})
 
+       
+       
+        let  getTheTrucks = teamTargets.filter(team => team.team_name !== 'trucks')
+
     
-        targetWithoutTrucks = teamTargets.map(({teammembers, ...rest})=> rest).filter(team => team.team_name != 'trucks').reduce((acc, team) => {
+        targetWithoutTrucks = getTheTrucks.map(({teammembers, ...rest})=> rest).reduce((acc, team) => {
             let overTeam = 'overall'
             if(!acc[overTeam]){
                 acc[overTeam] = {
@@ -493,8 +507,13 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             return acc
 
         }, {})
+
+
+      
         targetWithTrucks = Object.values(targetWithTrucks)
         targetWithoutTrucks = Object.values(targetWithoutTrucks)
+
+
 
         overAllTargets.push(targetWithTrucks[0])
         overAllTargets.push(targetWithoutTrucks[0])

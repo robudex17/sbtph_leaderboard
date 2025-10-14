@@ -3,7 +3,7 @@
       <!-- Sidebar -->
       <aside :class="sidebarClass" class="bg-gray-800 text-white transition-all fixed h-screen">
           <div class="flex justify-between items-center p-4 text-center text-2xl font-bold border-b border-gray-700">
-            <div v-if="!isCollapsed">Sales Leaderboard</div>
+            <div v-if="!isCollapsed">Sales Performance Dashboard</div>
             <button @click="toggleSidebar" class="text-white">
               <font-awesome-icon :icon="['fas', 'bars']" />
             </button>

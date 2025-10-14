@@ -244,16 +244,16 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
         .filter(agent => agent.agent_type !== 2)
         .reduce((sum, agent) => sum + (Number(agent.shipok) || 0), 0)
 
-    const totalNewDeposit= sales_agents
-        .filter(agent => agent.agent_type !== 2)
-        .reduce((sum, agent) => sum + (Number(agent.total_new_deposit) || 0), 0)
+    // const totalNewDeposit= sales_agents
+    //     .filter(agent => agent.agent_type !== 2)
+    //     .reduce((sum, agent) => sum + (Number(agent.total_new_deposit) || 0), 0)
 
       // Step 2: update type-2 agents
       sales_agents.forEach(agent => {
         if (agent.agent_type === 2) {
           agent.target = totalTarget
           agent.shipok = totalShipOk
-          agent.total_new_deposit = totalNewDeposit
+          agent.total_new_deposit = 0
         }
       })
 
@@ -669,20 +669,22 @@ for (const agent of sales_agents) {
       const combined = validFeedbacks.flat()
 
       // Check if all feedback_score > 0
-      isReady = combined.every(
+      isReady = combined.some(
         fb => fb && 'feedback_score' in fb && Number(fb.feedback_score) > 0
       )
     }
 
-    // Enforce feedback_qa > 0
-    // if (Number(agent.feedback_qa) <= 0) {
-    //   isReady = false
-    // }
+   // ready to submit  if atleast there is a quality assurance feedback
+    if (Number(agent.feedback_qa) > 0) {
+      isReady = true
+    }
 
     // Final override: if feedback_admin > 0 → ready_to_submit = true
     if (Number(agent.feedback_admin) > 0) {
       isReady = true
     } 
+
+
 
     agent.ready_to_submit = isReady
 }

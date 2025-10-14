@@ -7,30 +7,30 @@
     </div>
     <div v-else>
         <div v-if="dashboardoption =='individual'">
-                <p class="text-gray-800 font-bold text-4xl mb-5">Individual Results</p>
-                <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+                <p class="text-gray-800 font-bold text-2xl mb-5">Individual Results</p>
+                <p  class="text-gray-800 font-bold text-lg mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.market_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                    <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.db_name }} - {{ target_shipok.market_name }}</h2>
+                    <h2 class=" uppercase text-xl font-bold text-gray-800 mb-4">{{ target_shipok.db_name }} - {{ target_shipok.market_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_target }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Target(units)</p>
+                        <div class="bg-blue-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl ">{{ target_shipok.total_target }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Target(units)</p>
                         </div>
-                        <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
+                        <div class="bg-green-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Ship OK(units)</p>
                         </div>
-                        <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">
+                        <div class="bg-yellow-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">
                             {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_shipok) }}
                             <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
                             <!-- {{ target_shipok.total_target > 0 ? Math.round((target_shipok.total_ship_ok / target_shipok.total_target) * 100 + Number.EPSILON) + '%' : '0%' }}   -->
                         </p>
-                        <p class="text-gray-600 font-medium text-lg">Percentage</p>
+                        <p class="text-gray-600 font-medium text-xs">Percentage</p>
                         </div>
-                        <div :class="(target_shipok.total_target - target_shipok.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
+                        <div :class="(target_shipok.total_target - target_shipok.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Remaining(units)</p>
                         </div>
                     </div>
                 </div>                
@@ -38,21 +38,21 @@
           <div v-else-if="dashboardoption =='team'">
               
                
-                <p class="text-gray-800 font-bold text-4xl mb-5">Team Results</p>
-                <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+                <p class="text-gray-800 font-bold text-2xl mb-5">Team Results</p>
+                <p  class="text-gray-800 font-bold text-lg mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.team_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                    <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">{{ target_shipok.team_name }}</h2>
+                    <h2 class=" uppercase text-xl font-semibold text-gray-800 mb-4">{{ target_shipok.team_name }}</h2>
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_target }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Target(units)</p>
+                        <div class="bg-blue-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Target(units)</p>
                         </div>
-                        <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
+                        <div class="bg-green-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Ship OK(units)</p>
                         </div>
-                        <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">
+                        <div class="bg-yellow-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">
                            {{ getWholeNumberPercentage(target_shipok.total_target, target_shipok.total_shipok) }}
                             <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
                             <!-- {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }}  -->
@@ -62,9 +62,9 @@
                         
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
+                        <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
+                        <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
+                        <p class="text-gray-600 font-medium text-xs">Remaining(units)</p>
                         </div>
                     </div>
                     <button

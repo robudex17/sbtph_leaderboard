@@ -25,15 +25,16 @@
           <tbody>
             <tr 
               :key="agent.id" 
-              v-for="(agent) in agents" 
+              v-for="(agent, index) in agents" 
            
               :class="['odd:bg-white', 'even:bg-green-50']">
               <!-- <td class="py-2 px-4 text-sm text-green-800">{{ agent.id }}</td> -->
               <!-- <td class="py-2 px-4 text-sm text-green-800 font-bold">{{ agent.firstname }} {{ agent.lastname }}</td> -->
-              <td class="py-2 px-4 text-sm  border text-center"
-                  
-                  :class="agent.employee_status == 'Hired' || agent.employee_status == 'Rehired'? 'text-green-600 font-bold text-center' : 'text-red-500 font-bold text-center'">
-                {{agent.employee_status  }}
+              <td
+                class="py-2 px-4 text-sm border text-center"
+                :class="getStatusClass(setEmployeeStatus(agents, index))"
+              >
+                {{ setEmployeeStatus(agents, index) }}
               </td>
               <td class="py-2 px-4 text-sm border text-center"
         
@@ -87,6 +88,68 @@
 
       }
 
+      const setEmployeeStatus = (agents, index) => {
+        
+         if(agents.length == 1 ){
+           return agents[index].employee_status
+         }
+        
+        let nextIndex = index + 1
+         
+          if(nextIndex >= agents.length){
+              return agents[index].employee_status
+          }
+
+          // if(agents[index].employee_status === 'Resigned'){
+          //     return 'Resigned'
+          // }
+
+          if(agents[index].employee_status === 'Rehired' && agents[nextIndex].employee_status === 'Resigned'){
+              return 'Rehired'
+          }
+
+  
+         if(agents[nextIndex].effective_to !== null && agents[index].agent_type > agents[nextIndex].agent_type){
+            return 'Promoted'
+         }
+
+        if(agents[nextIndex].effective_to !== null && agents[index].agent_type < agents[nextIndex].agent_type){
+            return 'Demoted'
+         }
+
+          if(agents[nextIndex].effective_to !== null ){
+              return 'Transferred'
+          }
+
+         
+
+          return agents[index].employee_status
+
+      }
+
+     const getStatusClass = (status) => {
+        switch (status?.trim()) {
+          case 'Hired':
+          case 'Rehired':
+            return 'text-green-600 font-bold'
+
+          case 'Promoted':
+            return 'text-blue-600 font-bold'
+
+          case 'Demoted':
+            return 'text-orange-500 font-bold'
+
+          case 'Transferred':
+            return 'text-purple-500 font-bold' // 💡 Suggestion: purple fits “movement/change”
+
+          case 'Resigned':
+            return 'text-red-600 font-bold'
+
+          default:
+            return ''
+        }
+      }
+ 
       
 
       const config = useRuntimeConfig()
