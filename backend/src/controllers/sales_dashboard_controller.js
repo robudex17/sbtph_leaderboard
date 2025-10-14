@@ -468,8 +468,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 acc[overTeam] = {
                     month: givenMonth, 
                     year: givenYear,
-                    total_target: Number(team.total_target || 0),
-                    total_shipok: Number(team.total_shipok || 0),
+                    total_target: 0, //Number(team.total_target || 0),
+                    total_shipok: 0, //Number(team.total_shipok || 0),
                     team_name: 'overll market',
                     team: [],
                 }
@@ -493,8 +493,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 acc[overTeam] = {
                     month: givenMonth, 
                     year: givenYear,
-                    total_target: Number(team.total_target || 0),
-                    total_shipok: Number(team.total_shipok || 0),
+                    total_target: 0, //Number(team.total_target || 0),
+                    total_shipok: 0, //Number(team.total_shipok || 0),
                     team_name: 'overll market',
                     
                 }
