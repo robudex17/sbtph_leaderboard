@@ -1187,10 +1187,9 @@
             alert('No changes detected.')
             return
           }
-        if(currentAgent.value.changed_assignment == false) {
-          alert('Please Choose Agent Assignments')
-          return
-        }
+       // if(currentAgent.value.changed_assignment == false) {
+       //   alert('Please Choose Agent Assignments')
+       //   return
 
           if(currentAgent.value.changed_assignment){
                 //CHECKING Further 
