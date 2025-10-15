@@ -601,6 +601,10 @@
              showModalMetricsType.value = true           
             break
           case "deduction":
+           if(currentUser.login_type != 'standarduser'){
+              alert(`Not allowed to to udpate agent ${metricsType.value}`)
+              return
+            }
 
              modalMeticsTypeMessage.value = [ "Add Deduction", "Edit Deduction"]
              if(Number(selectedAgent.deduction) > 0){
