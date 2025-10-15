@@ -101,6 +101,15 @@
                               <p v-if="errorOtherMetrics" class="text-red-500 text-sm mt-2">{{ errorOtherMetrics }}</p>
                         </div>   
                     </div>
+
+                   <div v-if="metricsType == 'deduction' ">
+     
+                        <div class="mb-4"  >
+                              <label class="block text-sm font-medium mb-2">Deduction</label>
+                              <input  v-model="form.deduction" type="text" class="w-full border rounded-lg p-2" />
+                              <p v-if="errorOtherMetrics" class="text-red-500 text-sm mt-2">{{ errorOtherMetrics }}</p>
+                        </div>   
+                    </div>                    
                    
                    
 
@@ -184,7 +193,7 @@
         total_absences: '',
         total_tardiness: '',
         total_memo: '',
-        feedback: ''
+        deduction: ''
          
       
         
@@ -207,12 +216,11 @@
           total_absences: '',
           total_tardiness: '',
           total_memo: '',
-           feedback: '',
+           deduction: '',
          
           }
 
-     
-        userEntry.value = ''
+       userEntry.value = ''
         errorOtherMetrics.value = ''
         errorTarget.value = ''
 
@@ -304,6 +312,16 @@
             }
             closeModal();
             break
+          case "deduction":  
+            if(props.modalType === 'add'){
+              emit('passAddDataAgent', "", form.value)
+            }else if(props.modalType == 'edit' && Number(form.value.deduction) === 0){
+               emit('passDeleteDataAgent',"" ,form.value )
+            }else if(props.modalType == 'edit' && Number(form.value.deduction) > 0){
+               emit('passEditDataAgent',  "", form.value )
+            }
+            closeModal();
+            break
         
           default:
             console.log('Invalid Metrics type')
@@ -375,7 +393,27 @@
             errorOtherMetrics.value = '';
           }
         }
+      );  
+      
+      // Watcher for the fedback field
+    watch(
+        () => form.value.deduction,
+        (newValue) => {
+          // If empty or not a whole number, set error
+          if (!newValue || !/^\d+(\.\d+)?$/.test(form.value.deduction)) {
+           errorOtherMetrics.value = 'Please enter a valid numeric deduction.';
+          } else if(parseFloat(newValue) > 5){
+             errorOtherMetrics.value = 'The Highest Deduction you can give is 5.0.';
+          }   
+          // } else if(parseFloat(newValue) == 0 || parseFloat(newValue) < 0){
+          //    errorOtherMetrics.value = 'Deduction value of zero(0) or negative value is not allowed';
+          // }
+          else {
+            errorOtherMetrics.value = '';
+          }
+        }
       );      
+      
 
 
       
@@ -413,6 +451,7 @@
             total_tardiness: newVal.total_tardiness || 0 ,
             total_memo: newVal.total_memo || 0,
             feedback: newVal.feedback || "",
+            deduction: newVal.deduction || "",
         }
         // if(props.metricsType == 'targetShipok'){
         //    userEntry.value = newVal.shipok || ""

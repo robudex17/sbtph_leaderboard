@@ -38,13 +38,14 @@
               :key="index"
               class="bg-gray-800 text-white border rounded-lg shadow-lg overflow-hidden"
             >
-              <div class="flex flex-col items-center p-4">
-                  <div
-                    class="px-3 py-1 m-2 text-xl font-semibold"
-                    :class="team.tag ? 'font-bold  text-purple-400' : 'py-5'"
-                  >
-                    {{ team.tag }}
+              <div class="flex flex-col items-center justify-center text-center p-4">
+                <div
+                  class="px-3 py-1 m-2 text-xl font-semibold"
+                  :class="team.tag ? 'font-bold text-purple-400' : 'py-5'"
+                >
+                  {{ team.tag }}
                 </div>
+
                 <img
                   v-if="team.team_image"
                   :src="updateImageLink(team.team_image)"
@@ -52,13 +53,16 @@
                   class="w-20 h-20 rounded-full object-cover mb-4"
                 />
                 <div v-else class="w-20 h-20 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
-                  <span class="text-xl">{{ team.team_name || '' }}</span>
+                  <span class="text-lg pb-2">{{ team.team_name || '' }}</span>
                 </div>
-                <div class="text-center">
-                  <h3 class="text-lg font-semibold">{{ team.team_name }}</h3>
-                  <p class="text-sm  font-bold" :class="setRatingNameColor(team)" >{{ team.ratings_name }}</p>
 
-                  <div class="flex items-center mt-2 ">
+                <div class="text-center flex flex-col items-center">
+                  <h2 class="text-lg font-semibold">{{ team.team_name }}</h2>
+                  <p class="text-sm font-bold p-2" :class="setRatingNameColor(team)">
+                    {{ team.ratings_name }}
+                  </p>
+
+                  <div class="flex items-center justify-center mt-3">
                     <template v-for="i in 5" :key="i">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +72,10 @@
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        <path
+                          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2
+                          9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
                       </svg>
                     </template>
                   </div>
@@ -77,13 +84,15 @@
                   <p class="text-xl font-bold mt-2">{{ team.month }}</p>
                   <p class="text-xl font-bold mt-2">{{ team.year }}</p>
                 </div>
+
                 <button
                   @click="showTeamDetails(team)"
-                  class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+                  class="mt-3 text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
                 >
                   Performance Details
                 </button>
               </div>
+
             </div>            
             
           </div>    
@@ -288,6 +297,16 @@
                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.additional_points }}</td>
             </tr>
 
+            <tr v-if="selectedAgent && selectedAgent.deduction > 0">
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500">Deduction</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center">0</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center"
+               
+               >{{ selectedAgent.deduction }}</td>
+            </tr>
+
+            
+
             </tbody>
           </table>
           <table class="min-w-full table-auto mt-6">
@@ -319,106 +338,167 @@
     </div>
   </div>
 
-  <!-- Modal for Team Details -->
-  <div v-if="showModalForTeam" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-    <div class="bg-gray-800 text-white p-6 rounded-lg w-full md:w-2/3 lg:w-1/2 xl:w-1/3 h-auto overflow-auto">
-      <div class="flex flex-col items-center">
-      
-        <img
-          v-if="selectedTeam && selectedTeam.team_image"
-          :src="updateImageLink(selectedTeam.team_image)"
-          alt="Agent Image"
-          class="w-40 h-40 rounded-full object-cover mb-4"
-        />
-        <div v-else class="w-40 h-40 bg-gray-300 rounded-full mb-4 flex items-center justify-center text-white">
-          <span class="text-4xl">{{ selectedTeam ? selectedTeam.team_name : '' }}</span>
-        </div>
-        <div class="text-center">
-          <h3 class="text-3xl font-semibold">{{ selectedTeam ? selectedTeam.team_name : 'No Team selected' }}</h3>
-          <!-- <h3 class="text-xl font-semibold">AgentID: {{ selectedAge ? selectedAgent.id : 'Agent has no ID' }}</h3> -->
-          <p class="text-lg  font-bold" :class="setRatingNameColor(selectedTeam)">{{ selectedTeam ? selectedTeam.ratings_name : '' }}</p>
-
-          <div class="flex items-center mt-2">
-            <template v-for="i in 5" :key="i">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                :class="getStarClass(selectedTeam ? selectedTeam.final_ratings : 0, i)"
-                width="30"
-                height="35"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-              </svg>
-            </template>
-          </div>
-
-          <p class="text-3xl font-bold mt-2">{{ selectedTeam ? selectedTeam.final_ratings : '' }}</p>
-         
-        </div>
-        <p class="text-lg font-bold mt-2">Month Of: {{ selectedTeam ? selectedTeam.month : '' }}</p>
-        <p class="text-lg font-bold mt-2">Year: {{ selectedTeam ? selectedTeam.year : '' }}</p>
-        <!-- Table for Additional Information -->
-        <div class="mt-6 w-full overflow-x-auto">
-          <table class="min-w-full table-auto border-collapse border border-gray-700">
-            <thead>
-              <tr>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Team Members</th>
-                <th class="px-2 py-2 border bg-gray-800 text-white text-left">Market</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-left">Rating</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="member in selectedTeam.teams" :key="member.id">
-                <td class="border px-4 py-2">
-                  <div class="flex items-center space-x-2">
-                    <img
-                      v-if="member && member.image_link"
-                      :src="updateImageLink(member.image_link)"
-                      alt="Agent Image"
-                      class="w-10 h-10 rounded-full object-cover"
-                    />
-                    <span>{{ member.db_name }}</span> <span v-if="member.agent_type==1" class="text-blue-600 font-bold">- LM</span>
-                  </div>
-                </td>
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
-                  {{ member.market_name.toUpperCase() }}
-                </td>                
-                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">
-                  {{ member.final_ratings }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-                  
-          <table class="min-w-full table-auto mt-6">
-            <thead>
-              <tr>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Team Target</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Team ShipOK</th>
-                <th class="px-4 py-2 border bg-gray-800 text-white text-lef">Percentage(%)</th>
-
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="selectedAgent">
-                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedTeam.target }}</td>
-                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedTeam.shipok }}</td>
-                <td class="px-4 py-2 font-bold border bg-gray-900 text-green-500 text-center">{{ selectedTeam.shipok_percent }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <button
-          @click="closeModalForTeam"
-          class="mt-6 text-blue-300 hover:text-blue-500 font-semibold hover:underline hover:scale-105 transition duration-300"
-        >
-          Close
-        </button>
+<!-- Modal for Team Details -->
+<div
+  v-if="showModalForTeam"
+  class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+>
+  <div
+    class="bg-gray-800 text-white p-8 rounded-2xl w-full md:w-2/3 lg:w-1/2 xl:w-1/3 max-h-[90vh] overflow-y-auto shadow-2xl"
+  >
+    <!-- Modal Content -->
+    <div class="flex flex-col items-center text-center">
+      <!-- Image Section -->
+      <img
+        v-if="selectedTeam && selectedTeam.team_image"
+        :src="updateImageLink(selectedTeam.team_image)"
+        alt="Team Image"
+        class="w-40 h-40 rounded-full object-cover mb-4 border-4 border-gray-700 shadow-md"
+      />
+      <div
+        v-else
+        class="w-40 h-40 bg-gray-600 rounded-full mb-4 flex items-center justify-center text-white shadow-md"
+      >
+        <span class="text-4xl font-bold">{{
+          selectedTeam ? selectedTeam.team_name : ""
+        }}</span>
       </div>
+
+      <!-- Team Info -->
+      <div class="flex flex-col items-center">
+        <h3 class="text-3xl font-semibold mb-2">
+          {{ selectedTeam ? selectedTeam.team_name : "No Team Selected" }}
+        </h3>
+        <p
+          class="text-lg font-bold mb-2"
+          :class="setRatingNameColor(selectedTeam)"
+        >
+          {{ selectedTeam ? selectedTeam.ratings_name : "" }}
+        </p>
+
+        <!-- Rating Stars -->
+        <div class="flex items-center justify-center mt-2 mb-3">
+          <template v-for="i in 5" :key="i">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              :class="getStarClass(
+                selectedTeam ? selectedTeam.final_ratings : 0,
+                i
+              )"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 
+                9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+              />
+            </svg>
+          </template>
+        </div>
+
+        <p class="text-3xl font-bold mt-1">
+          {{ selectedTeam ? selectedTeam.final_ratings : "" }}
+        </p>
+
+        <p class="text-lg font-semibold mt-3">
+          Month Of:
+          <span class="font-normal">{{
+            selectedTeam ? selectedTeam.month : ""
+          }}</span>
+        </p>
+        <p class="text-lg font-semibold">
+          Year:
+          <span class="font-normal">{{
+            selectedTeam ? selectedTeam.year : ""
+          }}</span>
+        </p>
+      </div>
+
+      <!-- Tables Section -->
+      <div class="mt-6 w-full overflow-x-auto">
+        <!-- Team Members Table -->
+        <table
+          class="min-w-full table-auto border-collapse border border-gray-700 text-center"
+        >
+          <thead>
+            <tr class="bg-gray-700">
+              <th class="px-4 py-2 border border-gray-600">Team Members</th>
+              <th class="px-4 py-2 border border-gray-600">Market</th>
+              <th class="px-4 py-2 border border-gray-600">Rating</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="member in selectedTeam.teams"
+              :key="member.id"
+              class="bg-gray-900 hover:bg-gray-700 transition"
+            >
+              <td class="border border-gray-700 px-2 py-2">
+                <div class="flex items-center justify-left space-x-2">
+                  <img
+                    v-if="member && member.image_link"
+                    :src="updateImageLink(member.image_link)"
+                    alt="Agent Image"
+                    class="w-10 h-10 rounded-full object-cover border border-gray-600"
+                  />
+                  <span class="font-medium">{{ member.db_name }}</span>
+                  <span
+                    v-if="member.agent_type == 1"
+                    class="text-blue-400 font-bold"
+                    >- LM</span
+                  >
+                </div>
+              </td>
+              <td class="px-4 py-2 border border-gray-700 font-semibold">
+                {{ member.market_name.toUpperCase() }}
+              </td>
+              <td class="px-4 py-2 border border-gray-700 font-semibold">
+                {{ member.final_ratings }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Team Target Table -->
+        <table
+          class="min-w-full table-auto mt-6 border-collapse border border-gray-700 text-center"
+        >
+          <thead>
+            <tr class="bg-gray-700">
+              <th class="px-4 py-2 border border-gray-600">Team Target</th>
+              <th class="px-4 py-2 border border-gray-600">Team ShipOK</th>
+              <th class="px-4 py-2 border border-gray-600">Percentage (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="selectedTeam" class="bg-gray-900">
+              <td class="px-4 py-2 font-bold text-green-400 border border-gray-700">
+                {{ selectedTeam.target }}
+              </td>
+              <td class="px-4 py-2 font-bold text-green-400 border border-gray-700">
+                {{ selectedTeam.shipok }}
+              </td>
+              <td class="px-4 py-2 font-bold text-green-400 border border-gray-700">
+                {{ selectedTeam.shipok_percent }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Close Button -->
+      <button
+        @click="closeModalForTeam"
+        class="mt-6 text-blue-300 hover:text-blue-500 font-semibold hover:underline hover:scale-105 transition duration-300"
+      >
+        Close
+      </button>
     </div>
-  </div>  
+  </div>
+</div>
+ 
   </div>
 </template>
 

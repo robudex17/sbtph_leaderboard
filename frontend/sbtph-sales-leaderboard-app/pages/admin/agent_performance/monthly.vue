@@ -183,7 +183,7 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
   }
   
   if (agent.ratings_name == 'VERY SATISFACTORY') {
-    return 'text-blue-400'
+    return 'text-blue-500'
   }
 
   if (agent.ratings_name == 'SATISFACTORY') {
@@ -208,7 +208,7 @@ const setRatingColor = (agent) => {
   }
   
   if (agent.final_ratings >= 4 && agent.final_ratings < 5) {
-    return 'text-blue-400'
+    return 'text-blue-500'
   }
 
   if (agent.final_ratings >= 3 && agent.final_ratings < 4) {

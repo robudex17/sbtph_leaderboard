@@ -32,7 +32,8 @@ let leaderboardMasterQuery =
               COALESCE(nd.total_deposit_count, 0) AS deposit_score,
               COALESCE(ab.total_absences_count, 0) AS absences,
               COALESCE(td.total_tardiness_count, 0) AS tardiness,
-              COALESCE(mm.total_memo_count, 0) AS memo
+              COALESCE(mm.total_memo_count, 0) AS memo,
+              COALESCE(ded.deduction, 0) AS deduction
           FROM sales_agents2 sa
           JOIN (
               SELECT aa1.*
@@ -109,7 +110,11 @@ let leaderboardMasterQuery =
                 GROUP BY agent_id, year, month
             ) mm ON mm.agent_id = sa.id 
               AND mm.month =?
-              AND mm.year =?         
+              AND mm.year =? 
+
+            LEFT JOIN  deduction AS ded ON ded.agent_id = sa.id
+              AND ded.month =?
+              AND ded.year =?
 `
 
 exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, leaderboardOption,path, leaderboardMasterQuery ) => {
@@ -153,7 +158,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
     const [sales_agents_result] = await pool.execute(
       `${leaderboardMasterQuery} WHERE sa.id=?`,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
       givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-      givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,agent_id]  
+      givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, agent_id]  
     )
 
     leaderboardOption = "single"
@@ -165,7 +170,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
               leaderboardMasterQuery,  [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
               givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-              givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,]
+              givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,givenMonth, givenYear]
         )
         if(sales_agents_result[0].agent_type == 2){
             const resultUm =  sales_agents_result.map(manager =>{
@@ -215,7 +220,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
           leaderboardMasterQuery,[
         givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
         givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear
           ]  
         )
         sales_agents = sales_agents_result
@@ -224,7 +229,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
           const [sales_agents_result] = await pool.execute(
             `${leaderboardMasterQuery} AND m.name=?`, [   givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
           givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, 'trucks']  
+          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,  givenMonth, givenYear,'trucks']  
         )
           sales_agents = sales_agents_result
       }  
@@ -347,6 +352,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
             agent['memo'] = 0
             agent['memo_score'] = 0
             agent['feedback_score'] = 0
+            agent['deduction'] = 0
      }else{
  
               let agentAbsenceScore;
@@ -497,6 +503,8 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
       agent['feedback_rating'] =  parseFloat((agent['feedback_score'] * evaluation_criteria.feedback).toFixed(4)) 
       agent['additional_points'] = parseFloat((agent['deposit_score'] * evaluation_criteria.additional_points).toFixed(4))
 
+  
+    
     
 
       agent['final_ratings'] = (
@@ -505,7 +513,8 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
       agent['tardiness_rating'] +
       agent['memo_rating'] +
       agent['feedback_rating'] +
-      agent['additional_points']
+      agent['additional_points'] - 
+      agent['deduction']   // deduction points if needed to be subtracted
     ).toFixed(4);
 
 

@@ -132,7 +132,8 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
               COALESCE(td.total_tardiness_count, 0) AS total_tardiness,
               COALESCE(mm.total_memo_count, 0) AS total_memo,
               COALESCE(fba.feedback, 0) AS feedback_admin,
-              COALESCE(fbq.feedback_score, 0) AS feedback_qa
+              COALESCE(fbq.feedback_score, 0) AS feedback_qa,
+              COALESCE(ded.deduction, 0) AS deduction
           FROM sales_agents2 sa
           JOIN (
               SELECT aa1.*
@@ -218,8 +219,11 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
                 ON sa.id = fbq.agent_id
                 AND fbq.month = ?
                 AND fbq.year = ?  
-              
-         
+           LEFT JOIN deduction ded 
+                ON sa.id = ded.agent_id
+                AND ded.month = ?
+                AND ded.year = ?                  
+
 `
 
 
@@ -229,6 +233,7 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
   givenMonth, givenYear,givenMonth, givenYear,
   givenMonth, givenYear,givenMonth, givenYear,
   givenMonth, givenYear,givenMonth, givenYear,
+  givenMonth, givenYear,
 ])
 
   sales_agents = sales_agents_result

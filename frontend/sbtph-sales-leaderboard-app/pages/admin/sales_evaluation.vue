@@ -15,25 +15,26 @@
             <!-- Table Head -->
                 <thead>
                 <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">ID</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Name</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Employee Status</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Market</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Team</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Month</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Year</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Target</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">ShipOk</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">New Deposit</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Absences</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Tardiness</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Memo</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Feedback (Admin)</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Feedback (QA)</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Feedback (AGENTS)</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Feedback (LM)</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Feedback (UM)</th>
-                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900">Actions</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">ID</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Name</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Employee Status</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Market</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Team</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Month</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Year</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Target</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">ShipOk</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">New Deposit</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Absences</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Tardiness</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Memo</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Feedback (Admin)</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Feedback (QA)</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Feedback (AGENTS)</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Feedback (LM)</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Feedback (UM)</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Deduction</th>
+                    <th class="py-0.5 px-4 text-center text-xs font-bold text-green-900 border">Actions</th>
                 </tr>
                 </thead>
             <!-- Table Body -->
@@ -174,6 +175,15 @@
                     <button v-if="agent.ave_feedback_by_um != null"  @click="openModal( agent.feedback_by_um )" >
                         {{ agent.ave_feedback_by_um }}
                     </button>                    
+                    </td>
+                    <td class="py-0.5 px-4 text-center text-xs border  text-blue-700"
+                     :class="Number(agent.deduction) > 0 ? 'text-red-600 font-bold' : 'font-medium'"
+                    >
+
+                     <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, deduction:  agent.deduction, agent_type: agent.agent_type, metrics_type: 'deduction' })" >
+                      {{ agent.deduction }}
+
+                      </button>     
                     </td>
                    
                     <!-- Actions -->
@@ -590,6 +600,16 @@
              selectedData.value = selectedAgent
              showModalMetricsType.value = true           
             break
+          case "deduction":
+
+             modalMeticsTypeMessage.value = [ "Add Deduction", "Edit Deduction"]
+             if(Number(selectedAgent.deduction) > 0){
+              modalMeticsType.value = 'edit'
+           
+            }
+             selectedData.value = selectedAgent
+             showModalMetricsType.value = true
+            break
           default:
           console.log("Unknown Metircs type");
           break;
@@ -655,7 +675,16 @@
             await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', route.query, 'POST')
           
              fetchSalesAgentsEvaluation(route.query)  
-          break      
+          break 
+       case "deduction":
+            if(Number(agent.deduction) == 0){
+              alert('Deduction must be greater than zero(0)')
+              return
+            }
+             agent.evaluation = true
+             await useManageSalesStore.addUpdateDeleteDeduction(agent.agent_id, agent, route.query, 'POST')
+             fetchSalesAgentsEvaluation(route.query)  
+          break
 
       
       default:
@@ -692,7 +721,16 @@
              agent.feedback_score = agent.feedback  // assign feedback value to feedback_score because the qa feedback  is save as feedback_score
             await useFeedbackStore.addUpdateDeleteFeedback(agent.agent_id, agent, 'qa', route.query, 'PUT')
             fetchSalesAgentsEvaluation(route.query)
-          break                
+          break
+        case "deduction":
+             if(Number(agent.deduction) == 0){
+              alert('Deduction must be greater than zero(0)')
+              return
+            }
+             agent.evaluation = true
+             await useManageSalesStore.addUpdateDeleteDeduction(agent.agent_id, agent, route.query, 'PUT')
+             fetchSalesAgentsEvaluation(route.query)  
+          break                  
         default:
           console.log("Unknow Metircs type");
           break;
@@ -724,7 +762,11 @@
               agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
               await useManageSalesStore.deleteAgentAttendanceType(agent.agent_id, route.query, metricsType.value, agent)
               fetchSalesAgentsEvaluation(route.query)
-            break    
+            break
+          case "deduction":
+              agent.evaluation = true
+              await useManageSalesStore.addUpdateDeleteDeduction(agent.agent_id, agent, route.query, 'DELETE')
+              fetchSalesAgentsEvaluation(route.query)
                                      
             default:
               console.log("Unknow Metircs type");

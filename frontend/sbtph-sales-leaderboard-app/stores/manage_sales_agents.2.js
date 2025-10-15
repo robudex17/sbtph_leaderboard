@@ -24,6 +24,7 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
         salesAgentTardiness: [],
         salesAgentFeedback: [],
         salesAgentEvaluation: [],
+        salesAgentDeduction: [],
         loading:false,
         error: null
     })
@@ -1037,7 +1038,62 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
         } finally {
             state.loading = false
         }
-    }    
+    } 
+    
+    const addUpdateDeleteDeduction = async(id, data , query, httpMethod) => {
+        state.loading = true
+        state.error = null
+        let url = `${API.agent_deduction}/${id}`
+        let errorMessage
+        
+  
+         url = new URL(`${url}`)      
+        try {
+            const response = await fetch(`${url}`, {
+                method: httpMethod,
+                body: JSON.stringify(data),
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`,
+                },
+            }) 
+         
+            //token is  invalid  remove to local storage 
+            if(!response.ok && response.status == 403){
+                const errors = await response.json()
+                if (errors.message == 'Invalid Access Token'){
+                    localStorage.removeItem('jwt')
+                    alert('Your Session has been expired, Please Login again.')
+                    location.reload()
+                }
+            }           
+
+            if (!response.ok) {
+                
+                const errors = await response.json()
+                throw new Error(errors || "An unknown error occurred");
+            }
+       
+          if (httpMethod == 'POST'){
+               
+                alert(`Adding New Deduction with id of ${id} is successful` ) 
+           }else if (httpMethod== 'PUT'){
+                alert(`Updating Deduction with id of ${id} is successful` )
+           }else if (httpMethod== 'DELETE'){
+                alert(`Deleting Deduction with id of ${id} is successful` )
+           }else{
+            console.log('Un Identified method.')
+           }
+
+          
+        } catch (error) {
+            console.log(error.message)
+            state.error = error.message
+        } finally {
+            state.loading = false
+        }
+    }
+    
 
 
     return {
@@ -1062,7 +1118,8 @@ export const useManageSalesAgentStore2 = defineStore('salesAgents2', () => {
         deleteAgentFeedback,
         fetchSalesEvaluation, 
         submitSalesEvaluation,
-        reviewSalesEvaluation
+        reviewSalesEvaluation,
+        addUpdateDeleteDeduction,
     }
 })
 

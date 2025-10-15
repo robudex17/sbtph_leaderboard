@@ -232,6 +232,13 @@
                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.additional_points }}</td>
             </tr>
 
+            <tr v-if="selectedAgent && selectedAgent.deduction > 0">
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500">Deduction</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center">0</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center">{{ selectedAgent.deduction }}</td>
+            </tr>
+
+
             </tbody>
           </table>
           <table class="min-w-full table-auto mt-6">
