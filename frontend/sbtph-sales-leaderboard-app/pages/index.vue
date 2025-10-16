@@ -10,14 +10,14 @@
     <div v-else>
           <!-- Toggle Button for Card/Table View -->
       <div class="mb-4 flex justify-end">
-        <button v-if="leaderboardOption != 'team'"
+        <button v-if="leaderboardOption != 'team' && leaderboardOption != 'new deposit'"
           @click="toggleView" 
           class="bg-blue-600 text-white py-1 px-2 rounded-lg hover:bg-blue-700 transition duration-300"
         >
         <font-awesome-icon :icon="['fas', isCardView ? 'toggle-off' : 'toggle-on']" />
           Toggle to {{ isCardView ? 'Table' : 'Card' }} View
         </button>
-        <export-to-excel-component  v-if=" isAdmin && !isCardView && leaderBoardStore.state.leaderboard.length && leaderboardOption != 'team'" class="ml-2"
+        <export-to-excel-component  v-if=" isAdmin && !isCardView && leaderBoardStore.state.leaderboard.length && (leaderboardOption != 'team'  || leaderboardOption != 'new deposit')" class="ml-2"
          :exportUrl="exportUrl"
          :exportFileName="exportFileName"
          :query="query"
@@ -41,7 +41,7 @@
               <div class="flex flex-col items-center justify-center text-center p-4">
                 <div
                   class="px-3 py-1 m-2 text-xl font-semibold"
-                  :class="team.tag ? 'font-bold text-purple-400' : 'py-5'"
+                  :class="team.tag ? 'px-4 py-1 text-sm font-bold uppercase tracking-widest bg-purple-600/20 text-purple-400 rounded-full border border-purple-500' : 'py-5'"
                 >
                   {{ team.tag }}
                 </div>
@@ -95,7 +95,58 @@
 
             </div>            
             
-          </div>    
+          </div>  
+          <div
+            v-else-if="isCardView && leaderboardOption == 'new deposit'"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4"
+          >
+            <div
+              v-for="(agent, index) in leaderBoardStore.state.leaderboard"
+              :key="index"
+              class="bg-gray-800 text-white border border-gray-700 rounded-2xl shadow-lg overflow-hidden transition transform hover:scale-105 hover:shadow-2xl"
+            >
+              <div class="flex flex-col items-center justify-center text-center p-6 space-y-3">
+
+                <!-- Tag -->
+                <div
+                
+                  :class="agent.tag != '' ? 'px-4 py-1 text-sm font-bold uppercase tracking-widest bg-purple-600/20 text-purple-400 rounded-full border border-purple-500' : 'py-4'"
+                >
+                  {{ agent.tag }}
+                </div>
+
+                <!-- Agent Image -->
+                <img
+                  v-if="agent.image_link"
+                  :src="updateImageLink(agent.image_link)"
+                  alt="Agent Image"
+                  class="w-24 h-24 rounded-full object-cover border-2 border-gray-600 shadow-md"
+                />
+                <div
+                  v-else
+                  class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-white border border-gray-600"
+                >
+                  <span class="text-xl font-semibold">{{ agent.db_name?.charAt(0).toUpperCase() }}</span>
+                </div>
+
+                <!-- Agent Info -->
+                <div class="text-center">
+                  <h2 class="text-lg font-bold text-white">{{ agent.db_name }}</h2>
+
+                  <div class="my-3">
+                    <h1 class="text-6xl font-extrabold text-blue-400">{{ agent.new_deposit_count }}</h1>
+                    <p class="text-sm tracking-wide text-gray-400">New Deposits</p>
+                  </div>
+
+                  <div class="flex justify-center gap-3 mt-2 text-sm">
+                    <p class="font-semibold text-green-400">{{ agent.month }}</p>
+                    <p class="font-semibold text-yellow-400">{{ agent.year }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+            
           <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
               v-for="(agent, index) in leaderBoardStore.state.leaderboard"
@@ -105,7 +156,7 @@
               <div class="flex flex-col items-center p-4">
                   <div
                     class="px-3 py-1 m-2 text-xl font-semibold"
-                    :class="agent.tag ? 'font-bold  text-purple-400' : 'py-5'"
+                    :class="agent.tag ? 'px-4 py-1 text-sm font-bold uppercase tracking-widest bg-purple-600/20 text-purple-400 rounded-full border border-purple-500' : 'py-5'"
                   >
                     {{ agent.tag }}
                 </div>
@@ -556,8 +607,6 @@ const leaderboardOption = ref("")
 
 
 
-
-
 if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
     isAdmin.value = true
    
@@ -665,7 +714,7 @@ watch(route, (newRoute) => {
   query.value = newRoute.query
   leaderboardOption.value =  newRoute.query.leaderboardOption
 
-  if(leaderboardOption.value == 'team'){
+  if(leaderboardOption.value == 'team' || leaderboardOption.value == 'new deposit'){
     isCardView.value = true
   }
   

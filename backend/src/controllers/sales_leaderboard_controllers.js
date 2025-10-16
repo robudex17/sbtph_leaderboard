@@ -117,6 +117,83 @@ let leaderboardMasterQuery =
               AND ded.year =?
 `
 
+
+let leaderboardNewDepositOnlyQuery = 
+
+`
+    SELECT 
+              sa.id AS id,
+              sa.firstname,
+              sa.lastname,
+              sa.db_name,
+              sa.email,
+              sa.image_link,
+              aa.agent_type,
+              r.role_name AS agent_role,
+              aa.manager_id,
+              mgr.db_name AS manager_dbname,
+              mr.role_name AS manager_role,
+              m.id AS market_id,
+              m.name AS market_name,
+              t.id AS team_id,
+              t.name AS team_name,
+              ae.status AS employee_status,
+              COALESCE(nd.month, ?) AS month,
+              COALESCE(nd.year, ?) AS year,
+              COALESCE(nd.total_deposit_count, 0) AS new_deposit_count
+
+          FROM sales_agents2 sa
+          JOIN (
+              SELECT aa1.*
+              FROM agent_assignments aa1
+              JOIN (
+                  SELECT agent_id, MAX(id) AS latest_id
+                  FROM agent_assignments
+                  WHERE DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                    AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+                  GROUP BY agent_id
+              ) aa2 
+                ON aa1.agent_id = aa2.agent_id 
+              AND aa1.id = aa2.latest_id
+          ) aa ON sa.id = aa.agent_id
+          JOIN (
+              SELECT ae1.*
+              FROM agent_employments ae1
+              JOIN (
+                  SELECT agent_id, MAX(id) AS latest_id
+                  FROM agent_employments
+                  WHERE DATE_FORMAT(start_date, '%Y-%m') <= ?
+                    AND (end_date IS NULL OR DATE_FORMAT(end_date, '%Y-%m') >= ?)
+                  GROUP BY agent_id
+              ) ae2 
+                ON ae1.agent_id = ae2.agent_id 
+              AND ae1.id = ae2.latest_id
+          ) ae ON sa.id = ae.agent_id
+          LEFT JOIN sales_agent_roles r ON aa.agent_type = r.id
+          LEFT JOIN sales_agents2 mgr ON aa.manager_id = mgr.id
+          LEFT JOIN agent_assignments maa ON mgr.id = maa.agent_id 
+            AND maa.id = (
+                SELECT MAX(id) 
+                FROM agent_assignments 
+                WHERE agent_id = mgr.id
+                  AND DATE_FORMAT(effective_from, '%Y-%m') <= ?
+                  AND (effective_to IS NULL OR DATE_FORMAT(effective_to, '%Y-%m') >= ?)
+            )
+          LEFT JOIN sales_agent_roles mr ON maa.agent_type = mr.id
+          LEFT JOIN markets m ON aa.market_id = m.id
+          LEFT JOIN teams t ON aa.team_id = t.id
+          LEFT JOIN (
+                SELECT agent_id, year, month, COUNT(*) AS total_deposit_count
+                FROM new_deposit
+                GROUP BY agent_id, year, month
+            ) nd ON nd.agent_id = sa.id 
+             AND nd.month =?
+             AND nd.year = ?
+
+`
+
+
+
 exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, leaderboardOption,path, leaderboardMasterQuery ) => {
     //CHECK FIRST IF THERE ARE AVAILABLE MONTH AND YEAR ON target_shipok if not return empty array Imediately
 
@@ -152,6 +229,32 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
 
   let sales_agents
+
+  if(leaderboardOption == 'new deposit'){
+     const [sales_agents_new_deposit_result] = await pool.execute(leaderboardNewDepositOnlyQuery,[givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot,
+      givenMonth, givenYear
+     ])
+
+     
+
+     sales_agents =  sales_agents_new_deposit_result.filter(agent => agent.new_deposit_count > 0).sort((a, b) => b.new_deposit_count - a.new_deposit_count)
+                     // Step 1: Get the top final_ratings
+     const topRating = Math.max(...sales_agents.map(agent => parseFloat(agent.new_deposit_count)))
+
+
+    // Step 2: Check how many agents have the same top rating
+     const topCount = sales_agents.filter(agent => parseFloat(agent.new_deposit_count) === topRating).length; 
+
+                  // Step 2: Add the tag conditionally based on final_ratings and agent_type
+    const sales_agents_with_tags = sales_agents.map(agent => ({
+                    ...agent,
+                    tag: topCount === 1 && parseFloat(agent.new_deposit_count) === topRating ? 'TOP IN NEW DEPOSITS' : '',
+                      
+                  }))
+                
+
+     return sales_agents_with_tags
+  }
 
   if (agent_id != ""){
     
@@ -939,7 +1042,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           req.params.agent_id = agentId //manually place agentId in the
           next()
           //return the  agentMetrics immedaitely
-         } else if(agentId != ""){
+         } else if(agentId != "" || leaderboardOption == 'new deposit'){
            console.log(agentMetircs)
           res.status(200).json(agentMetircs)
         }  
