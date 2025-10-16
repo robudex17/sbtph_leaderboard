@@ -109,15 +109,15 @@
               ]
             },
 
-            { 
-              name: 'Overall Performance', 
-              route: null, 
-              icon: ['fas', 'cog'],
-              subMenu: [
-              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
-              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
-              ]
-            },            
+            // { 
+            //   name: 'Overall Performance', 
+            //   route: null, 
+            //   icon: ['fas', 'cog'],
+            //   subMenu: [
+            //   { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+            //   { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+            //   ]
+            // },            
 
             { 
               name: 'Analytics', 
@@ -197,15 +197,15 @@
               ]
             },
 
-            { 
-              name: 'Overall Performance', 
-              route: null, 
-              icon: ['fas', 'cog'],
-              subMenu: [
-              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
-              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
-              ]
-            },            
+            // { 
+            //   name: 'Overall Performance', 
+            //   route: null, 
+            //   icon: ['fas', 'cog'],
+            //   subMenu: [
+            //   { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+            //   { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+            //   ]
+            // },            
 
 
             { 

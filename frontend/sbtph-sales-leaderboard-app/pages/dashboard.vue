@@ -123,31 +123,31 @@
             
                 </div>
             </div>     -->
-            <div v-else-if="dashboardoption=='overall'">
-   
+            <div v-else-if="dashboardoption=='overall' && data?.length >0">
+          
                 <p class="text-gray-800 font-bold text-4xl mb-5 ">Overall PH Office Results</p>
                 <p  class="text-gray-800 font-bold text-3xl mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                     <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].total_target }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[0]?.total_target }}</p>
                         <p class="text-gray-600 font-medium text-lg">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-7xl">{{ data[0].total_shipok }}</p>
+                        <p class="text-gray-800 font-bold text-7xl">{{ data[0]?.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
                         <p class="text-gray-800 font-bold text-6xl">
-                            {{ getWholeNumberPercentage(data[0].total_target, data[0].total_shipok) }}
+                            {{ getWholeNumberPercentage(data[0]?.total_target, data[0]?.total_shipok) }}
                             <!-- {{ data.monthly_target > 0 ? ((data.total_shipok / data.monthly_target) * 100).toFixed(2) + '%' : '0%' }} -->
                            <!-- {{ data.monthly_target > 0 ? Math.round((data.total_shipok * 100) / data.monthly_target) + '%' : '0%' }} -->
                         </p>
                         <p class="text-gray-600 font-medium text-lg">Percentage</p>
                         </div>
-                        <div :class="(data[0].total_target - data[0].total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
-                        <p class="text-gray-800 font-bold text-6xl">{{ data[0].total_target - data[0].total_shipok }}</p>
+                        <div :class="(data[0]?.total_target - data[0]?.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-6 rounded-lg shadow flex flex-col items-center justify-center h-32">
+                        <p class="text-gray-800 font-bold text-6xl">{{ data[0]?.total_target - data[0]?.total_shipok }}</p>
                         <p class="text-gray-600 font-medium text-lg">Remaining(units)</p>
                         </div>
                     </div>
@@ -221,6 +221,7 @@
 
            
             </div>
+            <div v-else>No dashboard or undefined</div>
             <!-- <p class="text-gray-800 font-bold text-4xl mt-5 mb-5 pt-10">New Deposit <span class="text-red-600">({{ trucks }})</span> as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
             <div  class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
                 <h2 class=" uppercase text-2xl font-semibold text-gray-800 mb-4">All Market</h2>
@@ -277,19 +278,31 @@ const year = ref(new Date().getFullYear())
 
 const dashboardoption = ref("")
 
-if( currentUser.agent_type == 2){
-      dashboardoption.value = "team"
-}else{
-      dashboardoption.value = "individual"
-}
+// if( currentUser.agent_type == 2){
+//       dashboardoption.value = "team"
+// }else{
+//       dashboardoption.value = "individual"
+// }
 
 if(!route.query.dashboardoption && currentUser.agent_type != 2){
+
+  dashboardoption.value = 'individual'
   route.query.dashboardoption = 'individual'
+}else{
+  dashboardoption.value = route.query.dashboardoption
 }
 
 if(!route.query.dashboardoption && currentUser.agent_type == 2){
+  dashboardoption.value = 'team'
   route.query.dashboardoption = 'team'
+}else{
+  dashboardoption.value = route.query.dashboardoption
 }
+
+
+
+
+
 
 
 
@@ -308,6 +321,7 @@ const fetchDashboardData = async (query) => {
 }
 
 onMounted( async() => {
+
  await fetchDashboardData(route.query)
 
 })
@@ -320,21 +334,22 @@ onMounted( async() => {
 // })
 
 watch(route, async(oldRoute, newRoute) => {
-    if( currentUser.agent_type == 2){
-      dashboardoption.value = "team"
-    }else{
-          dashboardoption.value = "individual"
-    }
+   
 
     if(!newRoute.query.dashboardoption && currentUser.agent_type != 2){
-      newRoute.query.dashboardoption = 'individual'
+       dashboardoption.value = 'individual'
+       newRoute.query.dashboardoption = 'individual'
+    }else{
+      dashboardoption.value = newRoute.query.dashboardoption
     }
 
     if(!newRoute.query.dashboardoption && currentUser.agent_type == 2){
       newRoute.query.dashboardoption = 'team'
+      dashboardoption.value = 'team'
+    }else{
+      dashboardoption.value = newRoute.query.dashboardoption
     }
 
-    dashboardoption.value = newRoute.query.dashboardoption
     activeMarketId.value = null
     activeOverallBreakdown.value = false
    await fetchDashboardData(newRoute.query) 
@@ -370,105 +385,6 @@ const rowClass = computed(() => {
 </script>
 
 
- <!-- <script setup>
-
-definePageMeta({
-   middleware: 'auth'
-})
-import { onMounted,computed } from 'vue';
-
-import Chart from 'chart.js/auto';
-import { text } from '@fortawesome/fontawesome-svg-core';
-
-//get the current user
-const authStore = useAuthStore()
-authStore.fetchTokenFromLocalStore()
-
-const currentUser = authStore.state.user 
-
-
-const router = useRouter()
-const route = useRoute()
-
-
-
-const query = route.query
-
-const month = ref(null)
-const year = ref(null)
-
-const dashboardoption = ref("individual")
-    // Months for the dropdown
-    const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
-
-month.value= months[new Date().getMonth()]
-year.value = new Date().getFullYear() 
-
-if(!query.dashboardoption){
-  query.dashboardoption =  'individual'
-}
-
-
-
-const dashBoardStore = useDashBoardStore()
-
-const data = computed(() => {
-   return dashBoardStore.state.dashboard.data
-})
-
-
-// Reactive object to track which tables are shown
-const showTable = reactive({})
-
-const showMarketTable = ref(false)
-
-
-const toggleTable = (id) => {
-  showTable[id] = !showTable[id]
-}
-
-
-onMounted(async () => {
-  
-  //Initialize all show breakdown button to false
-//    data.forEach(d => {
-//      showTable[d.market_id] =!showTable[id]
-//    })
-    await dashBoardStore.fetchDashboard(query)
-  
- 
-})
-
-onMounted(async () => {
-  Object.keys(showTable).forEach(key => delete showTable[key])
-  await dashBoardStore.fetchDashboard(query)
-})
-
-watch(route,  async (newRoute) => {
-  console.log('The route is change. we should react to the change..')
-
-  
-  dashboardoption.value = newRoute.query.dashboardoption
-
-  console.log(newRoute.query)
-  router.push(newRoute.fullPath)
-  await dashBoardStore.fetchDashboard(newRoute.query)
-
-  
-})
-
-const rowClass = computed(() => {
-    return (agent, index) => {
-
-        return index % 2 === 0 ? "bg-white  text-green-800 font-bold" : "font-bold bg-green-100 text-green-800"; // Alternate row colors
-    };
-   });
-
-</script>  -->
 
 
 

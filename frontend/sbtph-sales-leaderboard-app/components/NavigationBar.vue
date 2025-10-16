@@ -158,6 +158,10 @@
     const selectedMonth = ref("");
     const selectedYear = ref("");
     const truckOption = ref(true) //default is  include the truck 
+    const router = useRouter()
+    const route = useRoute()
+    const urlPath = ref(route.fullPath)
+
     
 
     // Dashboard values
@@ -168,11 +172,23 @@
 
     //if rustan is login  set  dashboardOption default value as team
     if( currentUser.agent_type == 2){
-      dashboardOption.value = "team"
+      if(!route.query.dashboardoption){
+        dashboardOption.value = "team"
+      }else{
+       
+        dashboardOption.value = route.query.dashboardoption
+      }
     }else{
-      dashboardOption.value = "individual"
+     
+      if(!route.query.dashboardoption){
+        dashboardOption.value = "individual"
+      }else{
+     
+        dashboardOption.value = route.query.dashboardoption
+        
+      }
     }
-
+  
   
     const leaderboardOption = ref('agent')
 
@@ -193,9 +209,7 @@
     );
     // const years = Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - i);
 
-    const router = useRouter()
-    const route = useRoute()
-    const urlPath = ref(route.fullPath)
+
 
     const pathWithoutMonthOption = ref([
       '/analytics/agents',
@@ -295,6 +309,7 @@
     })
 
     const dashboardListOfOptions  = computed(()  => {
+      
       if (currentUser.agent_type == 2) {
         return [ 'team', 'overall']
       }else{

@@ -33,6 +33,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     //const  dashboarOption = req.query.dashboardoption 
 
     let dashboarOption ;
+
+    console.log(req.query.dashboardoption)
     if((!req.query.dashboardoption || req.query.dashboardoption == '') ){
         if(loginUser.agent_type == 2){
             dashboarOption = 'team'
