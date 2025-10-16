@@ -1531,12 +1531,13 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                       }else{
                         numberOfTimes = itterationArray[k];
                       }
+                        const givenDate = new Date(`${month} 5, ${year}`);
+                        const formatted = givenDate.toISOString().split('T')[0];
                       
                       if(table == 'new_deposit'){
                         console.log('first new deposit')
                        
-                        const givenDate = new Date(`${month} 1, ${year}`);
-                        const formatted = givenDate.toISOString().split('T')[0];
+
                         await pool.execute(
                         `INSERT INTO new_deposit (agent_id, month, year, date, new_deposit, description)
                         VALUES (?, ?, ?, ?, ?, ?)`,
@@ -1546,7 +1547,7 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                         await pool.execute(
                             `INSERT INTO ${table} (agent_id, month, year, date,  description)
                             VALUES (?, ?, ?, ?,? )`,
-                            [agent_id, toCapitalized(month), year, `${year}-${month}-${k+1}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
+                            [agent_id, toCapitalized(month), year, `${formatted}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
                         );
                      }
                       
