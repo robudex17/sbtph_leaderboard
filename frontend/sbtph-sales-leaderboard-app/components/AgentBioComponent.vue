@@ -1,6 +1,6 @@
 <template>
     <div>
-      <h1 class="text-2xl font-bold mb-4 text-center">{{ agentFirstname }} {{ agentLastname }} ({{ agentId }}) Employments and Assignments  Information</h1>    
+      <h1 class="text-2xl font-bold mb-4 text-center">{{ agentFirstname }} {{ agentLastname }} (<span class="text-green-600">{{ agentId }}</span>) Employments and Assignments  Information</h1>    
       <div class="overflow-x-auto">
         <table class="w-full table-auto border-collapse bg-white">
           <thead class="bg-gradient-to-r from-blue-300 to-blue-300 text-gray-800">

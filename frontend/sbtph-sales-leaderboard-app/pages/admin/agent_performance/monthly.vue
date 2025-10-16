@@ -183,7 +183,7 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
   }
   
   if (agent.ratings_name == 'VERY SATISFACTORY') {
-    return 'text-blue-500'
+     return 'text-blue-600'
   }
 
   if (agent.ratings_name == 'SATISFACTORY') {

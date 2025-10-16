@@ -234,7 +234,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
           sales_agents = sales_agents_result
       }  
 
-      sales_agents = sales_agents.filter(agent => agent.target != 0 || agent.agent_type == 2) // include only agent target is not zero and  senior manager
+      sales_agents = sales_agents.filter(agent => agent.target != 0 || agent.agent_type == 2 || agent.agent_type == 1) // include only agent target is not zero and  senior manager
  
       const lms = sales_agents.filter(agent => agent.agent_type == 1)
       const agents = sales_agents.filter(agent => agent.agent_type == 0)

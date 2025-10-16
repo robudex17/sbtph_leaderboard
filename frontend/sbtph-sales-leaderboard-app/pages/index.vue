@@ -597,9 +597,37 @@ const leaderBoardData = (leaderboardOption,query, year_summary) => {
 
 // Show the details of the selected agent
 const showAgentDetails = (agent) => {
-  // selectedAgent.value = agent;
-  Object.assign(selectedAgent, agent);
-  showModal.value = true; // Show the modal
+  
+
+      switch(currentUser.agent_type){ 
+      case 0:
+         if(currentUser.login_id !== agent.id){
+            alert('You are not allowed to view other agents details. Please contact your administrator.')
+            showModal.value = false
+            return;
+         } else {
+            Object.assign(selectedAgent, agent);
+            showModal.value = true; // Show the modal
+         }
+        break;
+      case 1:
+        if(currentUser.team_id !== agent.team_id){
+            alert('You are not allowed to view other teams agents details. Please contact your administrator.')
+            return;
+         } else {
+            Object.assign(selectedAgent, agent);
+            showModal.value = true; // Show the modal
+         }
+        break;
+      default:
+          Object.assign(selectedAgent, agent);
+          showModal.value = true; // Show the modal
+          break;
+    }
+
+    
+
+
 };
 
 // Show the details of the selected agent
