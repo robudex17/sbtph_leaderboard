@@ -373,6 +373,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
       
             sales_agents = [...agents, ...resultLms, ...resultUm]
+            sales_agents = sales_agents.filter(agent => agent.target != 0 ) // include only agent target is not zero and  senior manager
 
 
       }else if(leaderboardOption == 'lm'){
