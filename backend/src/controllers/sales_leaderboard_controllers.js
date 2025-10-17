@@ -990,7 +990,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         const monthResults = await Promise.all(monthQueries);
 
         // Flatten results (all months for this agent)
-        const fullYearAgentPerformances = monthResults.flat();
+        const fullYearAgentPerformances = monthResults.flat().filter(agent => agent.target != 0); // Remove any undefined/null records
 
         
 
@@ -1010,7 +1010,12 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           yearAverage.ratings_name = "INCOMPLETE RATING";
           // yearAverage.final_ratings = 0;
         } else if (yearAverage.final_ratings) {
-          yearAverage.ratings_name = await getRatingName(yearAverage.final_ratings);
+           const [year_ratings] = await pool.execute(
+              'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',
+              [yearAverage.final_ratings]
+            );
+
+          yearAverage.ratings_name = year_ratings[0].ratings_name;
         } else {
           yearAverage.ratings_name = "No Ratings";
           // yearAverage.final_ratings = 0;
@@ -1026,6 +1031,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           req.performance = data;
           next();
         } else {
+          console.log(data)
           res.status(200).json(data);
         }
   }
