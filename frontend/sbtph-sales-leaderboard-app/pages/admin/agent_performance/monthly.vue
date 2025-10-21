@@ -12,6 +12,12 @@
      
       <!-- Agents Table -->
       <div v-else class="overflow-x-auto shadow-xl rounded-lg">
+         <!-- <export-to-excel-component  v-if=" isAdmin  && agents.length > 0" 
+         :exportUrl="exportUrl"
+         :exportFileName="exportFileName"
+         :query="route.query"
+         :token="token"
+        ></export-to-excel-component>        -->
      
         <table class="w-full table-auto border-collapse bg-white">
           <thead>
@@ -28,7 +34,25 @@
               <th class="py-2 px-2  border text-center text-xs font-bold ">Rating</th>
               <th class="py-2 px-2  border text-center text-xs font-bold ">Rating Name</th>
               <th class="py-2 px-2  border text-center text-xs font-bold ">Image</th>
-              <th class="py-2 px-2 border text-center text-xs font-bold ">Details</th>
+              <th class="py-2 px-2 border text-center text-xs font-bold whitespace-nowrap min-w-[120px]">
+                <div class="flex items-center justify-center gap-2">
+                  <span>Details</span>
+
+                  <div class="flex-shrink-0">
+                    <export-to-excel-component
+                      v-if="isAdmin && agents.length > 0"
+                      :exportUrl="exportUrl"
+                      :exportFileName="exportFileName"
+                      :query="route.query"
+                      :token="token"
+                      :incomplete="incomplete"
+                      class=" !text-white !text-[10px] !px-2 !py-1 !rounded !hover:bg-green-600 !transition-all !duration-200"
+                    >
+                    </export-to-excel-component>
+                  </div>
+                </div>
+              </th>
+
             </tr>
           </thead>
           <tbody>
@@ -126,20 +150,32 @@
   
   import { ref, computed } from 'vue';
   import { onMounted } from 'vue';
-import { parse } from 'vue/compiler-sfc';
+
+ import API from '~/utils/api'
   
   //get the current user
   const authStore = useAuthStore()
   authStore.fetchTokenFromLocalStore()
   
   const currentUser = authStore.state.user 
+  const token = authStore.state.token
 
   const router = useRouter()
   const route = useRoute()
-  const query = route.query
+  
 
   const year_summary = false
   const leaderboardOption = 'all'
+  const isAdmin = ref(false)
+  const month = ref("")
+  const year = ref("")
+  const incomplete = ref(false)
+
+   const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ]
+
   
   
   const leaderBoardStore = useLeaderBoardStore()
@@ -157,6 +193,12 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
 //   const agents = computed(() => manageSalesAgentStore.state.salesAgents);
 
   const agents = computed(() => leaderBoardStore.state.leaderboard);
+
+  incomplete.value = agents?.value.some(agent => agent.ratings_name === 'INCOMPLETE RATING');
+
+
+
+
  
   const totalPages = computed(() =>
     Math.ceil(agents.value.length / itemsPerPage)
@@ -174,6 +216,27 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
   const updateImageLink = (imageLink) => {
         return `${config.public.imageBaseUrl}${imageLink}`
   }
+
+  const exportUrl = API.export.leaderboard
+
+  month.value = route.query.month ||  months[new Date().getMonth()]
+  year.value = route.query.year ||  new Date().getFullYear()
+  
+  route.query.leaderboardOption = 'all'
+
+  
+
+
+if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+   
+  }
+
+
+const exportFileName = computed(()=> {
+  return `agents-${month.value}-${year.value}-performance.xlsx`
+})
+
 
 
 
