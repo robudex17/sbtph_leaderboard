@@ -37,19 +37,22 @@
   incomplete: {
     required: true,
     type: Boolean
+  },
+  submittedArray: {
+    required: true,
+    type: Boolean
   }
 });
 
 
-let url = new URL(props.exportUrl)
-         console.log(url)
-        if (props.query) {
-            Object.keys(props.query).forEach((key) =>
-                url.searchParams.append(key, props.query[key])
-            )
-        }
+
+
+
 
 const exportExcel = async () => {
+
+
+
     if(props.submitted == 0){
       alert('Cannot Export Agent Data which has not been submitted')
       return
@@ -59,6 +62,15 @@ const exportExcel = async () => {
 
       return 
     }
+
+    let url = new URL(props.exportUrl)
+         console.log(url)
+        if (props.query) {
+            Object.keys(props.query).forEach((key) =>
+                url.searchParams.append(key, props.query[key])
+            )
+        }
+
     try {
       const response = await fetch(url, {
         method: 'GET',

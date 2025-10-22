@@ -43,7 +43,7 @@
                       v-if="isAdmin && agents.length > 0"
                       :exportUrl="exportUrl"
                       :exportFileName="exportFileName"
-                      :query="route.query"
+                      :query="query"
                       :token="token"
                       :incomplete="incomplete"
                       class=" !text-white !text-[10px] !px-2 !py-1 !rounded !hover:bg-green-600 !transition-all !duration-200"
@@ -162,6 +162,10 @@
 
   const router = useRouter()
   const route = useRoute()
+
+   const query = ref({})
+
+ 
   
 
   const year_summary = false
@@ -169,7 +173,7 @@
   const isAdmin = ref(false)
   const month = ref("")
   const year = ref("")
-  const incomplete = ref(false)
+  
 
    const months = [
             'January', 'February', 'March', 'April', 'May', 'June',
@@ -194,8 +198,12 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
 
   const agents = computed(() => leaderBoardStore.state.leaderboard);
 
-  incomplete.value = agents?.value.some(agent => agent.ratings_name === 'INCOMPLETE RATING');
 
+
+  const incomplete = computed(() => {
+     // true = has unsubmitted agents
+     return agents.value.some(agent => agent.submitted === 0)
+   })
 
 
 
@@ -224,7 +232,8 @@ const leaderBoardData = (leaderboardOption, query, year_summary) => {
   
   route.query.leaderboardOption = 'all'
 
-  
+  query.value = route.query
+
 
 
 if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
@@ -294,13 +303,16 @@ const setRatingColor = (agent) => {
   });
 
 
-  watch(route, (newRoute) => {
-  console.log('The route is change. we should react to the change..')
-  router.push(newRoute.fullPath)
-  leaderBoardData(leaderboardOption, newRoute.query, year_summary)
+watch(route, (newRoute) => {
+  console.log('Route changed, updating leaderboard data...')
   
+  const newQuery = { ...newRoute.query, leaderboardOption: 'all' }
+
+  leaderBoardData(leaderboardOption, newQuery, year_summary)
+  month.value = newQuery.month
+  year.value = newQuery.year
+  query.value = newQuery
 })
-  
   
   </script>
   
