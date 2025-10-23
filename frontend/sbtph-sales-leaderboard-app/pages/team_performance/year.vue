@@ -33,7 +33,7 @@
       <div v-else>
         <!-- CARD VIEW -->
           
-           <div v-if="isCardView"  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div v-if="isCardView"  class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
               <div
               v-for="(team, index) in teams"
               :key="index"

@@ -256,6 +256,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
      return sales_agents_with_tags
   }
 
+
   if (agent_id != ""){
     
     const [sales_agents_result] = await pool.execute(
@@ -321,9 +322,9 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
       if (withTrucks === "true" || withTrucks === true){
         const [sales_agents_result] = await pool.execute(
           leaderboardMasterQuery,[
-        givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
-        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
-        givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear
+          givenMonth, givenYear, snapshot, snapshot, snapshot , snapshot, snapshot, snapshot, 
+          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear,
+          givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear, givenMonth, givenYear
           ]  
         )
         sales_agents = sales_agents_result
@@ -337,7 +338,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
           sales_agents = sales_agents_result
       }  
 
-      sales_agents = sales_agents.filter(agent => agent.target != 0 || agent.agent_type == 2 || agent.agent_type == 1) // include only agent target is not zero and  senior manager
+      sales_agents = sales_agents.filter(agent => agent.target != 0 || agent.agent_type == 2 || agent.agent_type == 1) // include only agent target is not zero , lm and senior manager
  
       const lms = sales_agents.filter(agent => agent.agent_type == 1)
       const agents = sales_agents.filter(agent => agent.agent_type == 0)
@@ -361,14 +362,14 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
             const resultUm =  um.map(manager =>{
 
-            const totaTarget = sales_agents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
-            const totalShipOk = sales_agents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
+                const totaTarget = sales_agents.reduce((sum, a) => sum + (a.target || 0), manager.target || 0)
+                const totalShipOk = sales_agents.reduce((sum, a) => sum + (a.shipok || 0), manager.shipok || 0)
 
-            return {
-              ...manager,
-              target: totaTarget,
-              shipok: totalShipOk
-            }
+                return {
+                  ...manager,
+                  target: totaTarget,
+                  shipok: totalShipOk
+                }
             })
 
       
@@ -402,7 +403,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
                   shipok: totalShipOk
                 }
             })
-        sales_agents = [...resultLms, ...agents]
+          sales_agents = [...resultLms, ...agents]
       }else if(leaderboardOption == 'agent'){
         sales_agents = agents
       }
@@ -834,8 +835,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
     
-
-     
+ 
             // Get the month name
     const monthNames = [
               "January", "February", "March", "April", "May", "June",
@@ -889,22 +889,12 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     }
 
 
-    
-    // if(!req.query.leaderboardOption  || req.query.leaderboardOption  == ''){
-    //    leaderboardOption = 'agent'
-    // }else{
-    //     leaderboardOption  = req.query.leaderboardOption
-    // }
-
-    
+  
 
     leaderboardOption = req.params.leaderboardOption || req.query.leaderboardOption || 'agent'
     const path = req.path
 
     
-
- 
-
     try {
     //fetch all agent available and save it to sales_agent array
     // const connection =  await pool.getConnection()
@@ -1046,6 +1036,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
        
         if(exportToExcel){
           req.performance = agentMetircs 
+          req.leaderboardOption = leaderboardOption
           req.params.agent_id = agentId //manually place agentId in the
           next()
           //return the  agentMetrics immedaitely

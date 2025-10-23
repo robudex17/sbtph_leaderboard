@@ -100,7 +100,7 @@
   <script setup>
   
   definePageMeta({
-    middleware: ['auth']
+    middleware: ['auth', 'feedback-by-sales']
   })
   
   import { ref, computed } from 'vue';

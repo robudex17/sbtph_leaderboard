@@ -19,12 +19,9 @@ exports.addNewFeedback = async (req, res, next) => {
     const adminId = req.body.admin_id 
     const adminDbname = req.body.admin_dbname
     const adminRole = req.body.admin_role
-
     const agentId = req.params.agent_id
    
-
-
-   
+  
         
     try {
         const query = "INSERT INTO feedback ( agent_id, agent_dbname, admin_id, admin_dbname, admin_role,month,year,date,feedback) VALUES (?,?,?,?,?,?,?,?,?)"
@@ -51,7 +48,6 @@ exports.addNewFeedback = async (req, res, next) => {
     // }
    
 
-  
     const agentId = req.params.agent_id
 
     const feedback = req.body.feedback 
@@ -62,12 +58,7 @@ exports.addNewFeedback = async (req, res, next) => {
     const agentDbname = req.body.agent_dbname
     const adminId = req.body.admin_id 
     const adminDbname = req.body.admin_dbname
-    const adminRole = req.body.admin_role
-
-
-
-
-    
+    const adminRole = req.body.admin_role 
         
     try {
         const query = "UPDATE feedback SET  admin_id=?, admin_dbname=?, admin_role=?, feedback=?  WHERE agent_id=? AND month=? AND year=?"
@@ -166,7 +157,7 @@ exports.addNewFeedback = async (req, res, next) => {
     const agentId = req.params.agent_id
     const feedbackDate = req.query.date 
 
-   const feedbackMonth = req.body.month 
+    const feedbackMonth = req.body.month 
     const feedbackYear = req.body.year 
     const adminId = req.body.admin_id 
     const adminDbname = req.body.admin_dbname
@@ -194,8 +185,6 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
     const errors = validationResult(req)
 
-    console.log('it came to this controller')
-
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
@@ -208,7 +197,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
           feedback_type,
           } = req.body
    
-    console.log(req.method)
+   
     let feedback_table
     let success_message
     let error_message
@@ -263,7 +252,6 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
             error_message = 'Unit Manager Feedback Not Found..Cannot Delete Unit Manager Feedback'
         }
     }
-
 
 
     try {
@@ -352,10 +340,8 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-  
-    
 
-       const { who_give_feedback_id,
+    const { who_give_feedback_id,
           who_give_feedback_db_name,
           who_receive_feedback_id,
           who_receive_feedback_db_name, 
@@ -556,34 +542,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
             who_give_feedback_id = manager[0].manager_id
         }
 
-     
-
-    //     query_feedback_month =  `
-    //     SELECT 
-    //         sa.id AS  who_give_feedback_id,
-    //         sa.firstname,
-    //         sa.lastname,
-    //         sa.image_link,
-    //         sa.db_name AS who_give_feedback_name,
-    //         sa.manager_id,
-    //         COALESCE(fbalm.feedback_score, 0) AS feedback_score,
-    //         COALESCE(fbalm.responses, "{}") AS responses,
-    //         COALESCE(fbalm.month, ?) AS month,
-    //         COALESCE(fbalm.year, ?)  AS year,
-    //         fbalm.agent_id AS who_receive_feedback_id,
-    //         fbalm.agent_dbname,
-    //         fbalm.can_update
-    //     FROM sales_agents sa
-    //     LEFT JOIN feedback_agents_by_lm fbalm
-    //         ON sa.id = fbalm.lm_id
-    //     AND fbalm.month =  ?
-    //     AND fbalm.year =  ?
-    //     AND fbalm.agent_id = ?
-    //    WHERE sa.id = ${who_give_feedback_id}
-       
-    //   `
-
-
+    
     query_feedback_month =
             `
     

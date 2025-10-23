@@ -34,7 +34,7 @@
       <div v-else>
         <!-- CARD VIEW -->
           
-           <div v-if="isCardView && route.query.leaderboardOption == 'team' && currentUser.login_type == 'standarduser'"  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div v-if="isCardView"  class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
               <div
               v-for="(team, index) in teams"
               :key="index"
@@ -90,7 +90,7 @@
             
           </div>
 
-          <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
               v-for="(agent, index) in teams[0].teams"
               :key="index"
@@ -143,7 +143,7 @@
                 </button>
               </div>
             </div>
-          </div>        
+          </div>         -->
 
 
 
@@ -162,7 +162,7 @@
 
 
   <!-- Modal for Team Details -->
-  <div v-if="currentUser.login_type == 'standarduser'">
+  <div >
       <div v-if="showModalForTeam" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-gray-800 text-white p-6 rounded-lg w-full md:w-2/3 lg:w-1/2 xl:w-1/3 h-auto overflow-auto">
           <div class="flex flex-col items-center">
@@ -536,6 +536,7 @@ const exportFileName = computed(()=> {
 
 // Show the details of the selected agent
 const showTeamDetails = (team) => {
+  console.log(team)
   // selectedAgent.value = agent;
   Object.assign(selectedTeam, team);
   showModalForTeam.value = true; // Show the modal

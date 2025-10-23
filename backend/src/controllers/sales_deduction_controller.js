@@ -160,9 +160,6 @@ exports.deleteAgentDeduction = async (req, res, next) => {
     const month = req.body.month || req.body.eval_month
     const year = req.body.year || req.body.eval_year
 
-
-    
-
     try {
        
         const query = "DELETE FROM deduction WHERE  agent_id=? AND month=? AND year=?"

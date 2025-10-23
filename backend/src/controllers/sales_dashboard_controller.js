@@ -333,6 +333,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
    
    const fetchTeamTargetShipok = (result,month, year) => {
+             
                 let team_targets = result.reduce((acc, agent) => {
 
                 const teamId = agent.team_id 
@@ -342,7 +343,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 //will combine it with this format  'market1/market2'
                 if(!acc[teamId]){
                     acc[teamId] = {
-                        team_name: agent.market_name,
+                        team_name: agent.team_name,
                         team_id: teamId,
                         martket_id: agent.market_id,
                         market_name: agent.market_name,
@@ -441,8 +442,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
          
 
             const [result] = await pool.execute(
-                `${dashboarddMasterQuery} AND m.id=?`,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.market_id]
+                `${dashboarddMasterQuery} AND t.id=?`,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.team_id]
             )
 
          teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)

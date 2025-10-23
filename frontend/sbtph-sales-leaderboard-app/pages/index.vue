@@ -10,7 +10,8 @@
     <div v-else>
           <!-- Toggle Button for Card/Table View -->
       <div class="mb-4 flex justify-end">
-        <button v-if="leaderboardOption != 'team' && leaderboardOption != 'new deposit'"
+        <button  v-if="(leaderboardOption != 'team' && leaderboardOption != 'new deposit') && 
+         (currentUser.login_type == 'standarduser' || currentUser.agent_type == 2)"
           @click="toggleView" 
           class="bg-blue-600 text-white py-1 px-2 rounded-lg hover:bg-blue-700 transition duration-300"
         >
@@ -22,6 +23,7 @@
          :exportFileName="exportFileName"
          :query="query"
          :token="token"
+         :incomplete="incomplete"
         ></export-to-excel-component>
       </div>
       
@@ -633,10 +635,15 @@ if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
 
 const exportUrl = API.export.leaderboard
 const exportFileName = computed(()=> {
-  return `salesleaderboard-${month.value.month}-${year.value.year}.xlsx`
+  return `salesleaderboard-${month.value}-${year.value}.xlsx`
 })
 
 
+ const incomplete = computed(() => {
+     // true = has unsubmitted agents
+     
+     return leaderBoardStore.state.leaderboard.some(agent => agent.submitted === 0)
+   })
 
 
 // Method to fetch leaderboard data
@@ -701,6 +708,10 @@ const closeModalForTeam = () => {
 //Toggle the view mode between card and table
 
 const  toggleView = () => {
+  if(currentUser.login_type !== 'standarduser' && currentUser.agent_type !== 2){
+    alert('Not Allowed to shift views')
+    return
+  }
   isCardView.value = !isCardView.value
 }
 
@@ -712,6 +723,8 @@ watch(route, (newRoute) => {
   router.push(newRoute.fullPath)
   leaderBoardData(false,newRoute.query, year_summary)
   query.value = newRoute.query
+  month.value = newRoute.query.month
+  year.value = newRoute.query.year
   leaderboardOption.value =  newRoute.query.leaderboardOption
 
   if(leaderboardOption.value == 'team' || leaderboardOption.value == 'new deposit'){
