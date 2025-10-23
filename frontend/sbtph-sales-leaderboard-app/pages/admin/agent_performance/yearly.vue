@@ -97,7 +97,7 @@
 <script setup>
 
 definePageMeta({
-  middleware: ['auth', 'adminmanager']
+  middleware: ['auth', 'manager']
 })
 
 import { ref, computed } from 'vue';

@@ -2,7 +2,7 @@
     <div>
     <div class="p-4 mt-20">
       <!-- Loading Spinner -->
-
+     
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
@@ -332,7 +332,7 @@
   // in the case of salesagent user,  which he/she can view only his/her performance details agentId is equal to currentUser login_id
   let agentId;
    if (query.value.agent_id) {
-    if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin')  || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 2)){
+    if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin')  || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 2 ) || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 1 )){
        agentId = query.value.agent_id
        
     }else{

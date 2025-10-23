@@ -57,9 +57,11 @@
                 </div>
                 <div class="text-center">
                   <h3 class="text-lg font-semibold">{{ team.team_name }}</h3>
-                  <p class="text-sm  font-bold" :class="setRatingNameColor(team)" >{{ team.ratings_name }}</p>
+                  <p class="text-sm font-bold" :class="setRatingNameColor(team)">
+                    {{ team.ratings_name }}
+                  </p>
 
-                  <div class="flex items-center mt-2 ">
+                  <div class="flex justify-center items-center mt-2 space-x-1">
                     <template v-for="i in 5" :key="i">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -69,7 +71,10 @@
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        <path
+                          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2
+                            9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
                       </svg>
                     </template>
                   </div>
@@ -78,6 +83,7 @@
                   <p class="text-xl font-bold mt-2">{{ team.month }}</p>
                   <p class="text-xl font-bold mt-2">{{ team.year }}</p>
                 </div>
+
                 <button
                   @click="showTeamDetails(team)"
                   class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
@@ -124,7 +130,7 @@
           <!-- <h3 class="text-xl font-semibold">AgentID: {{ selectedAge ? selectedAgent.id : 'Agent has no ID' }}</h3> -->
           <p class="text-lg  font-bold" :class="setRatingNameColor(selectedTeam)">{{ selectedTeam ? selectedTeam.ratings_name : '' }}</p>
 
-          <div class="flex items-center mt-2">
+          <div  class="flex justify-center items-center mt-2 space-x-1">
             <template v-for="i in 5" :key="i">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

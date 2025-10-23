@@ -849,6 +849,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     let yearSummary = req.query.year_summary
     let exportToExcel = req.export_to_excel
     let leaderboardOption 
+    let loginUser = req.user 
+
    
     
     if( fullyear == 'true'){
@@ -980,7 +982,11 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         const monthResults = await Promise.all(monthQueries);
 
         // Flatten results (all months for this agent)
-        const fullYearAgentPerformances = monthResults.flat().filter(agent => agent.target != 0); // Remove any undefined/null records
+        let fullYearAgentPerformances = monthResults.flat().filter(agent => agent.target != 0); // Remove any undefined/null records
+
+        if(loginUser.agent_type == 1){
+          fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.team_id == loginUser.team_id)
+        }
 
         
 
@@ -1096,6 +1102,11 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
                       : ''
                     : ''
                 }))
+              // get only his/her team
+              if(loginUser.agent_type == 1){
+                 const agentMetircsWithRatingLoginUserTeam = agentMetircsWithRating.filter(agent => agent.team_id == loginUser.team_id)
+                   return res.status(200).json(agentMetircsWithRatingLoginUserTeam) 
+              }
               console.log(agentMetircsWithRating)
                return res.status(200).json(agentMetircsWithRating) 
             }
@@ -1137,6 +1148,10 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
 
           // Flatten results
           monthResults.forEach(result => fullYearAgentPerformances.push(...result))
+
+          if (loginUser.agent_type == 1){
+            fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.team_id == loginUser.team_id)
+          }
        
           // fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.agent_type !=2)
 
@@ -1206,7 +1221,9 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               agent_type: records[0].agent_type,
               db_name: records[0].db_name,
               image_link: records[0].image_link,
-              year: givenYear
+              year: givenYear,
+              team_id: records[0].team_id,
+              market_id: records[0].market_id
             });
 
             if (yearAverage.final_ratings) {
@@ -1267,6 +1284,12 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
                 req.performance = agentYearlyMetricsWithRating 
                 next()
               }
+
+              // if(loginUser.agent_type == 1){
+              //    const agentYearlyMetricsWithRatingForLoginUserTeam = agentYearlyMetricsWithRating.filter(agent => agent.team_id == loginUser.team_id)
+              //      return res.status(200).json(agentYearlyMetricsWithRatingForLoginUserTeam ) 
+              // }
+              console.log(agentYearlyMetricsWithRating)
                return res.status(200).json(agentYearlyMetricsWithRating) 
             }        
 
