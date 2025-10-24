@@ -267,6 +267,11 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
     leaderboardOption = "single"
 
+    // Return empty array if already resign at specific month and year
+    if(sales_agents_result.length ==0){
+      return []
+    }
+
     if(sales_agents_result[0].agent_type == 1 ||  sales_agents_result[0].agent_type == 2){
         
         
@@ -311,7 +316,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
         }
 
       }else if(sales_agents_result[0].agent_type == 0){
-      
+        
         sales_agents = sales_agents_result   
       
       }
@@ -919,6 +924,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
          
             
         ];
+
+        //
     
         const keysToSum = ["target", "shipok", "memo", "absences", "tardiness", "deposit_score"];
     
@@ -989,6 +996,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         }
 
         
+        //remove not submitted month
+        fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.submitted == 1)
 
         // Yearly averages
         const yearAverage = calculateAverages(fullYearAgentPerformances);
@@ -1149,6 +1158,11 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           // Flatten results
           monthResults.forEach(result => fullYearAgentPerformances.push(...result))
 
+
+          //remove month that not yet submitted 
+          fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.submitted == 1)
+          
+
           if (loginUser.agent_type == 1){
             fullYearAgentPerformances = fullYearAgentPerformances.filter(agent => agent.team_id == loginUser.team_id)
           }
@@ -1289,7 +1303,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               //    const agentYearlyMetricsWithRatingForLoginUserTeam = agentYearlyMetricsWithRating.filter(agent => agent.team_id == loginUser.team_id)
               //      return res.status(200).json(agentYearlyMetricsWithRatingForLoginUserTeam ) 
               // }
-              console.log(agentYearlyMetricsWithRating)
+              // console.log(agentYearlyMetricsWithRating[7])
                return res.status(200).json(agentYearlyMetricsWithRating) 
             }        
 
