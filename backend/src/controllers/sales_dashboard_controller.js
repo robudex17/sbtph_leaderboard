@@ -486,8 +486,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         },{})
 
        
-       
-        let  getTheTrucks = teamTargets.filter(team => team.team_name !== 'trucks')
+        //get the truck market
+        let  getTheTrucks = teamTargets.filter(team => team.team_id !== 5)
 
     
         targetWithoutTrucks = getTheTrucks.map(({teammembers, ...rest})=> rest).reduce((acc, team) => {
