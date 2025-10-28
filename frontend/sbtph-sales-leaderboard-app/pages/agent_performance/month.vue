@@ -2,7 +2,7 @@
     <div>
     <div class="p-4 mt-20">
       <!-- Loading Spinner -->
-
+     
       <div v-if="leaderBoardStore.state.loading">
         <spinner></spinner>
       </div>
@@ -232,6 +232,13 @@
                <td class="px-4 py-2 font-semibold border bg-gray-900 text-gray-100 text-center">{{ selectedAgent.additional_points }}</td>
             </tr>
 
+            <tr v-if="selectedAgent && selectedAgent.deduction > 0">
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500">Deduction</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center">0</td> 
+               <td class="px-4 py-2 font-bold border bg-gray-900 text-red-500 text-center">{{ selectedAgent.deduction }}</td>
+            </tr>
+
+
             </tbody>
           </table>
           <table class="min-w-full table-auto mt-6">
@@ -325,7 +332,7 @@
   // in the case of salesagent user,  which he/she can view only his/her performance details agentId is equal to currentUser login_id
   let agentId;
    if (query.value.agent_id) {
-    if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin')  || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 2)){
+    if ((currentUser.login_type == 'standarduser' && currentUser.role == 'admin')  || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 2 ) || (currentUser.login_type='salesagentuser' && currentUser.agent_type == 1 )){
        agentId = query.value.agent_id
        
     }else{

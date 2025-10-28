@@ -34,7 +34,7 @@
       <div v-else>
         <!-- CARD VIEW -->
           
-           <div v-if="isCardView && route.query.leaderboardOption == 'team' && currentUser.login_type == 'standarduser'"  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           <div v-if="isCardView"  class="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 gap-6">
               <div
               v-for="(team, index) in teams"
               :key="index"
@@ -58,9 +58,11 @@
                 </div>
                 <div class="text-center">
                   <h3 class="text-lg font-semibold">{{ team.team_name }}</h3>
-                  <p class="text-sm  font-bold" :class="setRatingNameColor(team)" >{{ team.ratings_name }}</p>
+                  <p class="text-sm font-bold" :class="setRatingNameColor(team)">
+                    {{ team.ratings_name }}
+                  </p>
 
-                  <div class="flex items-center mt-2 ">
+                  <div class="flex justify-center items-center mt-2 space-x-1">
                     <template v-for="i in 5" :key="i">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +72,10 @@
                         viewBox="0 0 24 24"
                         fill="currentColor"
                       >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                        <path
+                          d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2
+                            9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                        />
                       </svg>
                     </template>
                   </div>
@@ -79,6 +84,7 @@
                   <p class="text-xl font-bold mt-2">{{ team.month }}</p>
                   <p class="text-xl font-bold mt-2">{{ team.year }}</p>
                 </div>
+
                 <button
                   @click="showTeamDetails(team)"
                   class="text-green-300 hover:text-green-500 font-semibold hover:underline hover:scale-105 transition duration-300"
@@ -90,7 +96,7 @@
             
           </div>
 
-          <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <!-- <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div
               v-for="(agent, index) in teams[0].teams"
               :key="index"
@@ -143,7 +149,7 @@
                 </button>
               </div>
             </div>
-          </div>        
+          </div>         -->
 
 
 
@@ -162,7 +168,7 @@
 
 
   <!-- Modal for Team Details -->
-  <div v-if="currentUser.login_type == 'standarduser'">
+  <div >
       <div v-if="showModalForTeam" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="bg-gray-800 text-white p-6 rounded-lg w-full md:w-2/3 lg:w-1/2 xl:w-1/3 h-auto overflow-auto">
           <div class="flex flex-col items-center">
@@ -181,7 +187,7 @@
               <!-- <h3 class="text-xl font-semibold">AgentID: {{ selectedAge ? selectedAgent.id : 'Agent has no ID' }}</h3> -->
               <p class="text-lg  font-bold" :class="setRatingNameColor(selectedTeam)">{{ selectedTeam ? selectedTeam.ratings_name : '' }}</p>
 
-              <div class="flex items-center mt-2">
+              <div  class="flex justify-center items-center mt-2 space-x-1">
                 <template v-for="i in 5" :key="i">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -536,6 +542,7 @@ const exportFileName = computed(()=> {
 
 // Show the details of the selected agent
 const showTeamDetails = (team) => {
+  console.log(team)
   // selectedAgent.value = agent;
   Object.assign(selectedTeam, team);
   showModalForTeam.value = true; // Show the modal

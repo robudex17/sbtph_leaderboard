@@ -1187,11 +1187,17 @@
             alert('No changes detected.')
             return
           }
+<<<<<<< HEAD
 
         // if(currentAgent.value.changed_assignment == false) {
         //   alert('Please Choose Agent Assignments')
         //   return
         // }
+=======
+       // if(currentAgent.value.changed_assignment == false) {
+       //   alert('Please Choose Agent Assignments')
+       //   return
+>>>>>>> new-revision-2025-8-25
 
           if(currentAgent.value.changed_assignment){
                 //CHECKING Further 

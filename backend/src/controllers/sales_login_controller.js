@@ -57,18 +57,21 @@ exports.updateLogin = async(req,res,next) => {
         const { login_id, username, password, role, status} = req.body 
         
    
-        if (password != ""  || password != null) {
+        if (password != "" ) {
+            console.log('I still here??')
+            
             const hashedPassowrd = await bcyrpt.hash(password, 10)
-            const [ result ] = await pool.execute(`UPDATE sales_agents_login SET status=?, role=? , password_hash=? WHERE login_id=? AND username=? `, 
-                                      [status, role, hashedPassowrd, login_id,username ]
+            const [ result ] = await pool.execute(`UPDATE sales_agents_login SET username=?, status=?, role=? , password_hash=? WHERE login_id=? `, 
+                                      [username, status, role, hashedPassowrd, login_id ]
 
                                      )
              if (result.affectedRows === 0){
                     return res.status(400).json({message: 'Failed to update agent login'})
                 }
         }else {
-            const [ result ] = await pool.execute(`UPDATE sales_agents_login SET status=?, role=?  WHERE login_id=? AND username=? `, 
-                [status, role,  login_id,username ]
+            console.log('I came here')
+            const [ result ] = await pool.execute(`UPDATE sales_agents_login SET username=?, status=?, role=?  WHERE login_id=? `, 
+                [username, status, role,  login_id ]
 
                )
             if (result.affectedRows === 0){

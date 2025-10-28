@@ -7,7 +7,7 @@ export const useRatingColor = () => {
         }
         
         if (agent.ratings_name == 'VERY SATISFACTORY') {
-          return 'text-blue-700'
+          return 'text-blue-500'
         }
       
         if (agent.ratings_name == 'SATISFACTORY') {

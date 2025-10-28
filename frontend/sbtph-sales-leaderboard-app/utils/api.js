@@ -61,6 +61,7 @@ const API = {
     
     fetch_market_target_shipok_year: `${HTTPADDR}/agent_market_target_shipok_year`,
     fetch_market_new_deposit_year: `${HTTPADDR}/agent_market_new_deposit_year`,
+    agent_deduction: `${HTTPADDR}/agent_deduction`,
 
     export: {
         leaderboard: `${HTTPADDR}/sales_leaderboard_export`,
@@ -70,8 +71,8 @@ const API = {
 
     },
 
-  // newly added for experiment 
-   salesAgents2: `${HTTPADDR}/test/sales_agents`,
+  // newly added for production
+   salesAgents2: `${HTTPADDR}/prod/sales_agents`,
 }
 
 export default API 

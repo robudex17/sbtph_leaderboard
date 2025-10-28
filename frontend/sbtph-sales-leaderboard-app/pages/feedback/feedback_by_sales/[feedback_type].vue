@@ -25,7 +25,7 @@
   <script setup>
 
       definePageMeta({
-         middleware: 'auth'
+         middleware: ['auth', 'feedback-by-sales-details' ]
      })
 
      import { onMounted, watch, computed } from 'vue';

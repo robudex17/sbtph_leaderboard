@@ -23,6 +23,7 @@ const salesLoginRoutes = require('./routes/sales_login_routes')
 const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
 const salesEvaluationDataRoutes = require('./routes/sales_evaluation_data_routes')
+const salesDeductionRoutes = require('./routes/sales_deduction_routes')
 
 
 //new added for experiment 
@@ -52,10 +53,11 @@ app.use("/api", salesMarketRoutes)
 app.use("/api", salesTeamRoutes)
 app.use("/api", salesManagerRoutes)
 app.use('/api',salesEvaluationDataRoutes)
+app.use('/api', salesDeductionRoutes)
 
 
-//new added for experiment
-app.use("/api/test", salesAgentsRoutes2)
+//new added for production 
+app.use("/api/prod", salesAgentsRoutes2)
 
 
 // app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed

@@ -53,18 +53,18 @@
                <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.manager_dbname }}</td>
                <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.market_name }}</td>
                <td class="border border-gray-300 px-2 py-0.5 capitalize text-xs text-center">{{ agent.team_name }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.shipok_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.performance_rating }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.absence_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.tardiness_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.absence_rating, agent.tardiness_rating) }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.memo_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.feedback_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.memo_rating, agent.feedback_rating) }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.deposit_score }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.additional_points }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 text-xs text-center font-bold">{{ agent.final_ratings }}</td>
-              <td class="border border-gray-300 px-2 py-0.5 font-bold text-xs text-center" :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.shipok_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.performance_rating }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.absence_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.tardiness_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.absence_rating, agent.tardiness_rating) }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.memo_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.feedback_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ totalTheRating(agent.memo_rating, agent.feedback_rating) }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.deposit_score }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center">{{ agent.additional_points }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 text-xs text-center font-bold">{{ agent.final_ratings }}</td>
+               <td class="border border-gray-300 px-2 py-0.5 font-bold text-xs text-center" :class="setRatingNameColor(agent)">{{ agent.ratings_name }}</td>
 
             </tr>
            
@@ -131,7 +131,7 @@
 
 </script>
   
-  <style scoped>
+<style scoped>
       /* Ensure text resizes to fit within the cells */
       table {
         table-layout: auto;

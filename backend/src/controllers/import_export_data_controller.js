@@ -369,7 +369,7 @@ const createPerformanceExcelTable = (data, worksheet, startRow = 1, title, perfo
 
   // Add report title above the table
   const titleRow = worksheet.getRow(startRow);
-  const totalCols = 16; // Total number of columns in the table
+  const totalCols = 20; // Total number of columns in the table
   worksheet.mergeCells(startRow, 1, startRow, totalCols);
   titleRow.getCell(1).value = title
   titleRow.getCell(1).font = { bold: true, size: 24 };
@@ -514,6 +514,165 @@ const createPerformanceExcelTable = (data, worksheet, startRow = 1, title, perfo
     });
   });
 };
+
+
+const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, yearlyFinalRatings, yearlyRatingsName) => {
+  const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
+  let agent_ratings_name = data[0].ratings_name
+  if (performanceType == 'agent'){
+    if(fullyear == 'true' || fullyear == true){
+       title = `${title} ${yearlyFinalRatings} / ${yearlyRatingsName}`
+    }else{
+        title = `${title} ${data[0].final_ratings} / ${data[0].ratings_name}`
+    }
+  
+  }
+
+  // Cell style functions
+  const getHeaderStyle = () => ({
+    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
+    font: { bold: true, color: { argb: 'FFFFFF' } },
+  });
+
+  const getHeaderBorder = () => ({
+    top: { style: 'medium', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'medium', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  const getDataBorder = () => ({
+    top: { style: 'thin', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'thin', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  // Add report title above the table
+  const titleRow = worksheet.getRow(startRow);
+  const totalCols = 12; // Total number of columns in the table
+  worksheet.mergeCells(startRow, 1, startRow, totalCols);
+  titleRow.getCell(1).value = title
+  titleRow.getCell(1).font = { bold: true, size: 24 };
+  titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+  titleRow.height = 30; // Optional: increase row height for title
+
+  startRow += 1; // Move down after title
+
+
+
+    const columnGroups = [
+    { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
+    { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
+
+    // { label: 'MEMO', span: 1 },
+  ];
+
+
+
+
+  // Set headers
+  let currentCol = 1;
+  columnGroups.forEach(group => {
+    const startCol = currentCol;
+    const endCol = currentCol + group.span - 1;
+    const startCell = getCell(0, startCol);
+    startCell.value = group.label;
+    startCell.style = getHeaderStyle();
+    startCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    startCell.border = getHeaderBorder();
+
+    if (group.span > 1) {
+      worksheet.mergeCells(startRow, startCol, startRow, endCol);
+      for (let i = 0; i < group.span; i++) {
+        const subCell = getCell(1, startCol + i);
+        subCell.value = group.subHeaders[i];
+        subCell.style = getHeaderStyle();
+        subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        subCell.border = getHeaderBorder();
+      }
+    } else {
+      worksheet.mergeCells(startRow, startCol, startRow + 1, startCol);
+    }
+
+    currentCol = endCol + 1;
+  });
+
+  // Fix column widths
+  const columnWidths = [
+   10, 12, 20,25,15,15, 15,15,10, 10, 10, 10
+  ];
+  worksheet.columns = columnWidths.map((width) => ({ width }));
+
+  // Add data rows (starting from row after headers)
+  const dataStartRow = startRow + 2;
+
+  data.forEach((rowData, index) => {
+    const row = worksheet.getRow(dataStartRow + index);
+    row.values = [
+      rowData.year || '',
+      rowData.month || '',
+      capitalizeWord(rowData.db_name) || '',
+      rowData.employee_status || '',
+      rowData.agent_role || '',
+      rowData.manager_dbname || '',
+      rowData.market_name.toUpperCase() || '',
+      rowData.team_name.toUpperCase() || '',
+      rowData.target || 0,
+      rowData.shipok || 0,
+      rowData.shipok_percent  || 0,
+      rowData.shipok_score || 0,
+
+      // rowData.memo_text || '',
+    ];
+
+    row.eachCell((cell, colNumber) => {
+      cell.border = getDataBorder();
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+       
+      //EMPLOYEE STATUS column (4)
+
+      // if(colNumber == 4){
+      //   let fontColor
+      //   switch(cell.value){
+      //     case  'Hired': fontColor = '14DB3C'; break;
+      //     case  'Rehired': fontColor ='14DB3C'; break;
+      //     case  'Resigned': fontColor ='DB211A'; break;
+      //   }
+      //   cell.font = {bold: true ,color: { argb: fontColor }}
+      // }
+      // FINAL RATING column (14)
+      // if (colNumber === 19) {
+      //   let fontColor;
+      //   switch (true) {
+      //     case (cell.value >= 5): fontColor = '7414DB'; break;
+      //     case (cell.value >= 4): fontColor = '0069DB'; break;
+      //     case (cell.value >= 3): fontColor = '00DB4E'; break;
+      //     case (cell.value >= 2): fontColor = 'D9BC4F'; break;
+      //     default: fontColor = 'DB211A';
+      //   }
+      //   cell.font = { bold: true, color: { argb: fontColor } };
+      // }
+
+      // RATING column (15)
+      // if (colNumber === 20) {
+      //   let fillColor = 'FFFFFF';
+      //   let fontColor = '000000';
+      //   switch (cell.value) {
+      //     case 'EXCEPTIONAL': fillColor = '7414DB'; fontColor = 'FFFFFF'; break;
+      //     case 'VERY SATISFACTORY': fillColor = '0069DB'; fontColor = 'FFFFFF'; break;
+      //     case 'SATISFACTORY': fillColor = '00DB4E'; break;
+      //     case 'NEEDS IMPROVEMENT': fillColor = 'D99307'; break;
+      //     case 'POOR': fillColor = 'DB211A'; break;
+      //     case 'INCOMPLETE RATING': fillColor = 'DBC414'; fontColor = 'FFFFFF'; break;
+      //   }
+      //   cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+      //   cell.font = { bold: true, color: { argb: fontColor } };
+      // }
+    });
+  });
+};
+
 
 const createTeamPerformanceExcelTable = (
   worksheet,
@@ -695,15 +854,47 @@ const feedbackData = (agendId, dbName, givenMonth,givenYear, agentFeedback, mana
 
 exports.salesLeaderboardExportToExcel = async (req, res, next) => {
  
-  const performance = req.performance
+  let performance = req.performance
   const workbook = new ExcelJS.Workbook();
   const monthly_score = `${performance[0].month}-${performance[0].year}-SCORE`
   const worksheet = workbook.addWorksheet(monthly_score)
+  let  tableTitle = `SALES LEADERBORAD (MONTHLY PERFORMANCE)`
 
+ const leaderboardOption = req.leaderboardOption 
 
-  createPerformanceExcelTable(performance, worksheet, 1, 'SALES LEADERBORAD (MONTHLY PERFORMANCE)', 'leaderboard')
+ if(leaderboardOption == 'all'){
   
+ 
+   performance.sort((a, b) => b.agent_type - a.agent_type).sort((a,b) => a.team_id - b.team_id)
 
+  const arranged = [
+                ...performance.filter(a => a.market_name.toLowerCase() !== 'trucks'),
+                ...performance.filter(a => a.market_name.toLowerCase() === 'trucks')
+                ]
+
+   performance = arranged
+   tableTitle = 'AGENTS MONTHLY PERFORMANCE'
+
+ }
+
+
+  createPerformanceExcelTable(performance, worksheet, 1, tableTitle, 'leaderboard')
+  
+  if(leaderboardOption == 'all'){
+    const monthlyTarget =  `${performance[0].month}-${performance[0].year}-TARGET`
+    let tableTitle = 'AGENTS MONTHLY TARGET'
+     performance.sort((a, b) => b.agent_type - a.agent_type).sort((a,b) => a.team_id - b.team_id)
+
+    const arranged = [
+                ...performance.filter(a => a.market_name.toLowerCase() !== 'trucks'),
+                ...performance.filter(a => a.market_name.toLowerCase() === 'trucks')
+                ]
+
+    performance = arranged
+    const worksheet2 = workbook.addWorksheet(monthlyTarget)
+
+     createAgentMonthyTargetExcelTable(performance, worksheet2, 1, tableTitle, 'leaderboard')
+  }
   
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const filename = `users-${timestamp}.xlsx`;
@@ -717,7 +908,7 @@ exports.salesLeaderboardExportToExcel = async (req, res, next) => {
 exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
           
    // Generate file
-  console.log(req.query)
+
   const workbook = new ExcelJS.Workbook();
   const performance = req.performance
 
@@ -748,13 +939,9 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
         const yearPerformanceWorksheetName = `${capitalizeWord(yearAverage.db_name)}-${yearAverage.year}-SCORE`
         const yearPerformanceWorksheet = workbook.addWorksheet(yearPerformanceWorksheetName)
 
-        
-        
+      
       createPerformanceExcelTable(agentsFullYearPerformance , yearPerformanceWorksheet, 1, `${capitalizeWord(yearAverage.db_name)} - (Yearly PERFORMANCE)`, 'agents', fullyear, yearAverage.final_ratings, yearAverage.ratings_name )
         
-        
-    
-
         // get the yearl metrics summary
 
         const lastUsedRow = yearPerformanceWorksheet.lastRow.number;
@@ -773,8 +960,6 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
 
         createMetricsSummaryExcelTable( metricsSummary ,yearPerformanceWorksheet , secondTableStartRow, 'Metrics Year Summary', 'fullyear')
 
-
-        
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `users-${timestamp}.xlsx`;
       
@@ -854,12 +1039,9 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
   
 }
 
-
-
 exports.salesTeamPerformanceExportToExcel = async (req, res, next) => {
 
-     // Generate file
-  
+     // Generate file  
      const workbook = new ExcelJS.Workbook();
     
      let worksheetName = ""
@@ -1192,8 +1374,6 @@ exports.importTargetShipokData  = async (req, res, io, next) => {
 exports.importSalesEvaluationData = async (req, res, io) => {
 
     const loginUser = req.user
-
-    
 
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
@@ -1531,12 +1711,13 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                       }else{
                         numberOfTimes = itterationArray[k];
                       }
+                        const givenDate = new Date(`${month} 5, ${year}`);
+                        const formatted = givenDate.toISOString().split('T')[0];
                       
                       if(table == 'new_deposit'){
                         console.log('first new deposit')
                        
-                        const givenDate = new Date(`${month} 1, ${year}`);
-                        const formatted = givenDate.toISOString().split('T')[0];
+
                         await pool.execute(
                         `INSERT INTO new_deposit (agent_id, month, year, date, new_deposit, description)
                         VALUES (?, ?, ?, ?, ?, ?)`,
@@ -1546,7 +1727,7 @@ async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agen
                         await pool.execute(
                             `INSERT INTO ${table} (agent_id, month, year, date,  description)
                             VALUES (?, ?, ?, ?,? )`,
-                            [agent_id, toCapitalized(month), year, `${year}-${month}-${k+1}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
+                            [agent_id, toCapitalized(month), year, `${formatted}`, `${numberOfTimes} ${description} for - ${month} ${year}`] // The date format of this can be formated  properly later.
                         );
                      }
                       

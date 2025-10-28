@@ -42,10 +42,10 @@
             <td class="py-1 px-2 border text-center text-xs text-gray-700">
               {{ agent.year }}
             </td> 
-            <td class="py-1 px-2 border text-center text-xs text-gray-700" :class="setRatingColor(agent)">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700 font-bold " :class="setRatingColor(agent)">
               {{ agent.final_ratings }}
             </td>  
-            <td class="py-1 px-2 border text-center text-xs text-gray-700" :class="setRatingNameColor(agent)">
+            <td class="py-1 px-2 border text-center text-xs text-gray-700 font-bold" :class="setRatingNameColor(agent)">
               {{ agent.ratings_name }}
             </td>                                       
             <td class="py-1 px-1 border text-center text-xs">
@@ -97,7 +97,7 @@
 <script setup>
 
 definePageMeta({
-  middleware: ['auth', 'adminmanager']
+  middleware: ['auth', 'manager']
 })
 
 import { ref, computed } from 'vue';
@@ -172,7 +172,7 @@ if (agent.ratings_name == 'EXCEPTIONAL') {
 }
 
 if (agent.ratings_name == 'VERY SATISFACTORY') {
-  return 'text-blue-800'
+  return 'text-blue-500'
 }
 
 if (agent.ratings_name == 'SATISFACTORY') {
@@ -185,6 +185,10 @@ if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
 if (agent.ratings_name == 'POOR') {
   return 'text-red-600'
 }
+
+if (agent.ratings_name == 'INCOMPLETE RATING') {
+  return 'text-orange-600'
+}
 }
 
 const setRatingColor = (agent) => {
@@ -193,7 +197,7 @@ if (agent.final_ratings >= 5 ) {
 }
 
 if (agent.final_ratings >= 4 && agent.final_ratings < 5) {
-  return 'text-blue-800'
+  return 'text-blue-500'
 }
 
 if (agent.final_ratings >= 3 && agent.final_ratings < 4) {

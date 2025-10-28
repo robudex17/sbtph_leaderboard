@@ -33,6 +33,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     //const  dashboarOption = req.query.dashboardoption 
 
     let dashboarOption ;
+
+    console.log(req.query.dashboardoption)
     if((!req.query.dashboardoption || req.query.dashboardoption == '') ){
         if(loginUser.agent_type == 2){
             dashboarOption = 'team'
@@ -331,6 +333,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
    
    const fetchTeamTargetShipok = (result,month, year) => {
+             
                 let team_targets = result.reduce((acc, agent) => {
 
                 const teamId = agent.team_id 
@@ -340,7 +343,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 //will combine it with this format  'market1/market2'
                 if(!acc[teamId]){
                     acc[teamId] = {
-                        team_name: agent.market_name,
+                        team_name: agent.team_name,
                         team_id: teamId,
                         martket_id: agent.market_id,
                         market_name: agent.market_name,
@@ -439,8 +442,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
          
 
             const [result] = await pool.execute(
-                `${dashboarddMasterQuery} AND m.id=?`,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.market_id]
+                `${dashboarddMasterQuery} AND t.id=?`,
+              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.team_id]
             )
 
          teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
@@ -468,8 +471,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 acc[overTeam] = {
                     month: givenMonth, 
                     year: givenYear,
-                    total_target: Number(team.total_target || 0),
-                    total_shipok: Number(team.total_shipok || 0),
+                    total_target: 0, //Number(team.total_target || 0),
+                    total_shipok: 0, //Number(team.total_shipok || 0),
                     team_name: 'overll market',
                     team: [],
                 }
@@ -483,8 +486,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         },{})
 
        
-       
-        let  getTheTrucks = teamTargets.filter(team => team.team_name !== 'trucks')
+        //get the truck market
+        let  getTheTrucks = teamTargets.filter(team => team.team_id !== 5)
 
     
         targetWithoutTrucks = getTheTrucks.map(({teammembers, ...rest})=> rest).reduce((acc, team) => {
@@ -493,8 +496,8 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 acc[overTeam] = {
                     month: givenMonth, 
                     year: givenYear,
-                    total_target: Number(team.total_target || 0),
-                    total_shipok: Number(team.total_shipok || 0),
+                    total_target: 0, //Number(team.total_target || 0),
+                    total_shipok: 0, //Number(team.total_shipok || 0),
                     team_name: 'overll market',
                     
                 }

@@ -14,7 +14,7 @@
                 v-for="item in menuItems"
                 :key="item.name"
                 class="p-4 hover:bg-gray-700 cursor-pointer"
-                :class="{ 'bg-blue-600': activeMenu === item.name }"
+                :class="{ 'bg-blue-600 rounded-xl': activeMenu === item.name }"
               >
                 <div @click="item.subMenu ? toggleSubmenu(item.name) : activateMenu(item.name, item.route)">
                   <font-awesome-icon :icon="item.icon" class="pr-1" /> 
@@ -31,7 +31,7 @@
                     v-for="subItem in item.subMenu"
                     :key="subItem.name"
                     class="p-2 pl-6 hover:bg-gray-600 cursor-pointer"
-                    :class="{ 'bg-blue-600': activeMenu === subItem.name }"
+                    :class="{ 'bg-blue-600 rounded-xl': activeMenu === subItem.name }"
                     @click="activateMenu(subItem.name, subItem.route)"               
                   >
                     <div >
@@ -109,15 +109,15 @@
               ]
             },
 
-            { 
-              name: 'Overall Performance', 
-              route: null, 
-              icon: ['fas', 'cog'],
-              subMenu: [
-              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
-              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
-              ]
-            },            
+            // { 
+            //   name: 'Overall Performance', 
+            //   route: null, 
+            //   icon: ['fas', 'cog'],
+            //   subMenu: [
+            //   { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+            //   { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+            //   ]
+            // },            
 
             { 
               name: 'Analytics', 
@@ -197,15 +197,15 @@
               ]
             },
 
-            { 
-              name: 'Overall Performance', 
-              route: null, 
-              icon: ['fas', 'cog'],
-              subMenu: [
-              { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
-              { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
-              ]
-            },            
+            // { 
+            //   name: 'Overall Performance', 
+            //   route: null, 
+            //   icon: ['fas', 'cog'],
+            //   subMenu: [
+            //   { name: 'Overall_Monthly', route: '/admin/overall_performance/monthly', icon: ['fas', 'users'] },
+            //   { name: 'Overall_Yearly', route: '/admin/overall_performance/yearly', icon: ['fas', 'users'] },
+            //   ]
+            // },            
 
 
             { 
@@ -261,8 +261,8 @@
               route: null, 
               icon: ['fas', 'cog'],
               subMenu: [
-                { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
-                { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
+                { name: 'Agent_Monthly', route: '/admin/agent_performance/monthly', icon: ['fas', 'user'] },
+                { name: 'Agent_Yearly', route: '/admin/agent_performance/yearly', icon: ['fas', 'user'] },
                 // { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
               ]
             },

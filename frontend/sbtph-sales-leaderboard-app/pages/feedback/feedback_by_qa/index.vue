@@ -179,7 +179,7 @@
   <script setup>
   
   definePageMeta({
-    middleware: ['auth', 'adminmanager']
+    middleware: ['auth', 'adminmanager', 'admin-qa-feedback']
   })
   
   import { ref, computed } from 'vue';
