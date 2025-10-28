@@ -287,15 +287,15 @@
 
                   <!-- Delete Button -->
                   <button 
-                    @click="deleteAgentFeedback(data)"
-                    :disabled="disabledRows[data.who_give_feedback_id]"
-                    class="px-2 py-2 font-bold rounded-2xl shadow-md transition duration-300 text-white"
-                    :class="disabledRows[data.who_give_feedback_id]
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-red-500 hover:bg-red-600'"
-                  >
-                    <span v-if="disabledRows[data.who_give_feedback_id]">Deleted</span>
-                    <span v-else>Delete</span>
+                      @click="deleteAgentFeedback(data)"
+                      :disabled="disabledRows[data.who_give_feedback_id]"
+                      class="px-2 py-2 font-bold rounded-2xl shadow-md transition duration-300 text-white"
+                      :class="disabledRows[data.who_give_feedback_id]
+                        ? 'bg-gray-400 cursor-not-allowed' 
+                        : 'bg-red-500 hover:bg-red-600'"
+                    >
+                      <span v-if="disabledRows[data.who_give_feedback_id]">Deleted</span>
+                      <span v-else>Delete</span>
                   </button>
                   <NuxtLink  v-if="!disabledRows[data.who_give_feedback_id]"
                     :to="{

@@ -908,7 +908,7 @@ exports.salesLeaderboardExportToExcel = async (req, res, next) => {
 exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
           
    // Generate file
-  console.log(req.query)
+
   const workbook = new ExcelJS.Workbook();
   const performance = req.performance
 
@@ -939,13 +939,9 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
         const yearPerformanceWorksheetName = `${capitalizeWord(yearAverage.db_name)}-${yearAverage.year}-SCORE`
         const yearPerformanceWorksheet = workbook.addWorksheet(yearPerformanceWorksheetName)
 
-        
-        
+      
       createPerformanceExcelTable(agentsFullYearPerformance , yearPerformanceWorksheet, 1, `${capitalizeWord(yearAverage.db_name)} - (Yearly PERFORMANCE)`, 'agents', fullyear, yearAverage.final_ratings, yearAverage.ratings_name )
         
-        
-    
-
         // get the yearl metrics summary
 
         const lastUsedRow = yearPerformanceWorksheet.lastRow.number;
@@ -964,8 +960,6 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
 
         createMetricsSummaryExcelTable( metricsSummary ,yearPerformanceWorksheet , secondTableStartRow, 'Metrics Year Summary', 'fullyear')
 
-
-        
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `users-${timestamp}.xlsx`;
       

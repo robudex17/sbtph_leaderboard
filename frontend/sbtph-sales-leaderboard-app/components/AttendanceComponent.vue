@@ -260,10 +260,10 @@
       }
 
 
-        modalType.value = type;
-        showModal.value = true;
+      modalType.value = type;
+      showModal.value = true;
         
-        if (type === 'edit' && index !== null) {
+      if (type === 'edit' && index !== null) {
         
         form.value = { ...props.attendanceDetails[index]}
         } else {

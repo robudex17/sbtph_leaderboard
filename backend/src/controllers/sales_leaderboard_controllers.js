@@ -906,7 +906,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     //fetch all agent available and save it to sales_agent array
     // const connection =  await pool.getConnection()
 
-    function calculateAverages(dataArray) {
+    const calculateAverages = (dataArray) => {
         const keysToAverage = [
             "absence_score", 
             "feedback_score",
@@ -959,7 +959,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
         return result;
   }
 
-    let agentMetircs
+ let agentMetircs
  if (fullyear) {
 
         const currentYear = new Date().getFullYear()

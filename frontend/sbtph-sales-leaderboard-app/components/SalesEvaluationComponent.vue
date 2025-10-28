@@ -383,7 +383,7 @@
         (newValue) => {
           // If empty or not a whole number, set error
           if (!newValue || !/^\d+(\.\d+)?$/.test(form.value.feedback)) {
-           errorOtherMetrics.value = 'Please enter a valid numeric feedback.';
+           errorOtherMetrics.value = `Please enter a valid numeric ${props.metricsType}.`;
           } else if(parseFloat(newValue) > 5){
              errorOtherMetrics.value = 'The Highest Feedback you can give is 5.0.';
           } else if(parseFloat(newValue) == 0 || parseFloat(newValue) < 0){
@@ -401,7 +401,7 @@
         (newValue) => {
           // If empty or not a whole number, set error
           if (!newValue || !/^\d+(\.\d+)?$/.test(form.value.deduction)) {
-           errorOtherMetrics.value = 'Please enter a valid numeric deduction.';
+           errorOtherMetrics.value = `Please enter a valid numeric ${props.metricsType}.`;
           } else if(parseFloat(newValue) > 5){
              errorOtherMetrics.value = 'The Highest Deduction you can give is 5.0.';
           }   
