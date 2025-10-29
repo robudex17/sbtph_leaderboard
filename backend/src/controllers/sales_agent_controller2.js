@@ -504,7 +504,8 @@ exports.fetchSalesAgents = async (req,res, next ) => {
                 LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
 
                 -- only currently Hired (or Rehired)
-                 WHERE ae.status = '${employeeStatus}';
+                 WHERE ae.status = '${employeeStatus}'
+                 ORDER BY start_date;
 
                 `
 
