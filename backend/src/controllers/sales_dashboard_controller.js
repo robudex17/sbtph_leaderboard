@@ -137,6 +137,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 AND ts.month = ?
                 AND ts.year = ?
             WHERE aa.agent_type  != 2
+            ORDER BY team_id ASC;
     `
 
 
