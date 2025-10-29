@@ -6,7 +6,103 @@
         <spinner></spinner>
     </div>
     <div v-else>
-        <div v-if="dashboardoption =='individual'">
+
+      <div v-if="dashboardoption =='individual' && currentUser.login_type == 'standarduser' && data?.length > 0">
+              
+                <p class="text-gray-800 font-bold text-3xl mb-2 text-center">Individual Results</p>
+                <p  class="text-gray-800 font-bold text-lg mb-2 text-center">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+        <table class="w-full table-auto border-collapse bg-white">
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
+              <th class="py-2 px-2  border text-center text-medium font-bold ">ID</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Name</th>
+               <th class="py-2 px-2  border text-center text-medium font-bold ">Market</th>
+               <th class="py-2 px-2  border text-center text-medium font-bold ">Team</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Month</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Year</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Target</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Shipok</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Percentage(%)</th>
+              <th class="py-2 px-2  border text-center text-medium font-bold ">Remaining Units</th>
+
+
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="agent in paginatedAgents"
+              :key="agent.id"
+              class="even:bg-blue-50 odd:bg-white"
+            >
+              <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                {{ agent.id }}
+              </td>
+
+              <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                  <div class="flex items-center space-x-2">
+                            <img
+                            v-if="agent && agent.image_link"
+                            :src="updateImageLink(agent.image_link)"
+                            alt="Agent Image"
+                            class="w-9 h-9 rounded-full object-cover shadow"
+                            />
+                            <span >{{ agent.db_name }}</span>
+                  </div>
+              </td>
+             
+              <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                {{ agent.market_name.toUpperCase() }}
+              </td> 
+              <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                {{ agent?.team_name.toUpperCase() }}
+              </td>  
+              
+               <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                {{ agent.month }}
+              </td>
+              <td class="py-1 px-2 border text-center text-medium text-gray-700">
+                {{ agent.year }}
+              </td>               
+
+              <td class="py-1 px-2 border text-center text-medium text-gray-700 font-bold">
+                {{ agent.total_target }}
+              </td>  
+              <td class="py-1 px-2 border text-center text-medium text-gray-700 font-bold">
+                {{ agent.total_shipok }}
+              </td>
+              <td class="py-1 px-2 border text-center text-medium text-gray-700 font-bold">
+                 {{ getWholeNumberPercentage(agent.total_target, agent.total_shipok) }}
+              </td>  
+
+              <td class="py-1 px-2 border text-center text-medium text-gray-700 font-bold"
+              :class="(agent.total_target - agent.total_shipok) >= 0 ? 'text-red-600 border' : 'text-green-600'"
+              >
+                   {{ agent.total_target - agent.total_shipok }}
+              </td> 
+
+  
+
+            </tr>
+          </tbody>
+        </table>  
+        
+          <!-- Pagination -->
+          <div v-if="totalPages > 1" class="mt-4 flex justify-center space-x-4 mb-4">
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              class="px-4 py-2 border rounded"
+              :class="{
+                'bg-blue-500 text-white': currentPage === page,
+                'bg-white text-gray-700': currentPage !== page,
+              }"
+              @click="currentPage = page"
+            >
+              {{ page }}
+            </button>
+          </div>        
+        </div>
+        <div v-else-if="dashboardoption =='individual'">
                 <p class="text-gray-800 font-bold text-2xl mb-5">Individual Results</p>
                 <p  class="text-gray-800 font-bold text-lg mb-3">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
                 <div v-for="target_shipok in data" :key="target_shipok.market_id" class="bg-white shadow-md rounded-lg p-4 border border-gray-200">
@@ -14,11 +110,11 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl ">{{ target_shipok.total_target }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Target(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Ship OK(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">
@@ -26,11 +122,11 @@
                             <!-- {{ target_shipok.total_target > 0 ? ((target_shipok.total_ship_ok / target_shipok.total_target) * 100).toFixed(2) + '%' : '0%' }} -->
                             <!-- {{ target_shipok.total_target > 0 ? Math.round((target_shipok.total_ship_ok / target_shipok.total_target) * 100 + Number.EPSILON) + '%' : '0%' }}   -->
                         </p>
-                        <p class="text-gray-600 font-medium text-xs">Percentage</p>
+                        <p class="text-gray-600 font-medium text-medium">Percentage</p>
                         </div>
                         <div :class="(target_shipok.total_target - target_shipok.total_shipok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Remaining(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Remaining(units)</p>
                         </div>
                     </div>
                 </div>                
@@ -45,11 +141,11 @@
                     <div class="grid grid-cols-4 gap-4">
                         <div class="bg-blue-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Target(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Target(units)</p>
                         </div>
                         <div class="bg-green-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Ship OK(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Ship OK(units)</p>
                         </div>
                         <div class="bg-yellow-100 p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">
@@ -64,13 +160,13 @@
                         </div>
                         <div :class="(target_shipok.total_target - target_shipok.total_ship_ok) >= 0 ? 'bg-red-100' : 'bg-green-100'" class="p-8 rounded-lg shadow flex flex-col items-center justify-center h-10">
                         <p class="text-gray-800 font-bold text-4xl">{{ target_shipok.total_target - target_shipok.total_shipok }}</p>
-                        <p class="text-gray-600 font-medium text-xs">Remaining(units)</p>
+                        <p class="text-gray-600 font-medium text-medium">Remaining(units)</p>
                         </div>
                     </div>
                     <button
                     @click="toggleTable(target_shipok.team_id)"
                       :class="[
-                            'mb-1 mt-2 px-2 py-1 text-white rounded text-xs font-bold transition-colors duration-200',
+                            'mb-1 mt-2 px-2 py-1 text-white rounded text-medium font-bold transition-colors duration-200',
                             activeMarketId === target_shipok.team_id ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
                         ]"
                     >
@@ -154,7 +250,7 @@
                     <button
                     @click="toggleOverallTable"
                     :class="[
-                    'mb-1 mt-2 px-2 py-1 text-white rounded text-xs font-bold transition-colors duration-200',
+                    'mb-1 mt-2 px-2 py-1 text-white rounded text-medium font-bold transition-colors duration-200',
                     activeOverallBreakdown ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-blue-600 hover:bg-blue-700'
                     ]"
                     >
@@ -266,23 +362,14 @@ const months = [
 const month = ref(months[new Date().getMonth()])
 const year = ref(new Date().getFullYear())
 
-//hard coded month and year for temporary usage only
+  const itemsPerPage = 10;
+  const currentPage = ref(1);
 
-// const month = "June"
-
-// const year = 2025
-
-//const dashboardoption = ref(route.query.dashboardoption || 'individual')
 
  
 
 const dashboardoption = ref("")
 
-// if( currentUser.agent_type == 2){
-//       dashboardoption.value = "team"
-// }else{
-//       dashboardoption.value = "individual"
-// }
 
 if(!route.query.dashboardoption && currentUser.agent_type != 2){
 
@@ -305,6 +392,18 @@ if(!route.query.dashboardoption && currentUser.agent_type == 2){
 const dashBoardStore = useDashBoardStore()
 const data = computed(() => dashBoardStore.state.dashboard.data)
 
+
+  const totalPages = computed(() =>
+    Math.ceil(data.value.length / itemsPerPage)
+  )
+  
+  const paginatedAgents = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return data.value?.slice(start, end);
+  });
+
+
 // Only one open at a time
 const activeMarketId = ref(null)         // for team view
 const activeOverallBreakdown = ref(false) // for 'overall' view only
@@ -314,6 +413,14 @@ const fetchDashboardData = async (query) => {
   activeOverallBreakdown.value = false
   await dashBoardStore.fetchDashboard(route.query)
 }
+
+  //get image url from the .env file
+  const config = useRuntimeConfig()
+
+  const updateImageLink = (imageLink) => {
+        return `${config.public.imageBaseUrl}${imageLink}`
+  }
+
 
 onMounted( async() => {
 
