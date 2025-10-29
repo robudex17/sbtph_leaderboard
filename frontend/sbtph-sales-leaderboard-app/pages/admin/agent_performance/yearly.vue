@@ -1,7 +1,7 @@
 <template>
   <!-- <div class="p-6 bg-gradient-to-r from-blue-50 to-blue-100 min-h-screen  mt-20"> -->
   <div class="mt-20  p-4">
-  
+
        <!-- Loading Spinner -->
   <div v-if="leaderBoardStore.state.loading">
     <spinner></spinner>
@@ -20,10 +20,27 @@
             <th class="py-2 px-1  border text-center text-xs font-bold">ID</th>
             <th class="py-2 px-1  border text-center text-xs font-bold">Name</th>
             <th class="py-2 px-1  border text-center text-xs font-bold">Year</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Target</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Shipok</th>
+            <th class="py-2 px-1  border text-center text-xs font-bold">Percentage(%)</th>
             <th class="py-2 px-1  border text-center text-xs font-bold">Rating</th>
             <th class="py-2 px-1 border text-center text-xs font-bold">Rating Name</th>
             <th class="py-2 px-1 border text-center text-xs font-bold">Image</th>
-            <th class="py-2 px-1  border text-center text-xs font-bold">Details</th>
+             <div class="flex items-center justify-center gap-2">
+                  <span>Details</span>
+
+                  <div class="flex-shrink-0">
+                    <export-to-excel-component
+                      v-if="isAdmin && agents.length > 0"
+                      :exportUrl="exportUrl"
+                      :exportFileName="exportFileName"
+                      :query="query"
+                      :token="token"
+                      class=" !text-white !text-[10px] !px-2 !py-1 !rounded !hover:bg-green-600 !transition-all !duration-200"
+                    >
+                    </export-to-excel-component>
+                  </div>
+              </div>
           </tr>
         </thead>
         <tbody>
@@ -42,6 +59,15 @@
             <td class="py-1 px-2 border text-center text-xs text-gray-700">
               {{ agent.year }}
             </td> 
+            <td class="py-1 px-2 border text-center text-xs text-gray-700">
+              {{ agent.target }}
+            </td> 
+            <td class="py-1 px-2 border text-center text-xs text-gray-700">
+              {{ agent.shipok }}
+            </td> 
+            <td class="py-1 px-2 border text-center text-xs text-gray-700 font-bold">
+              {{ agent.shipok_percent }}
+            </td>                         
             <td class="py-1 px-2 border text-center text-xs text-gray-700 font-bold " :class="setRatingColor(agent)">
               {{ agent.final_ratings }}
             </td>  
@@ -102,29 +128,31 @@ definePageMeta({
 
 import { ref, computed } from 'vue';
 import { onMounted } from 'vue';
+import API from '~/utils/api'
 
 //get the current user
 const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
 
 const currentUser = authStore.state.user 
+const token = authStore.state.token
 
 const router = useRouter()
 const route = useRoute()
-const query = route.query
+const query = ref("")
+
 
 // query.year_summary = true
 
 const agentYear = ref([])
-
-
-
-
 const leaderBoardStore = useLeaderBoardStore()
 
 
  const year_summary = true
+ const isAdmin = ref(false)
  const leaderboardOption = 'all'
+ const year = ref("")
+ const exportUrl = API.export.leaderboardYearly
 
 
   // const agent = computed(() => {
@@ -133,7 +161,6 @@ const leaderBoardStore = useLeaderBoardStore()
 
 
 
-console.log('agent year', agentYear.value)
 
 // Method to fetch leaderboard data
 const leaderBoardData = async (leaderboardOption,query, year_summary) => {
@@ -144,6 +171,10 @@ const leaderBoardData = async (leaderboardOption,query, year_summary) => {
 const itemsPerPage = 10;
 const currentPage = ref(1);
 
+ year.value = route.query.year ||  new Date().getFullYear()
+ route.query.leaderboardOption = leaderboardOption
+
+ query.value = route.query
 
 const agents = computed(() => leaderBoardStore.state.leaderboard);
 
@@ -158,10 +189,21 @@ const paginatedAgents = computed(() => {
 });
 
 
-  //get image url from the .env file
-  const config = useRuntimeConfig()
+if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+    isAdmin.value = true
+   
+}
 
-  const updateImageLink = (imageLink) => {
+const exportFileName = computed(()=> {
+  return `agents-${year.value}-yearly-performance.xlsx`
+  
+})
+
+
+//get image url from the .env file
+const config = useRuntimeConfig()
+
+const updateImageLink = (imageLink) => {
         return `${config.public.imageBaseUrl}${imageLink}`
   }
 
@@ -217,13 +259,15 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
  onMounted( async() => {
   
     await leaderBoardData(leaderboardOption,route.query, year_summary);
-   
     
   })
 
 
 watch(route, (newRoute) => {
 console.log('The route is change. we should react to the change..')
+year.value = newRoute.query.year
+newRoute.query.leaderboardOption = leaderboardOption
+query.value = newRoute.query
 router.push(newRoute.fullPath)
 leaderBoardData(leaderboardOption,newRoute.query, year_summary)
 

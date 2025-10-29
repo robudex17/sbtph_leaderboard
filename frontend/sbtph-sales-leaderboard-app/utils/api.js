@@ -65,9 +65,11 @@ const API = {
 
     export: {
         leaderboard: `${HTTPADDR}/sales_leaderboard_export`,
+        leaderboardYearly: `${HTTPADDR}/sales_leaderboard_yearly_export`,
         agent_peformance: `${HTTPADDR}/sales_agent_performanace_export`,
         team_performance_monthly :  `${HTTPADDR}/agent_market_target_shipok_new_deposit_export`,
         team_performance_yearly :   `${HTTPADDR}/agent_market_target_shipok_new_deposit_year_export`,
+        sales_agents_export: `${HTTPADDR}/sales_agents_export`,
 
     },
 

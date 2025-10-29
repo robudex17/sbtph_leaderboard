@@ -64,13 +64,13 @@ const exportExcel = async () => {
     }
 
     let url = new URL(props.exportUrl)
-         console.log(url)
+      
         if (props.query) {
             Object.keys(props.query).forEach((key) =>
                 url.searchParams.append(key, props.query[key])
             )
         }
-
+   
     try {
       const response = await fetch(url, {
         method: 'GET',

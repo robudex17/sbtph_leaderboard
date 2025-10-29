@@ -899,6 +899,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
   
 
     leaderboardOption = req.params.leaderboardOption || req.query.leaderboardOption || 'agent'
+
+   
     const path = req.path
 
     
@@ -947,8 +949,13 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
     
         // Calculate averages for the specified keys
         keysToAverage.forEach(key => {
-            // result[key] =  Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
-            result[key] = (sum[key]/count).toFixed(4)
+            result[key] =  Math.round((sum[key] / count) * 100) / 100; // Round to 2 decimal places
+            if(key == 'shipok_percent'){
+              result[key] = Math.round((sum[key]/count))
+            }else{
+               result[key] = (sum[key]/count).toFixed(4)
+            }
+
         });
     
         // Store sums for "target" and "shipok"
@@ -1237,7 +1244,8 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               image_link: records[0].image_link,
               year: givenYear,
               team_id: records[0].team_id,
-              market_id: records[0].market_id
+              market_id: records[0].market_id,
+              employee_status:  records[0].employee_status //records[records.length-1].employee_status
             });
 
             if (yearAverage.final_ratings) {
@@ -1295,8 +1303,12 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
                 }))
               
               if(exportToExcel){
-                req.performance = agentYearlyMetricsWithRating 
+               
+                req.performanceYearly = agentYearlyMetricsWithRating.sort((a,b) => b.final_ratings - a.final_ratings) 
+                req.leaderboardOption = leaderboardOption
                 next()
+              }else{
+                 return res.status(200).json(agentYearlyMetricsWithRating.sort((a, b,)=> b.final_ratings - a.final_ratings)) 
               }
 
               // if(loginUser.agent_type == 1){
@@ -1304,7 +1316,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               //      return res.status(200).json(agentYearlyMetricsWithRatingForLoginUserTeam ) 
               // }
               // console.log(agentYearlyMetricsWithRating[7])
-               return res.status(200).json(agentYearlyMetricsWithRating) 
+              
             }        
 
          

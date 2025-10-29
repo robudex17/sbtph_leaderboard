@@ -516,6 +516,319 @@ const createPerformanceExcelTable = (data, worksheet, startRow = 1, title, perfo
 };
 
 
+const createYearlyPerformanceExcelTable = (data, worksheet, startRow = 1, title, performanceType) => {
+  const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
+
+
+  // Cell style functions
+  const getHeaderStyle = () => ({
+    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
+    font: { bold: true, color: { argb: 'FFFFFF' } },
+  });
+
+  const getHeaderBorder = () => ({
+    top: { style: 'medium', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'medium', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  const getDataBorder = () => ({
+    top: { style: 'thin', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'thin', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  // Add report title above the table
+  const titleRow = worksheet.getRow(startRow);
+  const totalCols = 8; // Total number of columns in the table
+  worksheet.mergeCells(startRow, 1, startRow, totalCols);
+  titleRow.getCell(1).value = title
+  titleRow.getCell(1).font = { bold: true, size: 24 };
+  titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+  titleRow.height = 30; // Optional: increase row height for title
+
+  startRow += 1; // Move down after title
+
+
+
+  const columnGroups = [
+ 
+    { label: 'YEAR', span: 1 },
+    { label: 'EMPLOYEE NAME', span: 1 },
+    { label: 'EMPLOYEE STATUS', span: 1 },
+    { label: 'TARGET', span: 1 },
+    { label: 'SHIPOK', span: 1 },
+    { label: 'PERCENTAGE(%)', span: 1 },
+    { label: 'RATING', span: 1 },
+    { label: 'RATING NAME', span: 1 }
+
+
+    // { label: 'MEMO', span: 1 },
+  ];
+
+
+  // Set headers
+  let currentCol = 1;
+  columnGroups.forEach(group => {
+    const startCol = currentCol;
+    const endCol = currentCol + group.span - 1;
+    const startCell = getCell(0, startCol);
+    startCell.value = group.label;
+    startCell.style = getHeaderStyle();
+    startCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    startCell.border = getHeaderBorder();
+
+    if (group.span > 1) {
+      worksheet.mergeCells(startRow, startCol, startRow, endCol);
+      for (let i = 0; i < group.span; i++) {
+        const subCell = getCell(1, startCol + i);
+        subCell.value = group.subHeaders[i];
+        subCell.style = getHeaderStyle();
+        subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        subCell.border = getHeaderBorder();
+      }
+    } else {
+      worksheet.mergeCells(startRow, startCol, startRow + 1, startCol);
+    }
+
+    currentCol = endCol + 1;
+  });
+
+  // Fix column widths
+  const columnWidths = [
+  25, 25, 25, 25, 25, 25, 25, 25
+  ];
+  worksheet.columns = columnWidths.map((width) => ({ width }));
+
+  // Add data rows (starting from row after headers)
+  const dataStartRow = startRow + 2;
+
+  data.forEach((rowData, index) => {
+    const row = worksheet.getRow(dataStartRow + index);
+    row.values = [
+      rowData.year || '',
+    
+      capitalizeWord(rowData.db_name) || '',
+      rowData.employee_status || '',
+      rowData.target || 0, 
+      rowData.shipok || 0,
+      rowData.shipok_percent || 0,
+      rowData.final_ratings || 0,
+      rowData.ratings_name || ''
+      // rowData.memo_text || '',
+    ];
+
+    row.eachCell((cell, colNumber) => {
+      cell.border = getDataBorder();
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+       
+      //EMPLOYEE STATUS column (4)
+
+      if(colNumber == 3){
+        let fontColor
+        switch(cell.value){
+          case  'Hired': fontColor = '14DB3C'; break;
+          case  'Rehired': fontColor ='14DB3C'; break;
+          case  'Resigned': fontColor ='DB211A'; break;
+        }
+        cell.font = {bold: true ,color: { argb: fontColor }}
+      }
+      // FINAL RATING column (14)
+      if (colNumber === 7) {
+        let fontColor;
+        switch (true) {
+          case (cell.value >= 5): fontColor = '7414DB'; break;
+          case (cell.value >= 4): fontColor = '0069DB'; break;
+          case (cell.value >= 3): fontColor = '00DB4E'; break;
+          case (cell.value >= 2): fontColor = 'D9BC4F'; break;
+          default: fontColor = 'DB211A';
+        }
+        cell.font = { bold: true, color: { argb: fontColor } };
+      }
+
+      // RATING column (15)
+      if (colNumber === 8) {
+        let fillColor = 'FFFFFF';
+        let fontColor = '000000';
+        switch (cell.value) {
+          case 'EXCEPTIONAL': fillColor = '7414DB'; fontColor = 'FFFFFF'; break;
+          case 'VERY SATISFACTORY': fillColor = '0069DB'; fontColor = 'FFFFFF'; break;
+          case 'SATISFACTORY': fillColor = '00DB4E'; break;
+          case 'NEEDS IMPROVEMENT': fillColor = 'D99307'; break;
+          case 'POOR': fillColor = 'DB211A'; break;
+          case 'INCOMPLETE RATING': fillColor = 'DBC414'; fontColor = 'FFFFFF'; break;
+        }
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+        cell.font = { bold: true, color: { argb: fontColor } };
+      }
+    });
+  });
+};
+
+
+const  createSalesAgentActiveExportToExcel = (data, worksheet, startRow = 1, title, performanceType) => {
+  const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
+
+
+  // Cell style functions
+  const getHeaderStyle = () => ({
+    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
+    font: { bold: true, color: { argb: 'FFFFFF' } },
+  });
+
+  const getHeaderBorder = () => ({
+    top: { style: 'medium', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'medium', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  const getDataBorder = () => ({
+    top: { style: 'thin', color: { argb: '000000' } },
+    left: { style: 'medium', color: { argb: '000000' } },
+    bottom: { style: 'thin', color: { argb: '000000' } },
+    right: { style: 'medium', color: { argb: '000000' } },
+  });
+
+  // Add report title above the table
+  const titleRow = worksheet.getRow(startRow);
+  const totalCols = 12; // Total number of columns in the table
+  worksheet.mergeCells(startRow, 1, startRow, totalCols);
+  titleRow.getCell(1).value = title
+  titleRow.getCell(1).font = { bold: true, size: 24 };
+  titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+  titleRow.height = 30; // Optional: increase row height for title
+
+  startRow += 1; // Move down after title
+
+
+
+  const columnGroups = [
+ 
+    { label: 'EMPLOYEE ID', span: 1 },
+    { label: 'DATE HIRED', span: 1 },
+    { label: 'EMPLOYEE STATUS', span: 1 },
+    { label: 'FIRSTNAME', span: 1 },
+    { label: 'LASTNAME', span: 1 },
+    { label: 'POSITION', span: 1 },
+    { label: 'DBNAME', span: 1 },
+    { label: 'APP USERNAME', span: 1 },
+    { label: 'EMAIL ADD', span: 1 },
+    { label: 'MANAGER', span: 1 },
+    { label: 'MARKET ASSIGNMENT', span: 1 },
+    { label: 'TEAM ASSIGNMENT', span: 1 }
+
+
+    // { label: 'MEMO', span: 1 },
+  ];
+
+
+  // Set headers
+  let currentCol = 1;
+  columnGroups.forEach(group => {
+    const startCol = currentCol;
+    const endCol = currentCol + group.span - 1;
+    const startCell = getCell(0, startCol);
+    startCell.value = group.label;
+    startCell.style = getHeaderStyle();
+    startCell.alignment = { horizontal: 'center', vertical: 'middle' };
+    startCell.border = getHeaderBorder();
+
+    if (group.span > 1) {
+      worksheet.mergeCells(startRow, startCol, startRow, endCol);
+      for (let i = 0; i < group.span; i++) {
+        const subCell = getCell(1, startCol + i);
+        subCell.value = group.subHeaders[i];
+        subCell.style = getHeaderStyle();
+        subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        subCell.border = getHeaderBorder();
+      }
+    } else {
+      worksheet.mergeCells(startRow, startCol, startRow + 1, startCol);
+    }
+
+    currentCol = endCol + 1;
+  });
+
+  // Fix column widths
+  const columnWidths = [
+  25, 25, 25, 25, 25, 25, 25, 25,30, 25, 25 , 30
+  ];
+  worksheet.columns = columnWidths.map((width) => ({ width }));
+
+  // Add data rows (starting from row after headers)
+  const dataStartRow = startRow + 2;
+
+  data.forEach((rowData, index) => {
+    const row = worksheet.getRow(dataStartRow + index);
+    row.values = [
+      rowData.id || '',
+      rowData.start_date || '',
+      rowData.employee_status || '',
+      rowData.firstname || '',
+      rowData.lastname || '',
+      rowData.agent_role || '',
+      capitalizeWord(rowData.db_name) || '',
+      capitalizeWord(rowData.username) || '',
+      rowData.email || '', 
+      rowData.manager_dbname || '',
+      rowData.market_name || '',
+      rowData.team_name || ''
+
+      // rowData.memo_text || '',
+    ];
+
+    row.eachCell((cell, colNumber) => {
+      cell.border = getDataBorder();
+      cell.alignment = { horizontal: 'center', vertical: 'middle' };
+       
+      //EMPLOYEE STATUS column (4)
+
+      if(colNumber == 3){
+        let fontColor
+        switch(cell.value){
+          case  'Hired': fontColor = '14DB3C'; break;
+          case  'Rehired': fontColor ='14DB3C'; break;
+          case  'Resigned': fontColor ='DB211A'; break;
+        }
+        cell.font = {bold: true ,color: { argb: fontColor }}
+      }
+      // FINAL RATING column (14)
+      // if (colNumber === 7) {
+      //   let fontColor;
+      //   switch (true) {
+      //     case (cell.value >= 5): fontColor = '7414DB'; break;
+      //     case (cell.value >= 4): fontColor = '0069DB'; break;
+      //     case (cell.value >= 3): fontColor = '00DB4E'; break;
+      //     case (cell.value >= 2): fontColor = 'D9BC4F'; break;
+      //     default: fontColor = 'DB211A';
+      //   }
+      //   cell.font = { bold: true, color: { argb: fontColor } };
+      // }
+
+      // RATING column (15)
+      // if (colNumber === 8) {
+      //   let fillColor = 'FFFFFF';
+      //   let fontColor = '000000';
+      //   switch (cell.value) {
+      //     case 'EXCEPTIONAL': fillColor = '7414DB'; fontColor = 'FFFFFF'; break;
+      //     case 'VERY SATISFACTORY': fillColor = '0069DB'; fontColor = 'FFFFFF'; break;
+      //     case 'SATISFACTORY': fillColor = '00DB4E'; break;
+      //     case 'NEEDS IMPROVEMENT': fillColor = 'D99307'; break;
+      //     case 'POOR': fillColor = 'DB211A'; break;
+      //     case 'INCOMPLETE RATING': fillColor = 'DBC414'; fontColor = 'FFFFFF'; break;
+      //   }
+      //   cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
+      //   cell.font = { bold: true, color: { argb: fontColor } };
+      // }
+    });
+  });
+};
+
+
+
 const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, yearlyFinalRatings, yearlyRatingsName) => {
   const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
   let agent_ratings_name = data[0].ratings_name
@@ -851,7 +1164,7 @@ const feedbackData = (agendId, dbName, givenMonth,givenYear, agentFeedback, mana
 };
 
 
-
+//this is controller is use by leaderboard and agent monthly performance..
 exports.salesLeaderboardExportToExcel = async (req, res, next) => {
  
   let performance = req.performance
@@ -904,6 +1217,32 @@ exports.salesLeaderboardExportToExcel = async (req, res, next) => {
 
   await workbook.xlsx.write(res);
 };
+
+
+exports.salesLeaderboardYearlyExportToExcel = async (req,res, next) => {
+  let performance = req.performanceYearly
+  const workbook = new ExcelJS.Workbook();
+  const yearly_score = `${performance[0].year}-SCORE`
+  const worksheet = workbook.addWorksheet(yearly_score)
+  let  tableTitle = `SALES AGENTS YEARLY PERFORMANCE`
+
+  
+  createYearlyPerformanceExcelTable(performance, worksheet, 1, tableTitle, 'leaderboard')
+
+  //  createPerformanceExcelTable(performance, worksheet, 1, tableTitle, 'leaderboard')
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `users-${timestamp}.xlsx`;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+  await workbook.xlsx.write(res);
+  
+
+   
+}
+
 
 exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
           
@@ -1614,6 +1953,27 @@ exports.importSalesEvaluationData = async (req, res, io) => {
         res.status(500).send("Error processing file: " + err.message);
   }
 };
+ 
+exports.fetchSalesAgentsExportToExcel = async (req, res, next) => {
+  let agents = req.agents
+  const workbook = new ExcelJS.Workbook();
+  const active_agents = `agent-list`
+  const worksheet = workbook.addWorksheet(active_agents)
+  let  tableTitle = `SALES AGENTS INFORMATION`
+
+  
+  createSalesAgentActiveExportToExcel(agents, worksheet, 1, tableTitle, 'agents')
+
+  //  createPerformanceExcelTable(performance, worksheet, 1, tableTitle, 'leaderboard')
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `users-${timestamp}.xlsx`;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+  await workbook.xlsx.write(res); 
+}
 
 // ================= Utility Functions =================
 function initStats(total) {

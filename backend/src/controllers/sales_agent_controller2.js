@@ -7,7 +7,6 @@ const path = require('path')
 exports.fetchSalesAgents = async (req,res, next ) => {
     
    
-
     //query his/her manager or senior manager
     if (req.user.role == 'manager' && req.user.agent_type == 1 && req.query.feedback_type == 'um_by_lm'){
         
@@ -15,30 +14,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
-                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                // `
-                // SELECT 
-                //     sa.id AS id,
-                //     sa.manager_id,
-                //     sa.agent_type,
-                //     sa.firstname,
-                //     sa.lastname,
-                //     sa.db_name,
-                //     sa.image_link,
-                //     sa.market_id,
-                //     sa.status as agent_status,
-                //     market.market_name,
-                //     managers.db_name AS manager_name,
-                //     sales_agents_login.username,
-                //     sales_agents_login.status as login_status,
-                //     sales_agents_login.role
-                // FROM sales_agents sa
-                // JOIN market ON sa.market_id = market.id
-                // JOIN managers ON sa.manager_id = managers.id
-                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                // WHERE sa.status = ? AND sa.id = ?
-    
-                // `,['active', req.user.manager_id]
+
 
                      `
                 SELECT 
@@ -141,31 +117,6 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
-                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                // `
-                // SELECT 
-                //     sa.id AS id,
-                //     sa.manager_id,
-                //     sa.agent_type,
-                //     sa.firstname,
-                //     sa.lastname,
-                //     sa.db_name,
-                //     sa.image_link,
-                //     sa.market_id,
-                //     sa.status as agent_status,
-                //     market.market_name,
-                //     managers.db_name AS manager_name,
-                //     sales_agents_login.username,
-                //     sales_agents_login.status as login_status,
-                //     sales_agents_login.role
-                // FROM sales_agents sa
-                // JOIN market ON sa.market_id = market.id
-                // JOIN managers ON sa.manager_id = managers.id
-                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                // WHERE sa.status = ? AND sa.manager_id =?
-    
-                // `,['active', req.user.login_id]
-
                      `
                 SELECT 
                     sa.id AS id,
@@ -269,31 +220,6 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
-                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                // `
-                // SELECT 
-                //     sa.id AS id,
-                //     sa.manager_id,
-                //     sa.agent_type,
-                //     sa.firstname,
-                //     sa.lastname,
-                //     sa.db_name,
-                //     sa.image_link,
-                //     sa.market_id,
-                //     sa.status as agent_status,
-                //     market.market_name,
-                //     managers.db_name AS manager_name,
-                //     sales_agents_login.username,
-                //     sales_agents_login.status as login_status,
-                //     sales_agents_login.role
-                // FROM sales_agents sa
-                // JOIN market ON sa.market_id = market.id
-                // JOIN managers ON sa.manager_id = managers.id
-                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                // WHERE sa.status = ? AND sa.manager_id =?  AND sa.id !=?
-    
-                // `,['active', req.user.login_id, req.user.login_id]
-
                                      `
                 SELECT 
                     sa.id AS id,
@@ -394,32 +320,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
-                // 'SELECT * FROM  `sales_agents` WHERE status=?',['active']  
-                // `
-                // SELECT 
-                //     sa.id AS id,
-                //     sa.manager_id,
-                //     sa.agent_type,
-                //     sa.firstname,
-                //     sa.lastname,
-                //     sa.db_name,
-                //     sa.image_link,
-                //     sa.market_id,
-                //     sa.status as agent_status,
-                //     market.market_name,
-                //     managers.db_name AS manager_name,
-                //     sales_agents_login.username,
-                //     sales_agents_login.status as login_status,
-                //     sales_agents_login.role
-                // FROM sales_agents sa
-                // JOIN market ON sa.market_id = market.id
-                // JOIN managers ON sa.manager_id = managers.id
-                // LEFT JOIN sales_agents_login ON sa.id = sales_agents_login.login_id
-                // WHERE sa.status = ? AND sa.id=?
-    
-                // `,['active', req.user.manager_id]
-
-                                  `
+             `
                 SELECT 
                     sa.id AS id,
                     sa.firstname,
@@ -615,7 +516,15 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             ...agent,
             active_agent: agent.employee_status === 'Hired' || agent.employee_status === 'Rehired'
             }));
-            res.json(agents)
+
+           if(req.export_to_excel){
+           
+            req.agents = agents 
+            next()
+           }else{
+              return res.json(agents)
+           }
+
 
         }catch(error){
             console.error('Error In Fetching Active Agents', error)
@@ -645,27 +554,6 @@ exports.fetchSalesAgent = async( req,res, next) => {
         }
 
         const [rows, fields] = await pool.execute(
-            // 'SELECT * FROM  `sales_agents` WHERE status=? AND id=?',['active',agentId]
-
-            // `
-            // SELECT 
-            //     sa.id AS id,
-            //     sa.manager_id,
-            //     sa.agent_type,
-            //     sa.firstname,
-            //     sa.lastname,
-            //     sa.db_name,
-            //     sa.image_link,
-            //     sa.market_id,
-            //     sa.status,
-            //     market.market_name,
-            //     managers.db_name AS manager_name
-            // FROM sales_agents sa
-            // JOIN market ON sa.market_id = market.id
-            // JOIN managers ON sa.manager_id = managers.id
-            // WHERE sa.status = ?  AND sa.id=?
-
-            // `,['active', agentId]
 
      `
         SELECT 

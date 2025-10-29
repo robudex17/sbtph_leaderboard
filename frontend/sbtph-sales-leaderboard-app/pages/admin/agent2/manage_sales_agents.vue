@@ -531,7 +531,6 @@
       </div>
  </div>
 
-
     <!-- Agents Table -->
     <div class="overflow-x-auto shadow-xl rounded-lg" v-if="agents.length != 0">
       <table class="w-full table-auto border-collapse bg-white">
@@ -550,7 +549,22 @@
             <th class="py-2 px-2 border text-center text-xs font-bold uppercase">Market</th>
             <th class="py-2 px-2 border text-center text-xs font-bold uppercase">Team</th>
             <th class="py-2 px-2 border text-center text-xs font-bold uppercase">Image</th>
-            <th class="py-2 px-2 border text-center text-xs font-bold uppercase">Actions</th>
+                <div class="flex items-center justify-center gap-2">
+                  <span>Actions</span>
+
+                  <div class="flex-shrink-0">
+                    <export-to-excel-component
+                      v-if="isAdmin && agents.length > 0"
+                      :exportUrl="exportUrl"
+                      :exportFileName="exportFileName"
+                      :query="route.query"
+                      :token="token"
+                      :incomplete="incomplete"
+                      class=" !text-white !text-[10px] !px-2 !py-1 !rounded !hover:bg-green-600 !transition-all !duration-200"
+                    >
+                    </export-to-excel-component>
+                  </div>
+                </div>
           </tr>
         </thead>
         <tbody>
@@ -685,6 +699,9 @@
     import { useManageSalesAgentStore } from '../../../stores/manage_sales_agents';
     import { onMounted } from 'vue';
 
+    import API from '~/utils/api'
+  
+
 
     const itemsPerPage = 10;
     const currentPage = ref(1);
@@ -700,6 +717,7 @@
     const authStore = useAuthStore()
     authStore.fetchTokenFromLocalStore()
     const currentUser = authStore.state.user 
+    const token = authStore.state.token
 
     //calling the global config
     const config = useRuntimeConfig()
@@ -842,13 +860,36 @@
         currentAgentLogin.value.password === currentAgentLogin.value.password_again
       )
     })      
+    const isAdmin = ref(false)
+    const month = ref("")
+    const year = ref("")
+
+     const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ]
+  
 
 
+  if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+      isAdmin.value = true
+    
+  }
+
+  month.value =  months[new Date().getMonth()]
+  year.value =  new Date().getFullYear() 
+
+
+  const exportFileName = computed(()=> {
+    return `sales-agents-active-list-${month.value}-${year.value}.xlsx`
+  })
+
+  const exportUrl = API.export.sales_agents_export
 
 
     //method or functions
 
-      const handleViewDetails = (agent) => {
+ const handleViewDetails = (agent) => {
 
         let month = null
         let year = null
@@ -867,7 +908,7 @@
     
       };
 
-    const updateImageLink = (imageLink) => {
+ const updateImageLink = (imageLink) => {
          if (!imageLink) return ''
   
         // ✅ If it's already a base64 Data URL, just return it directly
@@ -880,25 +921,25 @@
     }
 
 
-    const fetchSalesAgents = () => {
+const fetchSalesAgents = () => {
       manageSalesAgentStore.fetchSalesAgents(route.query);
     };
 
-    const fetchMarkets = () => {
+const fetchMarkets = () => {
       marketAgentStore.fetchMarkets(null,{market_status: 1})
     }  
 
-    const fetchTeams = () => {
+const fetchTeams = () => {
       teamsAgentStore.fetchTeams(null, {team_status: 1} )
       
     };
 
-    const fetchMangers = () => {
+const fetchMangers = () => {
       managerStore.fetchManagers()
     }
 
   
-    const handleAgentTypeChange = () => {
+const handleAgentTypeChange = () => {
       if (managers.value.length === 0) {
         if (currentAgent.value.agent_type !== 2) {
           alert('The first sales agent must be a Senior Manager (agent_type = 2).')
@@ -920,7 +961,7 @@
 
 
     // // Reset fields when checkbox unchecked
-    const  handleAssignmentToggle = () => {
+ const  handleAssignmentToggle = () => {
       if (!currentAgent.value.changed_assignment) {
         currentAgent.value.manager_id = originalAssignment.value.manager_id
         currentAgent.value.agent_type = originalAssignment.value.agent_type
