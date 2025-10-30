@@ -3,7 +3,8 @@
      
       <div class="w-full max-w-3xl bg-white shadow-lg rounded-lg p-6">
         <h2 class="text-2xl font-semibold text-gray-800 text-center"> {{ feedbackTitle }} FOR <span class="uppercase text-blue-700 font-bold"> ({{ who_receive_feedback_db_name }}) by <span class="text-purple-700">{{ who_give_feedback_db_name }}</span> </span></h2>
-        <p class="text-gray-600 text-center mb-6"> {{ feedbackSubtitle }}</p>
+        <p class="text-gray-600 text-center"> {{ feedbackSubtitle }}</p>
+        <p class="text-red-600 text-center mb-6 font-bold text-2xl"> For {{ month.toUpperCase() }} {{ year }}</p>
         <h2 class="text-center text-red-600 font-bold text-2xl" v-if="admin_view_only">(VIEW ONLY)</h2>
         <!-- <div>
           {{   feedback.length}}
@@ -95,11 +96,22 @@ import admin from "~/middleware/admin";
     const isUpdating = ref(false);
     const feedbackId = ref(null);
     const responses = ref({});
+    const month = ref("")
+    const year = ref("")
+
+    const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+         ]
+
 
     const route = useRoute()
     const query = route.query
     const { who_receive_feedback_id, who_receive_feedback_db_name, who_give_feedback_id, who_give_feedback_db_name } = query
     const id = ref(null)
+
+     month.value = route.query.month ||  months[new Date().getMonth()]
+     year.value = route.query.year ||  new Date().getFullYear()
 
     if (props.feedback.length > 0){
       isUpdating.value = true
@@ -128,6 +140,13 @@ import admin from "~/middleware/admin";
       },
       { immediate: true, deep: true }
     );
+
+    watch(() => {
+      route, (newRoute) => {
+         month.value = newRoute.query.month 
+         year.value = newRoute.query.year
+      }
+    })
 
 
     // Compute total score & percentage

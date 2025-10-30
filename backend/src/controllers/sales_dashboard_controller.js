@@ -137,7 +137,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 AND ts.month = ?
                 AND ts.year = ?
             WHERE aa.agent_type  != 2
-            ORDER BY team_id ASC;
+           
     `
 
 
@@ -386,7 +386,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
    
          if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
                const [result] = await pool.execute(
-                dashboarddMasterQuery,
+                `${dashboarddMasterQuery}  ORDER BY team_id ASC;`,
               [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
             )
                 const arranged = [
