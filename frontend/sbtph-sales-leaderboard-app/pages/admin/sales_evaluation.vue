@@ -508,12 +508,12 @@
       metricsType.value = selectedAgent.metrics_type
 
      if(selectedAgent.submitted ==1 ){
-        alert(`Adding, Updating, or Deleting ${metricsType.value} that is already submitted is prohited.`)
+        alert(`Adding, Updating, or Deleting ${metricsType.value} that is already submitted is prohibited.`)
         return
       }
 
       if(selectedAgent.employee_status == 'Resigned' ){
-        alert(`Adding, Updating, or Deleting Agent that is already resigned is prohited.`)
+        alert(`Adding, Updating, or Deleting Agent that is already resigned is prohibitted.`)
         return
       }
      
