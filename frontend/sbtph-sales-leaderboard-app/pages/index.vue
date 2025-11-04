@@ -10,7 +10,7 @@
     <div v-else>
           <!-- Toggle Button for Card/Table View -->
       <div class="mb-4 flex justify-end">
-        <button  v-if="(leaderboardOption != 'team' && leaderboardOption != 'new deposit') && 
+        <button  v-if="(leaderboardOption != 'team' && leaderboardOption != 'new deposit'  && leaderboardOption != 'shipok percentage' ) && 
          (currentUser.login_type == 'standarduser' || currentUser.agent_type == 2)"
           @click="toggleView" 
           class="bg-blue-600 text-white py-1 px-2 rounded-lg hover:bg-blue-700 transition duration-300"
