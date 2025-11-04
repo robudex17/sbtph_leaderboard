@@ -71,7 +71,7 @@
                   v-model="leaderboardOption"
                 >
               
-                <option v-for="leaderboardOptions in ['agent', 'lm', 'team', 'new deposit']" :key="leaderboardOptions" :value="leaderboardOptions">{{ leaderboardOptions.toUpperCase()  }}</option>
+                <option v-for="leaderboardOptions in ['agent', 'lm', 'team', 'new deposit', 'shipok percentage']" :key="leaderboardOptions" :value="leaderboardOptions">{{ leaderboardOptions.toUpperCase()  }}</option>
 
                 </select>
                 <button  v-if="hasYearOption" 

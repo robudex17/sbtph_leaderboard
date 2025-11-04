@@ -148,6 +148,57 @@
               </div>
             </div>
           </div>
+
+                    <div
+            v-else-if="isCardView && leaderboardOption == 'shipok percentage'"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4"
+          >
+            <div
+              v-for="(agent, index) in leaderBoardStore.state.leaderboard"
+              :key="index"
+              class="bg-gray-800 text-white border border-gray-700 rounded-2xl shadow-lg overflow-hidden transition transform hover:scale-105 hover:shadow-2xl"
+            >
+              <div class="flex flex-col items-center justify-center text-center p-6 space-y-3">
+
+                <!-- Tag -->
+                <div
+                
+                  :class="agent.tag != '' ? 'px-4 py-1 text-sm font-bold uppercase tracking-widest bg-purple-600/20 text-purple-400 rounded-full border border-purple-500' : 'py-4'"
+                >
+                  {{ agent.tag }}
+                </div>
+
+                <!-- Agent Image -->
+                <img
+                  v-if="agent.image_link"
+                  :src="updateImageLink(agent.image_link)"
+                  alt="Agent Image"
+                  class="w-24 h-24 rounded-full object-cover border-2 border-gray-600 shadow-md"
+                />
+                <div
+                  v-else
+                  class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-white border border-gray-600"
+                >
+                  <span class="text-xl font-semibold">{{ agent.db_name?.charAt(0).toUpperCase() }}</span>
+                </div>
+
+                <!-- Agent Info -->
+                <div class="text-center">
+                  <h2 class="text-lg font-bold text-white">{{ agent.db_name }}</h2>
+
+                  <div class="my-3">
+                    <h1 class="text-4xl font-extrabold text-blue-400">{{ agent.shipok_percent }}%</h1>
+                    <p class="text-sm tracking-wide text-gray-400">Shipok Percentage</p>
+                  </div>
+
+                  <div class="flex justify-center gap-3 mt-2 text-sm">
+                    <p class="font-semibold text-green-400">{{ agent.month }}</p>
+                    <p class="font-semibold text-yellow-400">{{ agent.year }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
             
           <div v-else-if="isCardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <div

@@ -349,7 +349,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
       const agents = sales_agents.filter(agent => agent.agent_type == 0)
       const um =  sales_agents.filter(agent => agent.agent_type == 2)
 
-      if (leaderboardOption == 'overall' || leaderboardOption == 'all'){
+      if (leaderboardOption == 'overall' || leaderboardOption == 'all' || leaderboardOption == 'shipok percentage'){
 
             const resultLms= lms.map(manager => {
                 const agent = agents.filter(agent => agent.manager_id === manager.id)
@@ -451,6 +451,12 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
       //  agent['shipok'] = 0
        agent['shipok_percent'] = 0
        agent['shipok_score'] = 0
+     }
+
+     //if leaderboardoption is shipok_percentage  continue or proceed to other agent
+
+     if(leaderboardOption == 'shipok percentage'){
+       continue
      }
 
     
@@ -1125,6 +1131,25 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               }
               console.log(agentMetircsWithRating)
                return res.status(200).json(agentMetircsWithRating) 
+            }else if(leaderboardOption == 'shipok percentage'){
+                        
+              agentMetircs =  agentMetircs.filter(agent => agent.shipok_percent > 0).sort((a, b) => b.shipok_percent - a.shipok_percent)
+                              // Step 1: Get the top final_ratings
+              const topRating = Math.max(...agentMetircs.map(agent => parseFloat(agent.shipok_percent)))
+
+
+              // Step 2: Check how many agents have the same top rating
+              const topCount = agentMetircs.filter(agent => parseFloat(agent.shipok_percent) === topRating).length; 
+
+                            // Step 2: Add the tag conditionally based on final_ratings and agent_type
+              const agentMetircsWithTag  = agentMetircs .map(agent => ({
+                              ...agent,
+                              tag: topCount === 1 && parseFloat(agent.shipok_percent) === topRating ? 'TOP IN SHIPOK PERCENTAGE' : '',
+                                
+                            }))
+             console.log(agentMetircsWithTag)
+             return res.status(200).json(agentMetircsWithTag)
+
             }
           }
 
