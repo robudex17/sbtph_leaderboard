@@ -70,6 +70,7 @@ const API = {
         team_performance_monthly :  `${HTTPADDR}/agent_market_target_shipok_new_deposit_export`,
         team_performance_yearly :   `${HTTPADDR}/agent_market_target_shipok_new_deposit_year_export`,
         sales_agents_export: `${HTTPADDR}/sales_agents_export`,
+        sales_agents_target_export: `${HTTPADDR}/sales_agents_target_export`,  
 
     },
 

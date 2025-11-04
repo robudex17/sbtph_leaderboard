@@ -6,7 +6,7 @@
         class="flex items-center justify-center gap-2 w-full py-1 px-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200"
       >
         <!-- <FontAwesomeIcon :icon="['fas', 'file-excel']" class="text-xl" /> -->
-        <font-awesome-icon :icon="['fas', 'file-excel']" />
+        <font-awesome-icon :icon="['fas', 'download']" />
         Export to Excel
       </button>
     </div>

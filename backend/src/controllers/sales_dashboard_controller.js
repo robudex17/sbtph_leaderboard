@@ -3,6 +3,7 @@ const  pool = require('../config/db')
 const { validationResult } = require('express-validator')
 
  const { getAgentsMetrics } = require('./sales_leaderboard_controllers')
+const { agent } = require('supertest')
 
 exports.fetchAgentDashboard = async (req,res,next) => {
     // const errors = validationResult(req);
@@ -10,13 +11,10 @@ exports.fetchAgentDashboard = async (req,res,next) => {
     //   return res.status(400).json({ errors: errors.array() });
     // }
    
-  
     const currentDate = new Date()
 
     const loginUser = req.user
 
-  
-    
 
            // Get the month name
     const monthNames = [
@@ -24,9 +22,9 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             "July", "August", "September", "October", "November", "December"
         ];
 
-    const givenMonth = monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
+    const givenMonth = req.query.month || monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
     // const givenMonth = "June"
-    const givenYear =    currentDate.getFullYear()
+    const givenYear =   req.query.year ||  currentDate.getFullYear()
 
     
     const  withTrucks = true
@@ -60,7 +58,6 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       November: "11",
       December: "12"
     };
-
   
 
  // Convert "March" -> "03"
@@ -91,7 +88,9 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 t.name AS team_name,
                 ae.status AS employee_status,
                 COALESCE(ts.target, 0) AS target,
-                COALESCE(ts.ship_ok, 0) AS shipok
+                COALESCE(ts.ship_ok, 0) AS shipok,
+                COALESCE(ts.month, ?) AS month,
+                COALESCE(ts.year, ?) AS year
             FROM sales_agents2 sa
             JOIN (
                 SELECT aa1.*
@@ -139,7 +138,6 @@ exports.fetchAgentDashboard = async (req,res,next) => {
             WHERE aa.agent_type  != 2
            
     `
-
 
 
     try {
@@ -332,12 +330,14 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }
 
 
+
+
    
    const fetchTeamTargetShipok = (result,month, year) => {
              
-                let team_targets = result.reduce((acc, agent) => {
+        let team_targets = result.reduce((acc, agent) => {
 
-                const teamId = agent.team_id 
+        const teamId = agent.team_id 
             
                 
                 //this section I use market_name as team_name if  more than one market in a team I 
@@ -381,45 +381,210 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
             return arrangedTeamTargets
     }
-     let individualTargets
-      if (dashboarOption == 'individual'){
-   
-         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
-               const [result] = await pool.execute(
-                `${dashboarddMasterQuery}  ORDER BY team_id ASC;`,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
-            )
+
+   const fetchIndividualTargetShipok = async(agent_id,query, month, year) => {
+        const monthNumber = monthMap[month];
+        const snapshot = `${year}-${monthNumber.toString().padStart(2, '0')}`;  
+        let individualTargets
+        if(agent_id != ""){
+            const [result] = await pool.execute(
+                query,
+                 [ month, year,snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, month, year, agent_id]
+              )   
+                individualTargets  = result              
+        }else{
+            const [result] = await pool.execute(
+                    query,
+                    [ month, year,snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, month, year]
+                )
+
                 const arranged = [
                 ...result.filter(a => a.market_name.toLowerCase() !== 'trucks'),
                 ...result.filter(a => a.market_name.toLowerCase() === 'trucks')
                 ]
 
-             individualTargets  = arranged
+              individualTargets  = arranged
+        }
 
+        return individualTargets
+
+
+   }
+
+   const  fetchIndividualTargetShipokYear = async(agent_id, query, year) => {
+                 // get the year summary of the individual target
+                const currentYear = new Date().getFullYear()
+                const currentMonth = new Date().getMonth()  // 0=Jan , 9 October ,
+                let fullYearTargetShipok = []
+
+                let monthsToProcess = []
+
+                if(Number(year) < currentYear){
+                    monthsToProcess = monthNames  
+                }else if(Number(givenYear) === currentYear) {
+                    monthsToProcess = monthNames.slice(0, currentMonth + 1) // put to current month
+                }else {
+
+                    // future year should be no data
+                     return res.status(200).json([])
+                     
+                }
+
+                
+                // 1. Fetch all months in parallel
+                const monthQueries = monthsToProcess.map(month =>
+                    fetchIndividualTargetShipok(agent_id, query, month, year)
+                );
+                const monthResults = await Promise.all(monthQueries);
+
+                // Flatten results
+                monthResults.forEach(result => fullYearTargetShipok .push(...result))    
+
+                // remove target = 0 , except for the agent_type 0
+                //   Group by agent using Map
+                    const agentsMap = new Map();
+
+                    for (const agent of fullYearTargetShipok) {
+                    // Skip agents with target = 0 and agent != 2
+                    if (agent.target === 0 ) continue;
+
+                    if (!agentsMap.has(agent.id)) {
+                        agentsMap.set(agent.id, []);
+                    }
+                    agentsMap.get(agent.id).push(agent);
+                    } 
+
+                 return agentsMap          
+    
+    }
+
+
+  const getTotalTargetShipok = (agent_id,individualTargetsYearMap) => {
+           const agentTotalTargetForYear = [];
+           for (const [agentId, records] of individualTargetsYearMap ) {
+            
+                 
+                    const yearTarget = records.reduce((acc, obj) => {
+                        return acc + parseFloat(obj.target)
+                    }, 0)
+
+                    const yearShipok = records.reduce((acc,obj) => {
+                        return acc + parseFloat(obj.shipok)
+                    },0)
+
+                    const remainUnits = yearTarget - yearShipok
+
+                    const yearPercentage = getWholeNumberPercentage(yearTarget, yearShipok)
+                    const agentYear = {
+                        id: records[0].id,
+                        agent_type: records[0].agent_type,
+                        db_name: records[0].db_name,
+                        image_link: records[0].image_link,
+                        year: givenYear,
+                        employee_status:  records[0].employee_status,//records[records.length-1].employee_status
+                        target: yearTarget,
+                        shipok: yearShipok,
+                        remain: remainUnits,
+                        percentage: yearPercentage
+               
+                    }
+              // if agent_id is not empty push the records as well 
+              agentTotalTargetForYear.push(agentYear)    
+              if(agent_id != "" &&  Number(agent_id) === agentYear.id){
+                return {
+                       'total_target_shipok_year' :  agentTotalTargetForYear,
+                        'records': records,
+                }
+                
+              }
+                
+           }   
+           return agentTotalTargetForYear   
+         
+  }
+
+   const getWholeNumberPercentage = (target,shipok) => {
+                //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
+                if (Number(target) !=0 && Number(shipok) != 0){
+                    const percentage =((shipok / target) * 100).toFixed(2)
+                    const roundOff = Math.round(percentage)
+                    return roundOff + '%'
+                }
+                return '0%'
+   }
+
+     let individualTargets
+     let individualTargetsYearMap
+    let year_summary =  req.query.year_summary == 'true'   ? true: false
+    let fullyear =  req.query.fullyear == 'true'  ? true : false
+    let agent_id = req.query.agent_id ? req.req.agent_id : ""
+    
+
+
+      if (dashboarOption == 'individual'){
+   
+         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
+
+             if(!year_summary){
+                individualTargets  =  await  fetchIndividualTargetShipok("", `${dashboarddMasterQuery}  ORDER BY team_id ASC;`, givenMonth, givenYear)
+                individualTargets = individualTargets.filter(agent => agent.target != 0)
+
+             }else{
+      
+                       
+                
+                if(fullyear && agent_id != ""){
+                   
+                    individualTargetsYearMap = await fetchIndividualTargetShipokYear(agent_id, `${dashboarddMasterQuery} AND sa.id=?`, givenYear)
+
+                    const  agentData =  getTotalTargetShipok(agent_id,individualTargetsYearMap) //expect for object
+                    dashboard.data = {
+                        'total_target_shipok_year' : agentData['total_target_shipok_year'], 
+                        'records': agentData['records']
+                    }
+                   
+                     if(req.export_to_excel){
+                        req.dashboard = dashboard
+                        req.year_summary = false
+                        req.fullyear = fullyear
+                        next()
+                     }else{
+                         return res.status(200).json(dashboard)
+                     }
+                  
+
+                }else{
+                   
+                     individualTargetsYearMap = await fetchIndividualTargetShipokYear("", `${dashboarddMasterQuery}  ORDER BY team_id ASC;`, givenYear)
+                      dashboard.data  = getTotalTargetShipok("",individualTargetsYearMap).sort((a, b) => b.agent_type - a.agent_type)
+
+                     if(req.export_to_excel){
+                        req.dashboard = dashboard
+                        req.year_summary = year_summary
+                        req.fullyear = fullyear
+                        next()
+                     }else{
+                         return res.status(200).json(dashboard)
+                     }
+                    
+                }
+            
+             }
+
+     
          }else{
             
-            //queryIndividual = dashboardQueryForInvidualAgents("sales_agents.id ", "=", loginUser.login_id, "sales_agents.id")
-            //  console.log( `${dashboarddMasterQuery} AND sa.id=?`)
-            //  return
-               const [result] = await pool.execute(
-                `${dashboarddMasterQuery} AND sa.id=?`,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.login_id]
-            )   
-                individualTargets  = result  
+                individualTargets  =  await  fetchIndividualTargetShipok(loginUser.login_id, `${dashboarddMasterQuery} AND sa.id=?`, givenMonth, givenYear)
          }
   
-
-      
-
-        // transform total_target and total_ship_ok value of null to 0
-        dashboard.data = individualTargets.map(item => ({
-          ...item,
-          total_target: item.target == null ? 0: item.target,
-          total_shipok: item.shipok == null ? 0 : item.shipok,
-          month: item.month == null ? givenMonth : item.month,
-          year: item.year == null ? givenYear : item.year,
-        }))
-
+         // transform total_target and total_ship_ok value of null to 0
+         dashboard.data = individualTargets.map(item => ({
+            ...item,
+            total_target: item.target == null ? 0: item.target,
+            total_shipok: item.shipok == null ? 0 : item.shipok,
+            month: item.month == null ? givenMonth : item.month,
+            year: item.year == null ? givenYear : item.year,
+         }))
 
       
       }else if (dashboarOption == 'team'){
@@ -430,7 +595,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
           const [result] = await pool.execute(
                 dashboarddMasterQuery,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
+              [ givenMonth, givenYear,snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
             )
         
           teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
@@ -444,7 +609,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
             const [result] = await pool.execute(
                 `${dashboarddMasterQuery} AND t.id=?`,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.team_id]
+              [ givenMonth, givenYear, snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear, loginUser.team_id]
             )
 
          teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
@@ -458,7 +623,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
            let targetWithoutTrucks = []
            const [result] = await pool.execute(
                 dashboarddMasterQuery,
-              [ snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
+              [ givenMonth, givenYear,snapshot, snapshot, snapshot, snapshot, snapshot, snapshot, givenMonth, givenYear]
             )
         
         let teamTargets = fetchTeamTargetShipok(result, givenMonth, givenYear)
@@ -527,12 +692,16 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       }
 
-
       console.log(dashboard)
-      res.status(200).json(dashboard)
-
-
-   
+      if(req.export_to_excel){
+        req.dashboard = dashboard
+        req.year_summary =  year_summary 
+        req.fullyear = fullyear
+        next()
+      }else{
+        return res.status(200).json(dashboard)
+ 
+      }
       
     }
     catch(error){

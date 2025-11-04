@@ -233,7 +233,8 @@
        '/overall_performance/year.vue',
       '/admin/overall_performance/yearly',
       '/admin/team_performance/yearly',
-      '/overall_performance/year'
+      '/overall_performance/year',
+       '/admin/target/yearly'
 
 
     ])
@@ -276,6 +277,8 @@
        '/admin/overall_performance/monthly',
         '/overall_performance/year',
         '/overall_performance/month',
+        '/admin/target/monthly',
+         '/admin/target/yearly'
 
 
     ])
@@ -418,7 +421,8 @@
           route.path == '/admin/agent_performance/yearly' ||
           route.path == '/admin/overall_performance/yearly' ||
           route.path == '/overall_performance/year' ||
-          route.path == '/admin/team_performance/yearly'
+          route.path == '/admin/team_performance/yearly' ||
+          route.path ==  '/admin/target/yearly'
         
         ){
             if (!validateInputYearDates(selectedYear.value)){

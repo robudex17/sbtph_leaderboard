@@ -1154,8 +1154,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               }
           }
 
-
-
           // 1. Fetch all months in parallel
           const monthQueries = monthsToProcess.map(month =>
             this.getAgentsMetrics("", month, givenYear, withTrucks, leaderboardOption, path, leaderboardMasterQuery)
@@ -1163,7 +1161,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           const monthResults = await Promise.all(monthQueries);
 
           // Flatten results
-          monthResults.forEach(result => fullYearAgentPerformances.push(...result))
+           monthResults.forEach(result => fullYearAgentPerformances.push(...result))
 
 
           //remove month that not yet submitted 
@@ -1181,7 +1179,7 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
             const teams_year = await this.groupedByTeam(fullYearAgentPerformances, leaderboardOption)
 
 
-           
+      
             teams_year.map(team => {
 
               team.teams.sort((a,b ) => b.agent_type !== a.agent_type).sort((a, b)=> monthNames.indexOf(a.eval_month) - monthNames.indexOf(b.eval_month))
@@ -1196,8 +1194,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
               })
            }
 
-
-            
             return res.status(200).json(teams_year)
           }
 
@@ -1219,10 +1215,10 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
           const getRatingName = async (rating) => {
             if (ratingCache.has(rating)) return ratingCache.get(rating);
 
-            const [year_ratings] = await pool.execute(
+             const [year_ratings] = await pool.execute(
               'SELECT ratings_name FROM result_ratings WHERE ? BETWEEN min_value AND max_value',
               [rating]
-            );
+             );
 
             const name = year_ratings?.[0]?.ratings_name || "No Ratings";
             ratingCache.set(rating, name);

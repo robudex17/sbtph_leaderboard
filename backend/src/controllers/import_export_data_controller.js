@@ -829,7 +829,7 @@ const  createSalesAgentActiveExportToExcel = (data, worksheet, startRow = 1, tit
 
 
 
-const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, yearlyFinalRatings, yearlyRatingsName) => {
+const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, year_summary, yearlyFinalRatings, yearlyRatingsName) => {
   const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
   let agent_ratings_name = data[0].ratings_name
   if (performanceType == 'agent'){
@@ -872,14 +872,22 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
 
   startRow += 1; // Move down after title
 
-
-
-    const columnGroups = [
+  let columnGroups
+ 
+ if(performanceType == 'target'){
+        columnGroups = [
     { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
-    { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
+    { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'REMAINING UNITS'] },
 
     // { label: 'MEMO', span: 1 },
   ];
+ }else {
+    columnGroups = [
+    { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
+    { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
+    ]
+ }
+
 
 
 
@@ -934,7 +942,7 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
       rowData.target || 0,
       rowData.shipok || 0,
       rowData.shipok_percent  || 0,
-      rowData.shipok_score || 0,
+      rowData.shipok_score ||  rowData.shipok - rowData.target,
 
       // rowData.memo_text || '',
     ];
@@ -943,45 +951,7 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
       cell.border = getDataBorder();
       cell.alignment = { horizontal: 'center', vertical: 'middle' };
        
-      //EMPLOYEE STATUS column (4)
 
-      // if(colNumber == 4){
-      //   let fontColor
-      //   switch(cell.value){
-      //     case  'Hired': fontColor = '14DB3C'; break;
-      //     case  'Rehired': fontColor ='14DB3C'; break;
-      //     case  'Resigned': fontColor ='DB211A'; break;
-      //   }
-      //   cell.font = {bold: true ,color: { argb: fontColor }}
-      // }
-      // FINAL RATING column (14)
-      // if (colNumber === 19) {
-      //   let fontColor;
-      //   switch (true) {
-      //     case (cell.value >= 5): fontColor = '7414DB'; break;
-      //     case (cell.value >= 4): fontColor = '0069DB'; break;
-      //     case (cell.value >= 3): fontColor = '00DB4E'; break;
-      //     case (cell.value >= 2): fontColor = 'D9BC4F'; break;
-      //     default: fontColor = 'DB211A';
-      //   }
-      //   cell.font = { bold: true, color: { argb: fontColor } };
-      // }
-
-      // RATING column (15)
-      // if (colNumber === 20) {
-      //   let fillColor = 'FFFFFF';
-      //   let fontColor = '000000';
-      //   switch (cell.value) {
-      //     case 'EXCEPTIONAL': fillColor = '7414DB'; fontColor = 'FFFFFF'; break;
-      //     case 'VERY SATISFACTORY': fillColor = '0069DB'; fontColor = 'FFFFFF'; break;
-      //     case 'SATISFACTORY': fillColor = '00DB4E'; break;
-      //     case 'NEEDS IMPROVEMENT': fillColor = 'D99307'; break;
-      //     case 'POOR': fillColor = 'DB211A'; break;
-      //     case 'INCOMPLETE RATING': fillColor = 'DBC414'; fontColor = 'FFFFFF'; break;
-      //   }
-      //   cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
-      //   cell.font = { bold: true, color: { argb: fontColor } };
-      // }
     });
   });
 };
@@ -1973,6 +1943,46 @@ exports.fetchSalesAgentsExportToExcel = async (req, res, next) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 
   await workbook.xlsx.write(res); 
+}
+
+exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
+  
+  const agendId = req.agentId 
+  const year_summary = req.year_summary
+  const fullyear = req.fullyear
+  const data = req.dashboard.data
+  const month = data[0].month 
+  const year = data[0].year
+
+  const dataWithShipokPercent = data.map(agent => {
+       const percentage =((agent.shipok / agent.target) * 100).toFixed(2)
+      const roundOff = Math.round(percentage)
+      return {
+        shipok_percent: roundOff, ...agent
+      }
+  })
+
+
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
+  let  tableTitle = `AGENT MONTHLY TARGET`
+
+
+  createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
+
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const filename = `users-${timestamp}.xlsx`;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+  await workbook.xlsx.write(res); 
+
+
+  
+  
 }
 
 // ================= Utility Functions =================

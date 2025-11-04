@@ -6,11 +6,14 @@
         <spinner></spinner>
     </div>
     <div v-else>
-
-      <div v-if="dashboardoption =='individual' && currentUser.login_type == 'standarduser' && data?.length > 0">
+      <div v-if="data?.length === 0" class="text-red-700 font-bold  text-5xl">
+         No Available Data.
+        
+      </div>
+      <div v-else-if="dashboardoption =='individual' && currentUser.login_type == 'standarduser' && data?.length > 0">
               
-                <p class="text-gray-800 font-bold text-3xl mb-2 text-center">Individual Results</p>
-                <p  class="text-gray-800 font-bold text-lg mb-2 text-center">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
+            <p class="text-gray-800 font-bold text-3xl mb-2 text-center">Individual Results</p>
+            <p  class="text-gray-800 font-bold text-lg mb-2 text-center">Target Vs ShipOk  as of: <span class="text-red-600">( {{ month }} {{ year }})</span></p>
         <table class="w-full table-auto border-collapse bg-white">
           <thead>
             <tr class="bg-gradient-to-r from-blue-200 to-blue-300 text-gray-800">
@@ -51,10 +54,10 @@
               </td>
              
               <td class="py-1 px-2 border text-center text-medium text-gray-700">
-                {{ agent.market_name.toUpperCase() }}
+                 {{ agent?.market_name?.toUpperCase?.() ?? '' }}
               </td> 
               <td class="py-1 px-2 border text-center text-medium text-gray-700">
-                {{ agent?.team_name.toUpperCase() }}
+                 {{ agent?.team_name?.toUpperCase?.() ?? '' }}
               </td>  
               
                <td class="py-1 px-2 border text-center text-medium text-gray-700">

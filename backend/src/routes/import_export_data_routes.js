@@ -25,6 +25,8 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 const salesMarketController = require('../controllers/sales_market_controller.js')
 
+const salesDashboardController = require('../controllers/sales_dashboard_controller.js')
+
 
 
 module.exports = (io) => {
@@ -80,7 +82,15 @@ module.exports = (io) => {
     }, salesAgentsController.fetchSalesAgents, importExportDataController.fetchSalesAgentsExportToExcel
  
  )
-  
+
+
+  router.get('/sales_agents_target_export', authenticateToken, authorizeRoles('admin'), 
+    (req, res, next) => {
+        req.export_to_excel = true
+        next()
+    },salesDashboardController.fetchAgentDashboard, importExportDataController.fetchSalesAgentsTargetExportToExcel
+ 
+ )
   
  router.get('/agent_market_target_shipok_new_deposit_export', authenticateToken, authorizeRoles('admin'),
             (req, res, next) => {
@@ -104,6 +114,8 @@ router.get('/agent_market_target_shipok_new_deposit_year_export', authenticateTo
      salesMarketController.fetchAgentMarketNewDepositYear,
      importExportDataController.salesTeamPerformanceExportToExcel
    )
+
+
 
 
 
