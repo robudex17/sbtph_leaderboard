@@ -271,7 +271,7 @@ validator.registerUser = [
 
     check('role')
     .notEmpty().withMessage('Role is required')
-    .isIn(['admin', 'manager','user']).withMessage('Role must be in admin, manager, or user only'),
+    .isIn(['admin', 'manager','user', 'poweruser']).withMessage('Role must be in admin, manager, or user only'),
 
     check('username')
     .notEmpty().withMessage('Username is required')
@@ -295,7 +295,7 @@ validator.updateLogin = [
 
     check('role')
     .notEmpty().withMessage('Role is required')
-    .isIn(['admin', 'manager','user']).withMessage('Role must be in admin, manager, or user only'),
+    .isIn(['admin','poweruser']).withMessage('Role must be in admin, or poweruser only'),
 
     check('username')
     .notEmpty().withMessage('Username is required')
@@ -318,7 +318,7 @@ validator.loginUser  = [
     check('loginas')
     .notEmpty().withMessage('Login as is required')
     // for now all standarduser is consider admin
-    .isIn(['unitmanager', 'lm', 'salesagent', 'standarduser', 'admin']).withMessage('Login as must be unitmanager, lm, salesagent, standarduser, or admin only')
+    .isIn(['unitmanager', 'lm', 'salesagent', 'standarduser', 'admin', 'poweruser']).withMessage('Login as must be unitmanager, lm, salesagent, standarduser, or admin only')
 ]
 
 validator.validateFeedbackDate = [

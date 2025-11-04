@@ -45,14 +45,14 @@ module.exports = (io) => {
             )
     
 
-    router.get('/sales_leaderboard_export', authenticateToken, authorizeRoles('admin'), (req, res, next) => {
+    router.get('/sales_leaderboard_export', authenticateToken, authorizeRoles('admin', 'poweruser'), (req, res, next) => {
         req.export_to_excel = true
         next()
         }, salesLeaderboardController.fetchAgentLeaderBoard, (req,res, next) => {
         next()
         }, importExportDataController.salesLeaderboardExportToExcel 
    )
-   router.get('/sales_agent_performanace_export',  authenticateToken, authorizeRoles('admin'),
+   router.get('/sales_agent_performanace_export',  authenticateToken, authorizeRoles('admin', 'poweruser'),
         (req,res, next) => {
             req.export_to_excel = true
          
@@ -64,7 +64,7 @@ module.exports = (io) => {
   )
 
 
-     router.get('/sales_leaderboard_yearly_export',  authenticateToken, authorizeRoles('admin'),
+     router.get('/sales_leaderboard_yearly_export',  authenticateToken, authorizeRoles('admin', 'poweruser'),
         (req,res, next) => {
             req.export_to_excel = true
          
@@ -75,7 +75,7 @@ module.exports = (io) => {
          importExportDataController.salesLeaderboardYearlyExportToExcel 
   )
 
-  router.get('/sales_agents_export', authenticateToken, authorizeRoles('admin'), 
+  router.get('/sales_agents_export', authenticateToken, authorizeRoles('admin', 'poweruser'), 
     (req, res, next) => {
         req.export_to_excel = true
         next()
@@ -84,7 +84,7 @@ module.exports = (io) => {
  )
 
 
-  router.get('/sales_agents_target_export', authenticateToken, authorizeRoles('admin'), 
+  router.get('/sales_agents_target_export', authenticateToken, authorizeRoles('admin', 'poweruser'), 
     (req, res, next) => {
         req.export_to_excel = true
         next()
@@ -92,7 +92,7 @@ module.exports = (io) => {
  
  )
   
- router.get('/agent_market_target_shipok_new_deposit_export', authenticateToken, authorizeRoles('admin'),
+ router.get('/agent_market_target_shipok_new_deposit_export', authenticateToken, authorizeRoles('admin', 'poweruser'),
             (req, res, next) => {
                req.export_to_excel = true
                req.year_only = false
@@ -104,7 +104,7 @@ module.exports = (io) => {
            )    
 
 
-router.get('/agent_market_target_shipok_new_deposit_year_export', authenticateToken ,authorizeRoles('admin'),
+router.get('/agent_market_target_shipok_new_deposit_year_export', authenticateToken ,authorizeRoles('admin', 'poweruser'),
      (req, res, next) => {
         req.export_to_excel = true 
         req.year_only = true 

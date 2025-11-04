@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
 
 
 
-  if (!authStore.state.user || ( authStore.state.user?.role !== 'admin' &&  authStore.state.user.agent_type != 1 && authStore.state.user.agent_type != 2) ) {
+  if (!authStore.state.user || ( authStore.state.user?.role !== 'admin' && authStore.state.user?.role !== 'poweruser' &&  authStore.state.user.agent_type != 1 && authStore.state.user.agent_type != 2) ) {
     alert('its true')
     return navigateTo('/unauthorized'); // Redirect if not admin
   }else{

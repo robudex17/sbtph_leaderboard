@@ -189,7 +189,7 @@ const paginatedAgents = computed(() => {
 });
 
 
-if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+if (currentUser.role == 'poweruser'  || currentUser.role == 'admin'){
     isAdmin.value = true
    
 }

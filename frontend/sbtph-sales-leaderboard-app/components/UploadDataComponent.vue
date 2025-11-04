@@ -115,6 +115,10 @@
   const duplicateAction = ref('skip') // Default action for duplicates
   
   const uploadFile = (event) => {
+    if(currentUser.role !== 'admin'){
+      alert('Access Denied')
+      return
+    }
     const file = event.target.files[0]
     if (file && (file.name.endsWith('.xls') || file.name.endsWith('.xlsx'))) {
       selectedFile.value = file
@@ -125,6 +129,10 @@
   }
   
   const submitFile = async () => {
+
+    if(currentUser.role !== 'admin'){
+      alert('Access Denied')
+    }
     if (!selectedFile.value) {
       alert('Please select a file')
       return

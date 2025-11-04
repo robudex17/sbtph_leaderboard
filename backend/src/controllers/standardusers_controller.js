@@ -58,10 +58,10 @@ exports.addNewStandardUser = async( req, res, next) => {
 
     let imageLink = ""
     if (!req.file) {
-        imageLink = null
+          imageLink = "/images/sbtlogo.png" 
     }else {
          // Construct the URL for the uploaded image
-       imageLink = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+      imageLink = `/images/${req.file.filename}`;
     }
 
     try {
@@ -142,7 +142,9 @@ exports.deleteStandardUser = async (req, res, next) => {
         
         const image_link = standardUserImageLink.image_link
         if(image_link != null || image_link != ""){
-            const filePath = new URL(image_link).pathname.substring(1)
+            // const filePath = new URL(image_link).pathname.substring(1)
+
+            const filePath = image_link.startsWith('/') ? image_link.substring(1) : image_link;
             
             //Construct absolute path
             const absolutePath = path.join(__dirname, '../', filePath)

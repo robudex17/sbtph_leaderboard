@@ -201,7 +201,7 @@
 
         // Validate Ship OK input on every keystroke
     const validateShipOk  = () => {
-         if(currentUser.login_type == 'standarduser'){
+         if(currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
           if (form.value.shipok === "" || !/^\d+$/.test(form.value.shipok)) {
             errorShipOk.value = "Please enter a valid whole number.";
           } else {
@@ -273,7 +273,7 @@
           emit('passNewTarget', agent_id,{month:month.value, year:year.value}, form.value )
 
           } else if (modalType.value === 'edit') {
-            if (currentUser.login_type == 'standarduser') {
+            if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin') {
               emit('passUpdatedTarget', agent_id,{month:month.value, year:year.value}, form.value )
             }else{
               // do some shipok manipulation before emitting
@@ -300,6 +300,13 @@
        if(agent.submitted == 1){
         alert(`Deleting Target/Shipok that already submitted is prohibited. `)
         return
+       }
+
+
+       //dont allow delete not admin
+
+       if(currentUser.role != 'admin'){
+         alert('Access Denied')
        }
 
        

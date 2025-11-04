@@ -660,7 +660,7 @@ const leaderboardOption = ref("")
 
 
 
-if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+if (currentUser.login_type == 'standarduser' && (currentUser.role == 'admin' || currentUser.role == 'poweruser')){
     isAdmin.value = true
    
   }

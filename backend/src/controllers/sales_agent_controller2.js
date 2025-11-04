@@ -414,7 +414,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             res.status(500).json({error: 'Database Error, Error In Fetching Active Agents'})
         }  
     }
-    else if(req.user.role=='admin' || (req.user.role == 'manager' && req.user.agent_type ==2)) {
+    else if(req.user.role=='admin' || req.user.role== 'poweruser' || (req.user.role == 'manager' && req.user.agent_type ==2)) {
         try{
             const employeeStatus = req.query.employee_status || 'Hired'
 

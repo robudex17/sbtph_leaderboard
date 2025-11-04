@@ -10,7 +10,7 @@ export default defineNuxtRouteMiddleware((to, from) => {
       return navigateTo('/unauthorized'); 
   }
 
-  if(Number(to.query.who_give_feedback_id) !== Number(authStore.state.user.login_id) && authStore.state.user?.role !== 'admin'){
+  if(Number(to.query.who_give_feedback_id) !== Number(authStore.state.user.login_id) && authStore.state.user?.role !== 'admin' && authStore.state.user?.role !== 'poweruser'){
       alert('Access Denied')
       return navigateTo('/unauthorized'); 
   }

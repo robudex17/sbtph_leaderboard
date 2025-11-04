@@ -500,7 +500,7 @@
           alert('User is not allowed to enable or disable update feedback which already submitted.')
           return
         }
-         if(currentUser.login_type != 'standarduser'){
+         if(currentUser.role != 'admin'){
           alert('User is not allowed to enable or disable update feedback')
           return
          }
@@ -526,7 +526,7 @@
               return
             }  
 
-          if(currentUser.login_type != 'standarduser'){
+          if(currentUser.role != 'admin'){
               alert('User is not allowed to delete feedback')
               return
             }

@@ -268,7 +268,7 @@
             'July', 'August', 'September', 'October', 'November', 'December'
          ];
   
-  if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+  if (currentUser.role == 'poweruser' || currentUser.role == 'admin'){
     isAdmin.value = true
     isCardView.value = false
   }
@@ -301,7 +301,7 @@
 
   let agentId;
    if (query.value.agent_id) {
-    if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin' || (currentUser.login_type == 'salesagentuser' && currentUser.login_type == 2)){
+    if ( (currentUser.role == 'admin')  || (currentUser.role == 'poweruser')|| (currentUser.login_type == 'salesagentuser' && currentUser.login_type == 2)){
        agentId = query.value.agent_id
        
     }

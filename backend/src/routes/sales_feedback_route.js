@@ -24,7 +24,7 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 router.get('/feedback_by_admin/all',
      authenticateToken,
-     authorizeRoles('admin','manager', 'user'),
+     authorizeRoles('admin','manager', 'user', 'poweruser'),
      validateMonthYear,
      salesFeedbackController.getAllAgentsFeedbackByQaOrByAdmin
 )
@@ -57,14 +57,14 @@ router.post('/feedback_by_qa',
 
 router.get('/feedback_by_qa/all',
      authenticateToken,
-     authorizeRoles('admin','manager', 'user'),
+     authorizeRoles('admin','manager', 'user', 'poweruser'),
      validateMonthYear,
      salesFeedbackController.getAllAgentsFeedbackByQaOrByAdmin
 )
 
 router.get('/feedback_by_qa/:agent_id',
      authenticateToken,
-     authorizeRoles('admin','manager', 'user'),
+     authorizeRoles('admin','manager', 'user','poweruser'),
      // validateAgentId,
      // validateMonthYear,
      salesFeedbackController.getAgentsFeedbackByQa
@@ -107,14 +107,17 @@ router.get('/feedback_by_sales/:id',
 
 router.put('/feedback_by_sales', 
            authenticateToken,
+         
           //  validateAddAndUpdateAgentsFeedback,
           //  validateFeedbackResponsesValues,
           //  validateFeedbackDate,
             validateMonthYear,
+
            salesFeedbackController.updateSalesFeedback
           )
 
 router.delete('/feedback_by_sales/:id', 
+             authorizeRoles('admin'),
              authenticateToken,
         //     validateAgentId,
         //     validateLmId,

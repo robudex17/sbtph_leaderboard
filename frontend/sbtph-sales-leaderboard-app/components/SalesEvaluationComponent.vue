@@ -26,12 +26,12 @@
                         <div class="mb-4" >
                           
                               <label class="block text-sm font-medium mb-2">Target</label>
-                              <input v-model="form.target" :disabled="currentUser.login_type != 'standarduser'" type="text" class="w-full border rounded-lg p-2"  />
+                              <input v-model="form.target" :disabled="currentUser.role != 'admin'" type="text" class="w-full border rounded-lg p-2"  />
                               <p v-if="errorTarget" class="text-red-500 text-sm mt-2">{{ errorTarget }}</p>
                         </div>
                         <div class="mb-4"  >
                               <label class="block text-sm font-medium mb-2">ShipOk</label>
-                              <input v-if="currentUser.login_type == 'standarduser'" v-model="form.shipok" type="text" class="w-full border rounded-lg p-2" />
+                              <input v-if="currentUser.role == 'admin'" v-model="form.shipok" type="text" class="w-full border rounded-lg p-2" />
                               <input v-else v-model="userEntry" type="text" class="w-full border rounded-lg p-2"  />
                               <p v-if="errorOtherMetrics" class="text-red-500 text-sm mt-2">{{ errorOtherMetrics }}</p>
                         </div>   
@@ -247,6 +247,8 @@
             return;
           }
 
+     
+
 
           errorOtherMetrics.value = ''
           errorTarget.value = ''
@@ -265,7 +267,7 @@
                   emit('passAddDataAgent', "", form.value)
                  
               } else if (props.modalType === 'edit') {
-                if (currentUser.login_type == 'standarduser') {
+                if (currentUser.role == 'admin') {
                   emit('passEditDataAgent',  "", form.value )
                  
                 }else{

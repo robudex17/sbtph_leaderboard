@@ -49,6 +49,7 @@
           >
            <!-- For now all standarduser is consider admin -->
             <option value="standarduser">Admin</option>
+            <!-- <option value="standarduser">Power User</option> -->
             <option value="unitmanager">Unit Manager</option>
             <option value="lm">Local Manager</option>
             <option value="salesagent">Sales Agent</option>

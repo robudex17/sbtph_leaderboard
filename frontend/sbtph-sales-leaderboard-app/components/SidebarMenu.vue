@@ -74,7 +74,7 @@
       const submenuStates = ref({});
       let menuItems 
 
-      if (currentUser.role === 'admin'){
+      if (currentUser.role === 'admin' || currentUser.role == 'poweruser'){
           menuItems = [
             // { name: 'Dashboard', route: null , icon: ['fas', 'tachometer-alt'],
             //   subMenu: [

@@ -523,7 +523,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
       if (dashboarOption == 'individual'){
    
-         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
+         if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role =='poweruser' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
 
              if(!year_summary){
                 individualTargets  =  await  fetchIndividualTargetShipok("", `${dashboarddMasterQuery}  ORDER BY team_id ASC;`, givenMonth, givenYear)
@@ -547,6 +547,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                         req.dashboard = dashboard
                         req.year_summary = false
                         req.fullyear = fullyear
+                        req.agentId = agent_id
                         next()
                      }else{
                          return res.status(200).json(dashboard)
@@ -562,6 +563,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                         req.dashboard = dashboard
                         req.year_summary = year_summary
                         req.fullyear = fullyear
+                         req.agentId = agent_id
                         next()
                      }else{
                          return res.status(200).json(dashboard)
@@ -590,7 +592,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
       }else if (dashboarOption == 'team'){
         let teamTargets = []
       
-        if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
+        if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role =='poweruser' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
 
 
           const [result] = await pool.execute(
@@ -697,6 +699,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         req.dashboard = dashboard
         req.year_summary =  year_summary 
         req.fullyear = fullyear
+         req.agentId = agent_id
         next()
       }else{
         return res.status(200).json(dashboard)

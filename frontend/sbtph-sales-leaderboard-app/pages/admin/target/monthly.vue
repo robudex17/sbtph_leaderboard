@@ -230,7 +230,7 @@ const data = computed(() => dashBoardStore.state.dashboard.data)
   });
 
 
-if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
+if (currentUser.role == 'poweruser' || currentUser.role == 'admin'){
     isAdmin.value = true
    
   }

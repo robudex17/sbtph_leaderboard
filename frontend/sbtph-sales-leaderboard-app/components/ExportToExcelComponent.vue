@@ -51,8 +51,6 @@
 
 const exportExcel = async () => {
 
-
-
     if(props.submitted == 0){
       alert('Cannot Export Agent Data which has not been submitted')
       return

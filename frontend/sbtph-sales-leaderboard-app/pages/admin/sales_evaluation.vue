@@ -519,6 +519,10 @@
      
       switch(metricsType.value){
           case "targetShipok":
+            if(currentUser.role != 'admin' && currentUser.agent_type != 2){
+               alert(`Not allowed to perform change on ${metricsType.value}`)
+              return
+            }
               modalMeticsTypeMessage.value = [ "Add  Target/Shipok", "Edit Target/Shipok`"]
             if(selectedAgent.agent_type== 2){
               alert('Cannot Update the agent directly')
@@ -537,6 +541,11 @@
             selectedData.value = selectedAgent
             break
           case "newDeposit": 
+
+            if(currentUser.role != 'admin' && currentUser.agent_type != 2){
+               alert(`Not allowed to perform change on ${metricsType.value}`)
+              return
+            }
             modalMeticsTypeMessage.value = [ "Add  New Deposit", "Edit New Deposit"]
             if(selectedAgent.agent_type== 2){
               alert('Cannot Update the agent directly')
@@ -546,7 +555,7 @@
              selectedData.value = selectedAgent
             break
           case "absence":
-            if(currentUser.login_type != 'standarduser'){
+            if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }
@@ -555,7 +564,7 @@
              selectedData.value = selectedAgent
             break
           case "tardiness":
-            if(currentUser.login_type != 'standarduser'){
+            if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }
@@ -565,7 +574,7 @@
           
             break
           case "memo":
-            if(currentUser.login_type != 'standarduser'){
+            if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }
@@ -574,7 +583,7 @@
               showModalMetricsType.value = true
             break
           case "feedback_admin":
-            if(currentUser.login_type != 'standarduser'){
+            if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }
@@ -587,7 +596,7 @@
              showModalMetricsType.value = true            
             break
           case "feedback_qa":
-            if(currentUser.login_type != 'standarduser'){
+            if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }
@@ -601,7 +610,7 @@
              showModalMetricsType.value = true           
             break
           case "deduction":
-           if(currentUser.login_type != 'standarduser'){
+           if(currentUser.role != 'admin'){
               alert(`Not allowed to to udpate agent ${metricsType.value}`)
               return
             }

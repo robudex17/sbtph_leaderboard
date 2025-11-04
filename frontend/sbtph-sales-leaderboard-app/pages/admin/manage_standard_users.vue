@@ -202,8 +202,8 @@
           >
           
             <option value="admin">Admin</option>
-            <option value="manager">Manager</option>
-            <option value="user">User</option>
+            <!-- <option value="manager">Manager</option> -->
+            <option value="poweruser">User</option>
           </select>
           <div class="flex justify-end space-x-4 mt-4">
             <button
@@ -326,9 +326,17 @@ import { onMounted } from 'vue';
 
 const config = useRuntimeConfig()
 
-const updateImageLink = (imageLink) => {
+ const updateImageLink = (imageLink) => {
+         if (!imageLink) return ''
+  
+        // ✅ If it's already a base64 Data URL, just return it directly
+        if (imageLink.startsWith('data:image')) {
+          return imageLink
+        }
+
+        // ✅ Otherwise, assume it's a server path
         return `${config.public.imageBaseUrl}${imageLink}`
-}
+    }
 
 //get the current user
 const authStore = useAuthStore()
@@ -375,7 +383,7 @@ const currentStandardUserLogin = ref({
   password: '',
   password_again: '',
   status: 'inactive',
-  role: 'user',
+  role: 'poweruser',
  
 });
 

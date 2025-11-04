@@ -8,9 +8,9 @@ const  {validateMonthYear} = require('../middleware/validator.js')
 
 router.get('/markets', authenticateToken, salesMarketController.fetchMarkets)
 router.get('/markets/:market_id', authenticateToken, salesMarketController.fetchMarkets )
-router.post('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
-router.put('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
-router.delete('/markets', authenticateToken, salesMarketController.addUpdateDeleteMarket)
+router.post('/markets', authenticateToken,authorizeRoles('admin'), salesMarketController.addUpdateDeleteMarket)
+router.put('/markets', authenticateToken, authorizeRoles('admin'), salesMarketController.addUpdateDeleteMarket)
+router.delete('/markets', authenticateToken, authorizeRoles('admin'),salesMarketController.addUpdateDeleteMarket)
 
 
 router.get('/agent_market', authenticateToken, salesMarketController.fetchAgentMarket)
