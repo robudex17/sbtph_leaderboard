@@ -16,7 +16,8 @@ export const isValidMonthRange = (startDate, endDate) => {
 
   // 2️⃣ End month should not exceed the current month
   //    (Optional — remove if you allow future months)
-  const currentMonth = new Date(current.getFullYear(), current.getMonth(), 1);
+  const now = new Date();
+  const currentMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); // last day of current month
   if (end > currentMonth) {
     return { valid: false, message: "Range cannot go beyond the current month." };
   }
