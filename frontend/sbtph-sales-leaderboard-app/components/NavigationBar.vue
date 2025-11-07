@@ -81,6 +81,86 @@
                   Submit
                 </button>
               </div>
+              <div
+                v-if="hasCustomSearchOption"
+                class="flex flex-col sm:flex-row items-center gap-4"
+              >
+                <!-- Filter By Dropdown -->
+                <div class="flex items-center gap-2" v-if="data?.length > 0">
+                
+                  <label for="filter-by" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    Filter By:
+                  </label>
+                  <select
+                    id="filter-by"
+                    v-model="selectedFilter"
+                    @change="fetchFilterValues"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option v-for="item in filterBy" :key="item" :value="item">
+                      {{ item.toUpperCase() }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Filter Value Dropdown -->
+                <div class="flex items-center gap-2"  v-if="data?.length > 0" >
+                  <label for="filter-value" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    Value:
+                  </label>
+                  <select
+                    id="filter-value"
+                    v-model="selectedFilterValue"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <option value="all">All</option>
+                    <option v-for="option in filterValueList" :key="option.id" :value="option.id">
+                      {{ option.name }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Start Date -->
+                <div class="flex items-center gap-2">
+                  <label for="start-date" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    Start Date:
+                  </label>
+                  <input
+                    id="start-date"
+                    type="month"
+                    v-model="selectStartDate"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+
+                <!-- End Date -->
+                <div class="flex items-center gap-2">
+                  <label for="end-date" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                    End Date:
+                  </label>
+                  <input
+                    id="end-date"
+                    type="month"
+                    v-model="selectEndDate"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+
+                <!-- Submit Button -->
+                <button
+                  class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  @click="submitCustomSearchSelection"
+                >
+                  Submit
+                </button>
+
+                <button 
+                  class="px-4 py-2 ml-0 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  @click="reset"
+                >
+                  Reset
+                </button>
+              </div>
           </div>
 
                 <!-- User Profile -->
@@ -134,12 +214,16 @@
 
 <script setup>
     import { ref, watch,computed } from "vue";
+    import API from "~/utils/api"
+
+    import { isValidMonthRange } from '~/utils/validation_script'
 
     //get the current user
     const authStore = useAuthStore()
     authStore.fetchTokenFromLocalStore()
 
     const currentUser = authStore.state.user 
+    const test = "rogmer"
 
     const config = useRuntimeConfig()
 
@@ -161,13 +245,106 @@
     const router = useRouter()
     const route = useRoute()
     const urlPath = ref(route.fullPath)
+    const selectStartDate = ref("")
+    const selectEndDate = ref("")
+    const filterBy = ref([
+      'lms','agent', 'all','market', 'team'
+    ])
 
-    
+    const selectedFilter = ref('all') // Default selected
+    const selectedFilterValue = ref('all') // Default "All"
+    // const filterValueList = ref([]) // Data fetched from API
 
-    // Dashboard values
-    // const individual = 'individual'
-    // const team = 'team'
-    // const overall = 'overall'
+        // Stores
+    const customSeachStore = useCustomSearchStore() 
+    const data = computed(() => customSeachStore.state.customSearch)
+
+    const filterValueList = computed(() => {
+      if (!data.value || !Array.isArray(data.value)) return []
+
+      let filtered = []
+     if(selectedFilter.value == 'all'){
+       filtered = data.value.map(agent => ({
+            id: agent.id,
+            name: agent.db_name
+          }))
+
+     
+     }
+     else if (selectedFilter.value === 'agent') {
+        filtered = data.value
+          .filter(agent => agent.agent_type == 0)
+          .map(agent => ({
+            id: agent.id,
+            name: agent.db_name
+          }))
+      } 
+      else if (selectedFilter.value === 'lms') {
+        filtered = data.value
+          .filter(agent => agent.agent_type == 1)
+          .map(agent => ({
+            id: agent.id,
+            name: agent.db_name
+          }))
+      } 
+      else if (selectedFilter.value === 'team') {
+        filtered = data.value.map(agent => ({
+          id: agent.team_id,
+          name: agent.team_name
+        }))
+      } 
+      else if (selectedFilter.value === 'market') {
+        filtered = data.value.map(agent => ({
+          id: agent.market_id,  // fixed typo: should use market_id
+          name: agent.market_name
+        }))
+      } 
+      else {
+        return []
+      }
+
+      // ✅ remove duplicates
+      const unique = Array.from(
+        new Map(
+          filtered.map(obj => [JSON.stringify(obj), obj])
+        ).values()
+      )
+
+   
+
+
+      return unique
+    })
+
+
+  watch(filterValueList, (newVal) => {
+    customSeachStore.setFilterValueList(newVal)
+  })
+
+    customSeachStore.state.isResetting = false
+
+   const reset = async() => {
+
+      customSeachStore.state.isResetting = true
+      const currentRoute = router.currentRoute.value;
+      customSeachStore.state.customSearch = []
+      selectedFilter.value  =  'all' // = ref('all') // Default selected
+      selectedFilterValue.value =  'all'  //ref('all') // Default "All"
+      selectStartDate.value = ""
+      selectEndDate.value = ""
+
+      await router.replace({
+        path: router.currentRoute.value.path,
+        query: {}
+      })
+
+  
+   }
+
+   
+    const searchType = route.params.search_type
+    //Dynamic API URL 
+
     const dashboardOption = ref("")
 
     //if rustan is login  set  dashboardOption default value as team
@@ -234,7 +411,8 @@
       '/admin/overall_performance/yearly',
       '/admin/team_performance/yearly',
       '/overall_performance/year',
-       '/admin/target/yearly'
+       '/admin/target/yearly',
+       '/admin/target/custom_search/target'
 
 
     ])
@@ -249,6 +427,8 @@
        '/admin/markets_and_teams',
        
        '/admin/agent2/manage_sales_agents',
+        '/admin/target/custom_search/target',
+
     ])
 
     const pathWithoutTrucksOption = ref([
@@ -266,8 +446,6 @@
       '/',
        '/admin/markets_and_teams',
        '/team_performance/year',
-
-
        '/admin/agent2/manage_sales_agents',
        '/admin/team_performance/monthly',
        '/admin/team_performance/yearly',
@@ -278,9 +456,15 @@
         '/overall_performance/year',
         '/overall_performance/month',
         '/admin/target/monthly',
-         '/admin/target/yearly'
+         '/admin/target/yearly',
+        '/admin/target/custom_search/target'
 
 
+
+    ])
+
+    const pathWithCustomSearchOption = ref([
+       '/admin/target/custom_search/target',
     ])
 
 
@@ -302,7 +486,7 @@
       }
     })
 
-
+     
     const hasTrucksOption = computed(() =>{
       if(!pathWithoutTrucksOption.value.includes(route.path) && !route.path.includes('/admin/agent') && !route.path.includes('/feedback')){
         return true
@@ -310,6 +494,10 @@
         return false
       }
     })
+
+    const hasCustomSearchOption = computed( () => pathWithCustomSearchOption.value.includes(route.path) )
+
+    
 
     const dashboardListOfOptions  = computed(()  => {
       
@@ -466,10 +654,28 @@
 
     };
 
-    // onMounted(() =>{
-    //   alert('this is mounted')
-    //   selectedMonth.value = ""
-    //   selectedYear.value = ""
+
+   const submitCustomSearchSelection = () => {
+
+      const { valid, message } = isValidMonthRange(selectStartDate.value, selectEndDate.value);
+
+      if (!valid) {
+        alert(message); // or show toast/snackbar
+         return;
+      }
+     
+      const currentRoute = router.currentRoute.value;   
+       router.push({
+              path: currentRoute.path,
+              query: { ...currentRoute.query,start_date:selectStartDate.value,end_date:selectEndDate.value, filterBy: selectedFilter.value, filterId:selectedFilterValue.value  },})
+
+    };
+
+
+    // watch(filterValueList, (newVal, oldVal) => {
+    //   customSeachStore.state.itemsPerPage = newVal.value.length
+      
+    
     // })
 
 
@@ -478,7 +684,7 @@
     watch(route, (newRoute, oldRoute)=> {
          urlPath.value = newRoute.fullPath
   
-         
+          
         if (Object.keys(newRoute.query).length == 0  ) {
           //  alert(JSON.stringify(newRoute.query))
             selectedMonth.value = ""

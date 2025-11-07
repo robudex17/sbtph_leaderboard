@@ -873,8 +873,16 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
   startRow += 1; // Move down after title
 
   let columnGroups
+
+  if(performanceType == 'target' && year_summary){
+        columnGroups = [
+    { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', , 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', ] },
+    { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'REMAINING UNITS'] },
+
+    // { label: 'MEMO', span: 1 },
+  ]; 
  
- if(performanceType == 'target'){
+}else if(performanceType == 'target'){
         columnGroups = [
     { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
     { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'REMAINING UNITS'] },
@@ -887,8 +895,6 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
     { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
     ]
  }
-
-
 
 
 

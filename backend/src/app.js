@@ -24,6 +24,7 @@ const standardUsersLoginRoutes = require('./routes/standardusers_login_routes')
 const standardUsersRoutes = require('./routes/standardusers_routes')
 const salesEvaluationDataRoutes = require('./routes/sales_evaluation_data_routes')
 const salesDeductionRoutes = require('./routes/sales_deduction_routes')
+const customSearchRoutes = require('./routes/custom_search_routes')
 
 
 //new added for experiment 
@@ -54,6 +55,7 @@ app.use("/api", salesTeamRoutes)
 app.use("/api", salesManagerRoutes)
 app.use('/api',salesEvaluationDataRoutes)
 app.use('/api', salesDeductionRoutes)
+app.use("/api", customSearchRoutes)
 
 
 //new added for production 

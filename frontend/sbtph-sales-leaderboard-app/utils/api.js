@@ -73,6 +73,7 @@ const API = {
         sales_agents_target_export: `${HTTPADDR}/sales_agents_target_export`,  
 
     },
+    custom_search: `${HTTPADDR}/custom_search`,
 
   // newly added for production
    salesAgents2: `${HTTPADDR}/prod/sales_agents`,

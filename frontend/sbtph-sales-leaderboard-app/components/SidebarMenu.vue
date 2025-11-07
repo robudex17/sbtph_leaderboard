@@ -116,6 +116,7 @@
               subMenu: [
               { name: 'Monthly_Target', route: '/admin/target/monthly', icon: ['fas', 'users'] },
               // { name: 'Yearly_Target', route: '/admin/target/yearly', icon: ['fas', 'users'] },
+               { name: 'custom_search', route: '/admin/target/custom_search/target', icon: ['fas', 'fa-search'] },
               ]
             },
 
