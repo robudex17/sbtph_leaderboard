@@ -4,26 +4,21 @@ export const useSpeechNotification = () => {
     return voices.find(v => v.name === voiceName) || voices[0];
   };
 
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig();
+  const soundsUrl = config.public.soundsUrl;
+  const soundClapping = `${soundsUrl}/applause-8.mp3`;
 
-  const soundsUrl = config.public.soundsUrl
-
-  const soundClapping = `${soundsUrl}/applause-8.mp3`
-
-  const playNotification = (agent) => {
+  const playNotification = async (agent) => {
     const { dbname, shipok_count, target, shipok, team_shipok, team_target, team_name } = agent;
 
-    // 🎯 Regular motivational messages
+    // 🎯 Motivational messages
     const regularMessages = [
       `Well done on closing a deal, ${dbname}! You now have ${shipok_count} ShipOK today. Keep up the momentum!`,
-      `Nice work ${dbname}! ${shipok_count} ShipOK so far.  your consistency is paying off. Let’s keep it going!`
+      `Nice work ${dbname}! ${shipok_count} ShipOK so far. Your consistency is paying off. Let’s keep it going!`
     ];
 
-    // 🏆 Agent reached target message
-    const agentTargetMessage = `Incredible job ${dbname}! You’ve reached your monthly target of ${target} ShipOK. You’re truly an inspiration.  keep shining!`;
-
-    // 👥 Team reached target message
-    const teamTargetMessage = `Congratulations to the entire ${team_name} team! Monthly goal achieved. teamwork makes the dream work!`;
+    const agentTargetMessage = `Incredible job ${dbname}! You’ve reached your monthly target of ${target} ShipOK. You’re truly an inspiration. Keep shining!`;
+    const teamTargetMessage = `Congratulations to the entire ${team_name} team! Monthly goal achieved. Teamwork makes the dream work!`;
 
     let messagesToPlay = [];
 
@@ -38,19 +33,35 @@ export const useSpeechNotification = () => {
       messagesToPlay.push(teamTargetMessage);
     }
 
-    // 🎧 Create looping applause sound
-
-   
-    
+    // 🎧 Prepare applause audio
     const applause = new Audio(soundClapping);
-    applause.loop = true; // ✅ continuous loop
-    applause.volume = 0.7; // not too loud
-    applause.play();
+    applause.loop = true;
+    applause.volume = 0.7;
+    applause.preload = "auto";
 
-    // 🗣️ Speak messages one by one
+    // ✅ Ensure browser allows sound playback (requires user gesture)
+    try {
+      // Add a small delay to allow alert/dialog to finish
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      await applause.play();
+    } catch (error) {
+      console.warn("Autoplay blocked or no user interaction yet:", error);
+      return; // exit early if autoplay not allowed
+    }
+
+    // ✅ Ensure voices are loaded before speaking
+    const ensureVoicesLoaded = () =>
+      new Promise(resolve => {
+        if (speechSynthesis.getVoices().length) return resolve();
+        speechSynthesis.onvoiceschanged = resolve;
+      });
+
+    await ensureVoicesLoaded();
+
+    // 🗣️ Speak one by one
     const speakNext = (index = 0) => {
       if (index >= messagesToPlay.length) {
-        // stop applause when finished
         applause.pause();
         applause.currentTime = 0;
         return;
