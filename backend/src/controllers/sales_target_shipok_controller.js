@@ -156,24 +156,7 @@ exports.fetchAgentTarget = async (req, res, next) => {
             
     }else {
         const [result] = await pool.execute(
-    //         //  'SELECT * FROM  `target_shipok` WHERE agent_id=? AND month=? AND year=?',[agentId,givenMonth,givenYear]  
-  
-    //       `
-    //       SELECT 
-    //          ts.agent_id,
-    //         ts.month,
-    //          ts.year,
-    //         ts.date,
-    //         ts.target,
-    //          ts.ship_ok
-    //    --      ts.market_id
-    //      -- market.market_name
-    //       FROM target_shipok ts
-    //    -- JOIN market ON ts.market_id = market.id
-    //     WHERE ts.agent_id = ? AND ts.month = ? AND ts.year = ?
-    
-    //       `
-  
+
         `
             SELECT 
                     sa.id AS id,
@@ -270,7 +253,7 @@ exports.fetchAgentTarget = async (req, res, next) => {
 
 }
 
-exports.updateAgentTarget = async (req,res, next) => {
+exports.updateAgentTarget = async (req,res, io) => {
 
     const errors = validationResult(req)
 
@@ -278,28 +261,16 @@ exports.updateAgentTarget = async (req,res, next) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    // const target = req.body.target
-    // const shipok = req.body.shipok
-    // const targetDate = req.body.date
-    // const marketId = req.body.market_id
-    // const agentId = req.params.agent_id
 
-    const { agent_id , month, year, date, target, shipok} = req.body
+    const loginUser = req.user
+    const { agent_id , month, year, date, target, shipok} = req.body 
+
+
     
      const agentId = req.params.agent_id
 
-    // const date = new Date(targetDate)
-    // const year = date.getFullYear()
-
-
-
-        // Get the month name
-    // const monthNames = [
-    //     "January", "February", "March", "April", "May", "June",
-    //     "July", "August", "September", "October", "November", "December"
-    // ];
-    // const monthName = monthNames[date.getMonth()]; // getMonth() returns 0-based index
-
+   
+  
 
 
     try {
@@ -311,6 +282,24 @@ exports.updateAgentTarget = async (req,res, next) => {
             return res.status(400).json({message: 'Agent Target Not Found'})
         }
 
+        
+        // ✅ Emit Socket.IO notification after successful update
+
+        if(io && loginUser.agent_type ==2 && req.body.evaluation && req.body.userEntry > 0){
+            io.emit('shipok_notification', {
+                agent_id: agent_id, 
+                shipok: shipok,
+                target: target,
+                dbname: req.body.agent_dbname,
+                image_link: req.body.agent_image_link,
+                shipok_count: req.body.userEntry,
+                team_target: Number(target) + Number(req.body.team.team_target),
+                team_shipok:  Number(shipok) + Number(req.body.team.team_shipok),
+                team_id: req.body.team_id,
+                team_image: req.body.team.team_image ,
+                team_name: req.body.team.team_name
+            })
+        }
 
         res.status(201).json({
             message: `Sales Agent Target is updated`

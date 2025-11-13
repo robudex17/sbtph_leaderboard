@@ -7,11 +7,12 @@ const pool = require('./config/db')
 const PORT = process.env.PORT || 3000
 
 const importExportDataRoutes = require('./routes/import_export_data_routes')
+const salesTargetShipokRoutes = require('./routes/sales_target_shipok_route')
 
 const server = http.createServer(app)
 const io = new Server(server, { cors: { origin: "*" } })
 
-
+app.use("/api", salesTargetShipokRoutes(io))  // in test, we can pass fake io if needed
 app.use("/api", importExportDataRoutes(io))  // in test, we can pass fake io if needed
 
 

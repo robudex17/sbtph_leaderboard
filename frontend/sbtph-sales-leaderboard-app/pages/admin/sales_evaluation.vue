@@ -86,13 +86,13 @@
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
                       
                      <!-- <span v-if="agent.agent_type ==2"> {{ agent.target }} </span> -->
-                      <button  @click="openMetricsTypeModal({ employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, metrics_type: 'targetShipok' })" >
+                      <button  @click="openMetricsTypeModal({ employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, agent_dbname:agent.db_name, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, team_id:agent.team_id,  image_link: agent.image_link,metrics_type: 'targetShipok' })" >
                         {{ agent.target }} 
                       </button>
                     </td>
                     <td class="py-0.5 px-4 text-left text-xs font-medium text-gray-700 border">
                       <!-- <span v-if="agent.agent_type ==2"> {{ agent.shipok }} </span> -->
-                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, metrics_type: 'targetShipok' })" >
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status, submitted: agent.submitted,agent_id: agent.id, agent_dbname:agent.db_name, month: agent.eval_month, year: agent.eval_year, target: agent.target, shipok: agent.shipok, agent_type: agent.agent_type, team_id:agent.team_id,  image_link: agent.image_link, metrics_type: 'targetShipok' })" >
                         {{ agent.shipok }} 
                       </button>
               
@@ -113,7 +113,7 @@
                     </td>
                     <td class="py-0.5 px-4 text-center text-xs font-medium text-gray-700 border">
                    
-                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_tardiness:  agent.total_tardiness, agent_type: agent.agent_type, metrics_type: 'tardiness' })" >
+                      <button   @click="openMetricsTypeModal({employee_status: agent.employee_status,submitted: agent.submitted,agent_id: agent.id, month: agent.eval_month, year: agent.eval_year, total_tardiness:  agent.total_tardiness, agent_type: agent.agent_type,  metrics_type: 'tardiness' })" >
                       {{ agent.total_tardiness }}
 
                       </button>                      
@@ -499,10 +499,33 @@
          ];
 
 
+  const fetchTeamTargetShipok = (teamId) => {
+     const teamTargetShipok =  agents.value.filter(agent => agent.team_id == teamId)
+    
+     const team  = {
 
+       team_id : teamId, 
+       team_target: 0,
+       team_shipok: 0
+     }
 
+     teamTargetShipok.forEach(agent => {
+        if(agent.agent_type ==1){
+          team.team_image =  agent.image_link
+          team.team_name = agent.team_name
+        
+        }
 
-    const openMetricsTypeModal = (selectedAgent) => {
+        team.team_target += parseFloat(agent.target)
+        team.team_shipok += parseFloat(agent.shipok)
+     })
+
+     return team
+     
+  }
+   
+
+  const openMetricsTypeModal = (selectedAgent) => {
     
 
       metricsType.value = selectedAgent.metrics_type
@@ -713,6 +736,8 @@
       const monthNumber = monthMap[agent.month];
       switch (metricsType.value){
          case "targetShipok":
+              agent.team = fetchTeamTargetShipok(agent.team_id)
+              agent.evaluation = true
               await useManageSalesStore.updateAgentTarget(agent.agent_id, route.query, agent )
       
               fetchSalesAgentsEvaluation(route.query)

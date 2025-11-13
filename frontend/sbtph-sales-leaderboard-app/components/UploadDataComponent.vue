@@ -74,7 +74,7 @@
   
   <script setup>
   import { ref, onMounted } from 'vue'
-  import { io } from 'socket.io-client'
+  // import { io } from 'socket.io-client'
   
   definePageMeta({
     middleware: ['auth', 'adminmanager']
@@ -177,12 +177,16 @@
       uploading.value = false
     }
   }
+
+   const { $socket } = useNuxtApp()
   
   onMounted(() => {
-    const socket = io(socketUrl)
+    // const socket = io(socketUrl)
+    // ✅ access global socket from Nuxt app
+   
 
 
-    socket.on('uploadProgress', (data) => {
+    $socket.on('uploadProgress', (data) => {
     
       progress.value = data.progress
       // insertedCount.value = data.targetShipokStats.insertedCount
@@ -192,6 +196,12 @@
       // notRegisteredAgentCount.value = data.targetShipokStats.notRegisteredAgentCount
       // emptyValuesCount.value = data.targetShipokStats.emptyValuesCount
     })
+
+
+  })
+
+  onUnmounted(() => {
+    $socket.off('uploadProgres')
   })
   </script>
   <style scoped>

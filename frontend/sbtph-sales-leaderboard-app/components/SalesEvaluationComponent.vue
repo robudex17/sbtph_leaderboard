@@ -430,6 +430,7 @@
           } else {
             errorOtherMetrics.value = '';
           }
+          form.value.userEntry  = Number(newValue)
         }
       ); 
     
@@ -443,6 +444,7 @@
         form.value = {
             agent_id: newVal.agent_id || "",
             agent_dbname: newVal.agent_dbname || "",
+            agent_image_link: newVal.image_link || "",
             month: newVal.month || "",
             year: newVal.year || "",
             target: newVal.target || "",
@@ -454,6 +456,8 @@
             total_memo: newVal.total_memo || 0,
             feedback: newVal.feedback || "",
             deduction: newVal.deduction || "",
+            team_id: newVal.team_id || 0,
+           
         }
         // if(props.metricsType == 'targetShipok'){
         //    userEntry.value = newVal.shipok || ""

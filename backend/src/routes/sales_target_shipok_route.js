@@ -1,25 +1,41 @@
-const express = require('express')
+// routes/sales_target_shipok_routes.js
+const express = require('express');
+const router = express.Router();
 
-const router = express.Router()
+const { validateMonthYear } = require('../middleware/validator');
+const salesTargetShipokController = require('../controllers/sales_target_shipok_controller');
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
+// 👇 Export a function that accepts `io`
+module.exports = (io) => {
+  
+  router.post(
+    '/agent_target_shipok/:agent_id',
+    authenticateToken,
+    authorizeRoles('admin', 'manager'),
+    (req, res) => salesTargetShipokController.addAgentNewTarget(req, res, io)
+  );
 
-const { validateTarget, validateMonthYear } = require('../middleware/validator')
-const salesTargetShipokController = require('../controllers/sales_target_shipok_controller')
+  router.get(
+    '/agent_target_shipok/:agent_id',
+    authenticateToken,
+    validateMonthYear,
+    salesTargetShipokController.fetchAgentTarget
+  );
 
-const { authenticateToken, authorizeRoles} = require('../middleware/auth')
+  router.put(
+    '/agent_target_shipok/:agent_id',
+    authenticateToken,
+    authorizeRoles('admin', 'manager'),
+    (req, res) => salesTargetShipokController.updateAgentTarget(req, res, io)
+  );
 
-// I remove the validateTarget because it is not needed for now
+  router.delete(
+    '/agent_target_shipok/:agent_id',
+    authenticateToken,
+    authorizeRoles('admin', 'manager'),
+    salesTargetShipokController.deleteAgentTarget
+  );
 
-router.post('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.addAgentNewTarget)
-
-
-router.get('/agent_target_shipok/:agent_id', authenticateToken,validateMonthYear,salesTargetShipokController.fetchAgentTarget)
-
-
-router.put('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'),  salesTargetShipokController.updateAgentTarget)
-
-
-router.delete('/agent_target_shipok/:agent_id', authenticateToken, authorizeRoles('admin', 'manager'), salesTargetShipokController.deleteAgentTarget)
-
-
-module.exports = router
+  return router;
+};
