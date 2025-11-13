@@ -31,6 +31,9 @@ import { ref, onMounted } from 'vue'
 import { useShipokNotification } from '~/composables/useShipokNotification'
 import ShipokNotificationCard from '~/components/ShipokNotificationCard.vue'
 
+import { useAudioUnlock } from '~/composables/useAudioUnlock'
+useAudioUnlock()
+
 // ✅ Reactive array for multiple notifications
 const notifications = ref([])
 
