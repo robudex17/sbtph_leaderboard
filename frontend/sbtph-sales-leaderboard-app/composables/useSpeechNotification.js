@@ -4,6 +4,12 @@ export const useSpeechNotification = () => {
     return voices.find(v => v.name === voiceName) || voices[0];
   };
 
+  const config = useRuntimeConfig()
+
+  const soundsUrl = config.public.soundsUrl
+
+  const soundClapping = `${soundsUrl}/applause-8.mp3`
+
   const playNotification = (agent) => {
     const { dbname, shipok_count, target, shipok, team_shipok, team_target, team_name } = agent;
 
@@ -33,7 +39,10 @@ export const useSpeechNotification = () => {
     }
 
     // 🎧 Create looping applause sound
-    const applause = new Audio('/applause-8.mp3');
+
+   
+    
+    const applause = new Audio(soundClapping);
     applause.loop = true; // ✅ continuous loop
     applause.volume = 0.7; // not too loud
     applause.play();

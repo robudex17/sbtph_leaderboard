@@ -23,6 +23,7 @@ export default defineNuxtConfig({
       apiUrl: process.env.NUXT_PUBLIC_API_URL,
       socketUrl: process.env.NUXT_PUBLIC_SOCKET_IO_URL,
       imageBaseUrl: process.env.NUXT_IMAGE_BASE_URL,
+      soundsUrl: process.env.NUXT_SOUNDS_BASE_URL,
     },
    
   }
