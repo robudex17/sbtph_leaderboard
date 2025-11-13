@@ -293,7 +293,7 @@ exports.updateAgentTarget = async (req,res, io) => {
                 dbname: req.body.agent_dbname,
                 image_link: req.body.agent_image_link,
                 shipok_count: req.body.userEntry,
-                team_target: Number(target) + Number(req.body.team.team_target),
+                team_target:  Number(req.body.team.team_target),
                 team_shipok:  Number(shipok) + Number(req.body.team.team_shipok),
                 team_id: req.body.team_id,
                 team_image: req.body.team.team_image ,
