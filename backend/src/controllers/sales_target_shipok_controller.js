@@ -269,7 +269,9 @@ exports.updateAgentTarget = async (req,res, io) => {
     
      const agentId = req.params.agent_id
 
-   
+    console.log(req.body.team.team_target)
+     console.log(req.body.team.team_shipok)
+ 
   
 
 
@@ -294,7 +296,7 @@ exports.updateAgentTarget = async (req,res, io) => {
                 image_link: req.body.agent_image_link,
                 shipok_count: req.body.userEntry,
                 team_target:  Number(req.body.team.team_target),
-                team_shipok:  Number(shipok) + Number(req.body.team.team_shipok),
+                team_shipok:  Number(req.body.userEntry) + Number(req.body.team.team_shipok),
                 team_id: req.body.team_id,
                 team_image: req.body.team.team_image ,
                 team_name: req.body.team.team_name
