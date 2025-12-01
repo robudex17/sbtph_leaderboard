@@ -129,6 +129,7 @@ definePageMeta({
 import { ref, computed } from 'vue';
 import { onMounted } from 'vue';
 import API from '~/utils/api'
+import {  setRatingColor, setRatingNameColor} from '@/utils/constants'
 
 //get the current user
 const authStore = useAuthStore()
@@ -153,12 +154,6 @@ const leaderBoardStore = useLeaderBoardStore()
  const leaderboardOption = 'all'
  const year = ref("")
  const exportUrl = API.export.leaderboardYearly
-
-
-  // const agent = computed(() => {
-  //   return leaderBoardStore.state.agentYearPerformance.yearAverage
-  // })
-
 
 
 
@@ -208,52 +203,6 @@ const updateImageLink = (imageLink) => {
   }
 
 
-const setRatingNameColor = (agent) => {
-if (agent.ratings_name == 'EXCEPTIONAL') {
-  return 'text-purple-600'
-}
-
-if (agent.ratings_name == 'VERY SATISFACTORY') {
-  return 'text-blue-500'
-}
-
-if (agent.ratings_name == 'SATISFACTORY') {
-  return 'text-green-600'
-}
-if (agent.ratings_name == 'NEEDS IMPROVEMENT') {
-  return 'text-yellow-600'
-}
-
-if (agent.ratings_name == 'POOR') {
-  return 'text-red-600'
-}
-
-if (agent.ratings_name == 'INCOMPLETE RATING') {
-  return 'text-orange-600'
-}
-}
-
-const setRatingColor = (agent) => {
-if (agent.final_ratings >= 5 ) {
-  return 'text-purple-600'
-}
-
-if (agent.final_ratings >= 4 && agent.final_ratings < 5) {
-  return 'text-blue-500'
-}
-
-if (agent.final_ratings >= 3 && agent.final_ratings < 4) {
-  return 'text-green-600'
-}
-if (agent.final_ratings >= 2 && agent.final_ratings < 3) {
-  return 'text-yellow-600'
-}
-
-if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
-  return 'text-red-600'
-}
-}
-
 
  // Fetch leaderboard data on mount
  onMounted( async() => {
@@ -264,12 +213,12 @@ if (agent.final_ratings <= 1 && agent.final_ratings < 2) {
 
 
 watch(route, (newRoute) => {
-console.log('The route is change. we should react to the change..')
-year.value = newRoute.query.year
-newRoute.query.leaderboardOption = leaderboardOption
-query.value = newRoute.query
-router.push(newRoute.fullPath)
-leaderBoardData(leaderboardOption,newRoute.query, year_summary)
+  console.log('The route is change. we should react to the change..')
+  year.value = newRoute.query.year
+  newRoute.query.leaderboardOption = leaderboardOption
+  query.value = newRoute.query
+  router.push(newRoute.fullPath)
+  leaderBoardData(leaderboardOption,newRoute.query, year_summary)
 
 })
 

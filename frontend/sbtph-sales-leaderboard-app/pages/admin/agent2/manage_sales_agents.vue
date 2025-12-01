@@ -700,7 +700,8 @@
     import { onMounted } from 'vue';
 
     import API from '~/utils/api'
-  
+
+    import { months } from '@/utils/constants'
 
 
     const itemsPerPage = 10;
@@ -864,12 +865,6 @@
     const month = ref("")
     const year = ref("")
 
-     const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ]
-  
-
 
   if (currentUser.login_type == 'standarduser' && currentUser.role == 'admin'){
       isAdmin.value = true
@@ -1020,8 +1015,6 @@ const handleAgentTypeChange = () => {
 
         
 
-        
-
       }else if(currentAgent.value.employee_status == 'Hired' && currentAgent.value.active_agent){
         currentAgent.value.end_date = null
       
@@ -1037,8 +1030,6 @@ const handleAgentTypeChange = () => {
         currentAgent.value.start_date = today; // reset to today
       }
     }
-
-
 
 
 

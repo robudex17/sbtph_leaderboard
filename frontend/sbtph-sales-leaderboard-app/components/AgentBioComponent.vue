@@ -121,8 +121,6 @@
               return 'Transferred'
           }
 
-         
-
           return agents[index].employee_status
 
       }

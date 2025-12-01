@@ -225,6 +225,7 @@
 <script setup>
 import { useLeaderBoardStore } from '../stores/sales_leaderboard';
 import { onMounted, reactive,ref, watch, computed  } from 'vue';
+import { months, getStarClass } from '@/utils/constants'
 
 import API from '~/utils/api'
 
@@ -289,13 +290,6 @@ const { setRatingNameColor } = useRatingColor()
  if(currentUser.login_type == 'salesagentuser' && currentUser.agent_type == 1){
       teamId.value = currentUser.team_id
  }
-
-
- const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ]
-
 
 
   month.value = route.query.month ||  months[new Date().getMonth()]
@@ -375,28 +369,6 @@ onMounted( async() => {
 
 
 
-
-
-
-    
-
-
-
-// Star rating calculation
-const getStarClass = (rating, index) => {
-  const fullStar = 'text-yellow-500';
-  const halfStar = 'text-yellow-300';
-  const emptyStar = 'text-gray-300';
-
-  const decimalPart = rating - Math.floor(rating);
-  if (index <= Math.floor(rating)) {
-    return fullStar;
-  } else if (index - 1 < decimalPart) {
-    return halfStar;
-  } else {
-    return emptyStar;
-  }
-};
 </script>
 
 <style scoped>

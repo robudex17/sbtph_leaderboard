@@ -179,6 +179,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 import API from '~/utils/api'
+import { months, getWholeNumberPercentage } from '@/utils/constants'
 
 const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
@@ -194,14 +195,8 @@ const query = ref("")
 
 const exportUrl = API.export.sales_agents_target_export
 
-
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
-
-  month.value = route.query.month ||  months[new Date().getMonth()]
-  year.value = route.query.year ||  new Date().getFullYear()
+ month.value = route.query.month ||  months[new Date().getMonth()]
+ year.value = route.query.year ||  new Date().getFullYear()
 
 
   const itemsPerPage = 10;
@@ -261,8 +256,6 @@ onMounted(() => {
 })
 
 
-
-  
 watch(route, (newRoute) => {
   console.log('Route changed, updating leaderboard data...')
   
@@ -275,18 +268,6 @@ watch(route, (newRoute) => {
 })
 
   
-
-
-
-const getWholeNumberPercentage = (target,shipok) => {
-  //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
-   if (Number(target) !=0 && Number(shipok) != 0){
-     const percentage =((shipok / target) * 100).toFixed(2)
-     const roundOff = Math.round(percentage)
-     return roundOff + '%'
-   }
-   return '0%'
-}
 
 const rowClass = computed(() => {
   return (item, index) => {

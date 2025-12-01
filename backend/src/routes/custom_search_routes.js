@@ -11,7 +11,7 @@ const { authenticateToken, authorizeRoles} = require('../middleware/auth')
 
 // router.get('/custom_search/:search_type:/:filter_by', authenticateToken, authorizeRoles('admin', 'poweruser'),customSearchController.fetchSalesAgentsByFilter)
 
-router.get('/custom_search/:search_type', authenticateToken, authorizeRoles('admin', 'poweruser'),customSearchController.fetchCustomSearch )
+router.get('/custom_search/:search_type', authenticateToken ,customSearchController.fetchCustomSearch )
 
 
 

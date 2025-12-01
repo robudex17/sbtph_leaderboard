@@ -104,7 +104,7 @@
                 </div>
 
                 <!-- Filter Value Dropdown -->
-                <div class="flex items-center gap-2"  v-if="data?.length > 0" >
+                <div class="flex items-center gap-2"  v-if="data?.length > 0 && (currentUser.role == 'admin' || currentUser.role == 'poweruser' || currentUser.agent_type == 2)" >
                   <label for="filter-value" class="text-sm font-medium text-gray-700 whitespace-nowrap">
                     Value:
                   </label>
@@ -113,7 +113,8 @@
                     v-model="selectedFilterValue"
                     class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
-                    <option value="all">All</option>
+                    <option value="all" v-if="currentUser.role == 'admin' || currentUser.role == 'poweruser' || currentUser.agent_type ==2">All</option>
+                  
                     <option v-for="option in filterValueList" :key="option.id" :value="option.id">
                       {{ option.name }}
                     </option>
@@ -216,6 +217,9 @@
     import { ref, watch,computed } from "vue";
     import API from "~/utils/api"
 
+    
+    import { months, monthMap } from '@/utils/constants'
+
     import { isValidMonthRange } from '~/utils/validation_script'
 
     //get the current user
@@ -247,12 +251,28 @@
     const urlPath = ref(route.fullPath)
     const selectStartDate = ref("")
     const selectEndDate = ref("")
-    const filterBy = ref([
-      'lms','agent', 'all','market', 'team'
-    ])
 
-    const selectedFilter = ref('all') // Default selected
-    const selectedFilterValue = ref('all') // Default "All"
+    const  filterBy = ref([])
+    const selectedFilterValue = ref('')
+
+
+    // const filterBy = ref([
+    //   'lms','agent', 'individual','market', 'team'
+    // ])
+
+    if (currentUser.role != 'admin' && currentUser.role != 'poweruser' && currentUser.agent_type !=2){
+      filterBy.value = [ 'individual', 'team', 'overall']
+      
+     
+    }else {
+     
+      filterBy.value = ['lms','agent', 'individual','market', 'team', 'overall']
+      selectedFilterValue.value = 'all'
+    }
+
+
+    const selectedFilter = ref('individual') // Default selected
+    // const selectedFilterValue = ref('all') // Default "All"
     // const filterValueList = ref([]) // Data fetched from API
 
         // Stores
@@ -263,7 +283,7 @@
       if (!data.value || !Array.isArray(data.value)) return []
 
       let filtered = []
-     if(selectedFilter.value == 'all'){
+     if(selectedFilter.value == 'individual'){
        filtered = data.value.map(agent => ({
             id: agent.id,
             name: agent.db_name
@@ -311,8 +331,6 @@
       )
 
    
-
-
       return unique
     })
 
@@ -328,7 +346,7 @@
       customSeachStore.state.isResetting = true
       const currentRoute = router.currentRoute.value;
       customSeachStore.state.customSearch = []
-      selectedFilter.value  =  'all' // = ref('all') // Default selected
+      selectedFilter.value  =  'individual' // = ref('all') // Default selected
       selectedFilterValue.value =  'all'  //ref('all') // Default "All"
       selectStartDate.value = ""
       selectEndDate.value = ""
@@ -371,12 +389,6 @@
 
     const salesEmployementStatus = ref('Hired')
 
-
-
-    const months = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
-    ];
 
     const startYear = 2020;
     const currentYear = new Date().getFullYear();
@@ -465,6 +477,8 @@
 
     const pathWithCustomSearchOption = ref([
        '/admin/target/custom_search/target',
+
+       
     ])
 
 
@@ -689,6 +703,11 @@
           //  alert(JSON.stringify(newRoute.query))
             selectedMonth.value = ""
             selectedYear.value =  ""
+            selectedFilterValue.value =  'all'  //ref('all') // Default "All"
+            selectStartDate.value = ""
+            selectEndDate.value = ""
+            selectedFilter.value  =  'individual'
+                  
             salesEmployementStatus.value = "Hired"
             if (currentUser.agent_type == 2){
                  dashboardOption.value = "team"

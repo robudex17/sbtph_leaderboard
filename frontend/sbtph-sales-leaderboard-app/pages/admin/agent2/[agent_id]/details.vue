@@ -137,6 +137,8 @@
   import NewDeposit from '../../../components/NewDepositComponent.vue'
   import AgentBio from '../../../components/AgentBioComponent.vue'
 
+  import { months } from '@/utils/constants'
+
  
   const props = defineProps({
       fullyear: {
@@ -151,23 +153,8 @@
   const route = useRoute();
   const query = route.query;
 
-
-
   const month = ref(null)
   const year = ref(null)
-
-  // Months for the dropdown
-  const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
- const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
- ];
-
-
 
 
     if(!query.month || query.month == ""){
@@ -187,8 +174,6 @@
     query.fullyear = props.fullyear
 
 
-   
-  
     const today = new Date()
     const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -354,11 +339,11 @@ const useFeedbackStore  = feedbackStore()
     };
 
     if (props.fullyear) {
-      monthNames.forEach((month, index) => {
+      months.forEach((month, index) => {
         processMonth(month, index);
       });
     } else {
-      const selectedIndex = monthNames.findIndex(m => m === month.value);
+      const selectedIndex = months.findIndex(m => m === month.value);
     
       if (selectedIndex !== -1) {
         processMonth(month.value, selectedIndex);

@@ -48,6 +48,7 @@
 
   import { onMounted, watch, computed } from 'vue';
   import { useRouter, useRoute } from 'vue-router';
+  import { months } from '@/utils/constants'
 
   
   import AgentBio from '../../../components/AgentBioComponent.vue'
@@ -69,11 +70,6 @@
 
   const currentUser = authStore.state.user 
 
-  // Months for the dropdown
-  const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
 
 
     month.value= route.query.month

@@ -7,6 +7,8 @@ const { agent } = require('supertest')
 
 const sqlQueries = require('../sql/sql')
 
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
+
 exports.fetchAgentDashboard = async (req,res,next) => {
     // const errors = validationResult(req);
     // if (!errors.isEmpty()) {
@@ -17,12 +19,6 @@ exports.fetchAgentDashboard = async (req,res,next) => {
 
     const loginUser = req.user
 
-
-           // Get the month name
-    const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
 
     const givenMonth = req.query.month || monthNames[currentDate.getMonth()]  // getMonth() returns 0-based index
     // const givenMonth = "June"
@@ -47,22 +43,7 @@ exports.fetchAgentDashboard = async (req,res,next) => {
         dashboarOption = req.query.dashboardoption
     }
 
-      // Map month names to numbers
-    const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
-  
+
 
  // Convert "March" -> "03"
     const monthNumber = monthMap[givenMonth];

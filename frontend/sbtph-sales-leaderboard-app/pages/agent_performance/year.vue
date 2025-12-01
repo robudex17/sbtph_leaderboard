@@ -238,6 +238,8 @@
   import AgentDetails from '../../pages/admin/agent/[agent_id]/details.vue'
   import API from '~/utils/api'
 
+  import { months,  getStarClass } from '@/utils/constants';
+
   definePageMeta({
     middleware: ['auth'] 
   })
@@ -262,12 +264,7 @@
         return `${config.public.imageBaseUrl}${imageLink}`
   }
 
-    // Months for the dropdown
-    const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-  
+
   if (currentUser.role == 'poweruser' || currentUser.role == 'admin'){
     isAdmin.value = true
     isCardView.value = false
@@ -275,6 +272,8 @@
 
   const route = useRoute()
   const router = useRouter()
+  
+  // use settigns collor from composables
   const { setRatingNameColor } = useRatingColor()
   
   route.query.fullyear = true
@@ -314,51 +313,6 @@
   const agent = computed(() => {
     return leaderBoardStore.state.agentYearPerformance.yearAverage
   })
-
-  // const yearSummaryMetrics = computed(() =>{
-           // if array is empty return []
-          // if (!agent.value || agent.value.length === 0) return [];
-
-          // let summary = {
-          //   shipok: 0,
-          //   shipok_score: 0,
-          //   deposit_score: 0,
-          //   absences: 0, 
-          //   tardiness: 0,
-          //   memo: 0,
-          //   absence_score: 0,
-          //   tardiness_score : 0,
-          //   memo_score : 0, 
-          //   feedback_score: 0
-          // };
-
-          // let count = agent.value.length;
-
-          // agent.value.forEach(item => {
-          //   summary.shipok += item.shipok;
-          //   summary.shipok_score += Number(item.shipok_score);
-          //   summary.deposit_score += Number(item.deposit_score);
-          //   summary.absences += Number(item.absences);
-          //   summary.tardiness += Number(item.tardiness);
-          //   summary.memo += Number(item.memo);
-          //   summary.absence_score += Number(item.absence_score)
-          //   summary.tardiness_score += Number(item.tardiness_score);
-          //   summary.memo_score += Number(item.memo_score);
-          //   summary.feedback_score += Number(item.feedback_score);
-          //   summary.year = item.year
-          // });
-
-          // average the score fields
-          // summary.shipok_score = summary.shipok_score / count || 0;
-          // summary.absence_score = summary.absence_score / count || 0;
-          // summary.absence_score = 
-
-       //   return [summary]; // wrap in array as you requested
-
-  // })
-
-
-  
 
 
   
@@ -405,21 +359,7 @@
     
   });
   
-  // Star rating calculation
-  const getStarClass = (rating, index) => {
-    const fullStar = 'text-yellow-500';
-    const halfStar = 'text-yellow-300';
-    const emptyStar = 'text-gray-300';
-  
-    const decimalPart = rating - Math.floor(rating);
-    if (index <= Math.floor(rating)) {
-      return fullStar;
-    } else if (index - 1 < decimalPart) {
-      return halfStar;
-    } else {
-      return emptyStar;
-    }
-  };
+
   </script>
   
   <style scoped>

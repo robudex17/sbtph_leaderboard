@@ -102,6 +102,7 @@
   // import FeedbackByAdmin from '../../../components/FeedbackByAdminComponent.vue'
   import NewDeposit from '../../../components/NewDepositComponent.vue'
   import AgentBio from '../../../components/AgentBioComponent.vue'
+  import { months, getWholeNumberPercentage } from '@/utils/constants'
 
  
   const props = defineProps({
@@ -120,37 +121,10 @@
 
 
 
- 
-
 
   const month = ref(null)
   const year = ref(null)
 
-  // Months for the dropdown
-  const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
-
-    // month.value= route.query.month
-    // year.value = route.query.year 
-
-    // if (month.value == null || month.value == ""){
-    //     month.value= months[new Date().getMonth()]
-    //  }
-
-    // if (year.value == null || year.value == ""){
-    //     year.value = new Date().getFullYear()
-    // }
-
-    // if(!query.month || query.month == ""){
-    //   query.month = months[new Date().getMonth()]
-    // }
-
-    // if(!query.year || query.year == ""){
-    //   query.year = new Date().getFullYear()
-    // }
 
     if(!query.month || query.month == ""){
       query.month = months[new Date().getMonth()]
@@ -411,13 +385,6 @@ const deleteSalesFeedback = async(data) => {
   const umFeedbackByLm = computed(() => useFeedbackStore.state.um_by_lm);
   const feedbackByQa =  computed(() => useFeedbackStore.state.qa);
 
-  const monthNames = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
-
-
-
 
 const feedbackData = computed(() => {
     const currentDate = new Date();
@@ -500,11 +467,11 @@ const feedbackData = computed(() => {
     };
 
     if (props.fullyear) {
-      monthNames.forEach((month, index) => {
+      months.forEach((month, index) => {
         processMonth(month, index);
       });
     } else {
-      const selectedIndex = monthNames.findIndex(m => m === month.value);
+      const selectedIndex = months.findIndex(m => m === month.value);
     
       if (selectedIndex !== -1) {
         processMonth(month.value, selectedIndex);

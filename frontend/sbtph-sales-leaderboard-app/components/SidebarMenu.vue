@@ -117,6 +117,7 @@
               { name: 'Monthly_Target', route: '/admin/target/monthly', icon: ['fas', 'users'] },
               // { name: 'Yearly_Target', route: '/admin/target/yearly', icon: ['fas', 'users'] },
                { name: 'custom_search', route: '/admin/target/custom_search/target', icon: ['fas', 'fa-search'] },
+              
               ]
             },
 
@@ -195,6 +196,18 @@
                 { name: 'Team_Monthly', route: '/admin/team_performance/monthly', icon: ['fas', 'users'] },
                 { name: 'Team_Yearly', route: '/admin/team_performance/yearly', icon: ['fas', 'users'] },
                 // { name: 'Analytics', route: '/team_performance/analytics', icon: ['fas', 'users'] },
+              ]
+            },
+
+           { 
+              name: 'Reports', 
+              route: null, 
+              icon: ['fas', 'cog'],
+              subMenu: [
+              { name: 'Monthly_Target', route: '/admin/target/monthly', icon: ['fas', 'users'] },
+              // { name: 'Yearly_Target', route: '/admin/target/yearly', icon: ['fas', 'users'] },
+               { name: 'custom_search', route: '/admin/target/custom_search/target', icon: ['fas', 'fa-search'] },
+              
               ]
             },
 
@@ -279,6 +292,18 @@
             },
 
             { 
+              name: 'Reports', 
+              route: null, 
+              icon: ['fas', 'cog'],
+              subMenu: [
+              { name: 'Monthly_Target', route: '/admin/target/monthly', icon: ['fas', 'users'] },
+              // { name: 'Yearly_Target', route: '/admin/target/yearly', icon: ['fas', 'users'] },
+               { name: 'custom_search', route: '/admin/target/custom_search/target', icon: ['fas', 'fa-search'] },
+              
+              ]
+            },
+
+            { 
               name: 'Feedback', 
               route: null, icon: ['fas', 'poll'],
               subMenu:[
@@ -319,6 +344,18 @@
                 { name: 'Agent_Monthly', route: '/agent_performance/month', icon: ['fas', 'user'] },
                 { name: 'Agent_Yearly', route: '/agent_performance/year', icon: ['fas', 'user'] },
                 // { name: 'Analytics', route: '/agent_performance/analytics', icon: ['fas', 'user'] },
+              ]
+            },
+
+            { 
+              name: 'Reports', 
+              route: null, 
+              icon: ['fas', 'cog'],
+              subMenu: [
+              { name: 'Monthly_Target', route: '/admin/target/monthly', icon: ['fas', 'users'] },
+              // { name: 'Yearly_Target', route: '/admin/target/yearly', icon: ['fas', 'users'] },
+               { name: 'custom_search', route: '/admin/target/custom_search/target', icon: ['fas', 'fa-search'] },
+              
               ]
             },
             // { 

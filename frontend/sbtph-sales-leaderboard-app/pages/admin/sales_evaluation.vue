@@ -434,10 +434,9 @@
   import { ref, computed } from 'vue';
   import { onMounted } from 'vue';
 
+  import { months, monthMap } from '@/utils/constants'
+
    
-
-
-  
   const router = useRouter();
   const route = useRoute();
   
@@ -471,34 +470,11 @@
     const editLoginMode = ref(false); // Toggle between Add and Edit mode for login
     const imagePreview = ref(null);
 
-      const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
 
+  const useFeedbackStore  = feedbackStore()
 
-    const useFeedbackStore  = feedbackStore()
-
-    const useManageSalesStore = useManageSalesAgentStore();
+   const useManageSalesStore = useManageSalesAgentStore();
       
-
-    // Months for the dropdown
-  const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
-
   const fetchTeamTargetShipok = (teamId) => {
      const teamTargetShipok =  agents.value.filter(agent => agent.team_id == teamId)
     

@@ -3,6 +3,7 @@ export const useSpeechNotification = () => {
   const getVoice = (voiceName = "Microsoft Mark - English (United States)") => {
     const voices = speechSynthesis.getVoices();
     return voices.find(v => v.name === voiceName) || voices[0];
+    
   };
 
   const config = useRuntimeConfig();
@@ -11,11 +12,11 @@ export const useSpeechNotification = () => {
 
   const playNotification = (agent) => {
     const { dbname, shipok_count, target, shipok, team_shipok, team_target, team_name } = agent;
-
+   
     // 🎯 Regular motivational messages
     const regularMessages = [
-      `Well done on closing a deal, ${dbname}! You now have ${shipok_count} ShipOK today. Keep up the momentum!`,
-      `Nice work ${dbname}! ${shipok_count} ShipOK so far. Your consistency is paying off. Let’s keep it going!`
+      `Well done on closing a deal! You now have ${shipok_count} ShipOK today. Keep up the momentum. ${dbname}!`,
+      `Nice work! You already reached ${shipok_count} ShipOK so far. Your consistency is paying off. great job. ${dbname}!`
     ];
 
     // 🏆 Agent reached target message
@@ -35,6 +36,7 @@ export const useSpeechNotification = () => {
     }
 
     if (team_shipok >= team_target) {
+     
       messagesToPlay.push(teamTargetMessage);
     }
 

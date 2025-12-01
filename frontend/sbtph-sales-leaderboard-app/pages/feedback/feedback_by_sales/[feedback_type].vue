@@ -30,6 +30,7 @@
 
      import { onMounted, watch, computed } from 'vue';
      import { feedbackStore } from '~/stores/feedback';
+     import { months } from '@/utils/constants'
 
      const router = useRouter()
      const route = useRoute()
@@ -40,14 +41,6 @@
      const admin_view_only = route.query.admin_view_only=='true'
 
      const {who_receive_feedback_id } = query
-
-
-    // Months for the dropdown
-    const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
 
     month.value= route.query.month
     year.value = route.query.year 

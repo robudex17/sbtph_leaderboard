@@ -129,6 +129,7 @@ definePageMeta({
 
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { months, getWholeNumberPercentage } from '@/utils/constants'
 
 const authStore = useAuthStore()
 authStore.fetchTokenFromLocalStore()
@@ -136,13 +137,6 @@ authStore.fetchTokenFromLocalStore()
 const router = useRouter()
 const route = useRoute()
 const currentUser = authStore.state.user
-
-
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
-
 
 
   const itemsPerPage = 10;
@@ -196,17 +190,6 @@ watch(route, (newRoute) => {
     fetchDashboardData(newRoute.query) 
   
 })
-
-
-const getWholeNumberPercentage = (target,shipok) => {
-  //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
-   if (Number(target) !=0 && Number(shipok) != 0){
-     const percentage =((shipok / target) * 100).toFixed(2)
-     const roundOff = Math.round(percentage)
-     return roundOff + '%'
-   }
-   return '0%'
-}
 
 const rowClass = computed(() => {
   return (item, index) => {

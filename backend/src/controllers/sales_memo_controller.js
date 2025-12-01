@@ -1,6 +1,8 @@
 const pool =  require('../config/db')
 const { validationResult } = require('express-validator')
 
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
+
 exports.createSalesAgentMemo = async (req, res, next) => {
 
     // const errors = validationResult(req)
@@ -69,12 +71,6 @@ exports.fetchAgentMemo = async (req, res, next) => {
 
     const export_to_excel = req.export_to_excel 
 
-
-              // Get the month name
-    const monthNames = [
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-            ];
  
     if (!req.query.month ||  req.query.month ==="") {
         
@@ -143,7 +139,7 @@ exports.updateAgentMemo = async (req,res, next) => {
 
     const agentId = req.params.agent_id
     
-    console.log(req.body)
+
 
     const  agentMemoDate = req.body.date 
     const agentMemoDescription = req.body.description

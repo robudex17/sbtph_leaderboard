@@ -184,6 +184,7 @@
   
   import { ref, computed } from 'vue';
   import { onMounted } from 'vue';
+  import { months } from '@/utils/constants'
 
   
   const router = useRouter();
@@ -220,14 +221,6 @@
         year: '',
         feedback: '',
       });
-
-    // Months for the dropdown
-  const months = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-         ];
-
-
 
 
     if(!query.month){
@@ -296,9 +289,6 @@
 
         modalType.value = type;
         showModal.value = true;
-
-
- 
 
 
         if(type == 'add'){

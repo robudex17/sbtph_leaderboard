@@ -27,6 +27,8 @@ const salesMarketController = require('../controllers/sales_market_controller.js
 
 const salesDashboardController = require('../controllers/sales_dashboard_controller.js')
 
+const customSearchController = require('../controllers/custom_search_controller')
+
 
 
 module.exports = (io) => {
@@ -117,6 +119,13 @@ router.get('/agent_market_target_shipok_new_deposit_year_export', authenticateTo
 
 
 
+  router.get('/custom_search_export/target', authenticateToken, authorizeRoles('admin', 'poweruser'), 
+    (req, res, next) => {
+        req.export_to_excel = true
+        next()
+    }, customSearchController.fetchCustomSearch, importExportDataController.fetchSalesAgentsTargetExportToExcel
+ 
+ )
 
 
     return router

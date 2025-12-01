@@ -1,6 +1,7 @@
 
 const pool =  require('../config/db')
 const { validationResult } = require('express-validator')
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
 exports.recordNewAbsent = async (req, res, next) => {
 
     const errors = validationResult(req)
@@ -72,12 +73,6 @@ exports.fetchAgentAbsent = async (req, res, next) => {
     const export_to_excel  = req.export_to_excel
     const currentDate = new Date()
 
-                // Get the month name
-    const monthNames = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
-                ];
- 
     if (!req.query.month ||  req.query.month ==="") {
         
 

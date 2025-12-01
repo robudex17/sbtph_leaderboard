@@ -2,6 +2,9 @@ const ExcelJS = require('exceljs');
 const xlsx = require('xlsx');
 const pool = require('../config/db')
 
+
+const { getDataBorder, getHeaderBorder, getHeaderStyle, monthNames, getTargetShipokPercentageInWholeNumber } = require('./helper_scripts/global_variables_and_functions')
+
 function capitalizeWord(word) {
   if (!word) return "";
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
@@ -347,25 +350,6 @@ const createPerformanceExcelTable = (data, worksheet, startRow = 1, title, perfo
   
   }
 
-  // Cell style functions
-  const getHeaderStyle = () => ({
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
-    font: { bold: true, color: { argb: 'FFFFFF' } },
-  });
-
-  const getHeaderBorder = () => ({
-    top: { style: 'medium', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'medium', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
-
-  const getDataBorder = () => ({
-    top: { style: 'thin', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'thin', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
 
   // Add report title above the table
   const titleRow = worksheet.getRow(startRow);
@@ -520,25 +504,6 @@ const createYearlyPerformanceExcelTable = (data, worksheet, startRow = 1, title,
   const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
 
 
-  // Cell style functions
-  const getHeaderStyle = () => ({
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
-    font: { bold: true, color: { argb: 'FFFFFF' } },
-  });
-
-  const getHeaderBorder = () => ({
-    top: { style: 'medium', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'medium', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
-
-  const getDataBorder = () => ({
-    top: { style: 'thin', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'thin', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
 
   // Add report title above the table
   const titleRow = worksheet.getRow(startRow);
@@ -672,25 +637,7 @@ const  createSalesAgentActiveExportToExcel = (data, worksheet, startRow = 1, tit
   const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
 
 
-  // Cell style functions
-  const getHeaderStyle = () => ({
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
-    font: { bold: true, color: { argb: 'FFFFFF' } },
-  });
 
-  const getHeaderBorder = () => ({
-    top: { style: 'medium', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'medium', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
-
-  const getDataBorder = () => ({
-    top: { style: 'thin', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'thin', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
 
   // Add report title above the table
   const titleRow = worksheet.getRow(startRow);
@@ -841,25 +788,6 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
   
   }
 
-  // Cell style functions
-  const getHeaderStyle = () => ({
-    fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: '00B050' } },
-    font: { bold: true, color: { argb: 'FFFFFF' } },
-  });
-
-  const getHeaderBorder = () => ({
-    top: { style: 'medium', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'medium', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
-
-  const getDataBorder = () => ({
-    top: { style: 'thin', color: { argb: '000000' } },
-    left: { style: 'medium', color: { argb: '000000' } },
-    bottom: { style: 'thin', color: { argb: '000000' } },
-    right: { style: 'medium', color: { argb: '000000' } },
-  });
 
   // Add report title above the table
   const titleRow = worksheet.getRow(startRow);
@@ -963,6 +891,257 @@ const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title,
 };
 
 
+const createAgentMonthyTargetForTeamExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, filterBy, year_summary, yearlyFinalRatings, yearlyRatingsName) => {
+      const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
+      let agent_ratings_name = data[0].ratings_name
+      if (performanceType == 'agent'){
+        if(fullyear == 'true' || fullyear == true){
+          title = `${title} ${yearlyFinalRatings} / ${yearlyRatingsName}`
+        }else{
+            title = `${title} ${data[0].final_ratings} / ${data[0].ratings_name}`
+        }
+      
+      }
+
+ 
+      // Add report title above the table
+      const titleRow = worksheet.getRow(startRow);
+      const totalCols = 7; // Total number of columns in the table
+      worksheet.mergeCells(startRow, 1, startRow, totalCols);
+      titleRow.getCell(1).value = title
+      titleRow.getCell(1).font = { bold: true, size: 24 };
+      titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+      titleRow.height = 30; // Optional: increase row height for title
+
+      startRow += 1; // Move down after title
+
+      let columnGroups
+
+
+      if(performanceType == 'target' && year_summary){
+            columnGroups = [
+        { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', , 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', ] },
+        { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'REMAINING UNITS'] },
+
+        // { label: 'MEMO', span: 1 },
+      ]; 
+    
+    }else if(performanceType == 'target' ){
+          
+        columnGroups = [
+    
+            { label: 'TEAM', span: 1 },
+            { label: 'MONTH', span: 1 },
+            { label: 'YEAR', span: 1 },
+            { label: 'TARGET', span: 1 },
+            { label: 'SHIPOK', span: 1 },
+            { label: 'PERCENTAGE(%)', span: 1 },
+            { label: 'REMAINING UNITS', span: 1 },
+
+        ];
+
+     
+    }else {
+        columnGroups = [
+        { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
+        { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
+        ]
+    }
+
+
+
+      // Set headers
+      let currentCol = 1;
+      columnGroups.forEach(group => {
+        const startCol = currentCol;
+        const endCol = currentCol + group.span - 1;
+        const startCell = getCell(0, startCol);
+        startCell.value = group.label;
+        startCell.style = getHeaderStyle();
+        startCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        startCell.border = getHeaderBorder();
+
+        if (group.span > 1) {
+          worksheet.mergeCells(startRow, startCol, startRow, endCol);
+          for (let i = 0; i < group.span; i++) {
+            const subCell = getCell(1, startCol + i);
+            subCell.value = group.subHeaders[i];
+            subCell.style = getHeaderStyle();
+            subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            subCell.border = getHeaderBorder();
+          }
+        } else {
+          worksheet.mergeCells(startRow, startCol, startRow + 1, startCol);
+        }
+
+        currentCol = endCol + 1;
+      });
+
+      // Fix column widths
+      const columnWidths = [
+      15, 15, 15, 15, 15, 15, 15
+      ];
+      worksheet.columns = columnWidths.map((width) => ({ width }));
+
+      // Add data rows (starting from row after headers)
+      const dataStartRow = startRow + 2;
+
+      data.forEach((rowData, index) => {
+        const row = worksheet.getRow(dataStartRow + index);
+        row.values = [
+          rowData.team_name.toUpperCase() || '',
+          rowData.month || '',
+          rowData.year || '',
+          rowData.target || 0,
+          rowData.shipok || 0,
+           rowData.shipok_percent  || 0,
+           rowData.shipok_score ||  rowData.shipok - rowData.target,
+
+          // rowData.memo_text || '',
+        ];
+
+        row.eachCell((cell, colNumber) => {
+          cell.border = getDataBorder();
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          
+
+        });
+      });
+};
+
+
+const createAgentMonthyTargetForOverallExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, filterBy, year_summary, yearlyFinalRatings, yearlyRatingsName) => {
+      const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
+      let agent_ratings_name = data[0].ratings_name
+      if (performanceType == 'agent'){
+        if(fullyear == 'true' || fullyear == true){
+          title = `${title} ${yearlyFinalRatings} / ${yearlyRatingsName}`
+        }else{
+            title = `${title} ${data[0].final_ratings} / ${data[0].ratings_name}`
+        }
+      
+      }
+
+ 
+      // Add report title above the table
+      const titleRow = worksheet.getRow(startRow);
+      const totalCols = 12; // Total number of columns in the table
+      worksheet.mergeCells(startRow, 1, startRow, totalCols);
+      titleRow.getCell(1).value = title
+      titleRow.getCell(1).font = { bold: true, size: 24 };
+      titleRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+      titleRow.height = 30; // Optional: increase row height for title
+
+      startRow += 1; // Move down after title
+
+      let columnGroups
+
+
+      if(performanceType == 'target' && year_summary){
+            columnGroups = [
+        { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', , 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', ] },
+        { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'REMAINING UNITS'] },
+
+        // { label: 'MEMO', span: 1 },
+      ]; 
+    
+    }else if(performanceType == 'target' ){
+          
+        columnGroups = [
+    
+            { label: 'MARKET', span: 1 },
+            { label: 'TEAM', span: 1 },
+            { label: 'MONTH', span: 1 },
+            { label: 'YEAR', span: 1 },
+            { label: 'TARGET', span: 1 },
+            { label: 'SHIPOK', span: 1 },
+            { label: 'PERCENTAGE(%)', span: 1 },
+            { label: 'REMAINING UNITS', span: 1 },
+            { label: 'TARGET(NO TRUCK)', span: 1 },
+            { label: 'SHIPOK(NO TRUCK)', span: 1 },
+            { label: 'PERCENTAGE(%) (NO TRUCK) ', span: 1 },
+            { label: 'REMAINING UNITS (NO TRUCK)', span: 1 },
+
+
+        ];
+
+     
+    }else {
+        columnGroups = [
+        { label: 'AGENT EMPLOYMENTS AND ASSIGNMENTS', span: 8, subHeaders: ['YEAR', 'MONTH,', 'EMPLOYEE NAME', 'EMPLOYEE STATUS', 'POSITION', 'MANAGER', 'MARKET', 'TEAM'] },
+        { label: 'TARGET AND SHIPOK', span: 4, subHeaders: ['TARGET', 'SHIPOK', 'PERCENTAGE(%)', 'SCORE'] },
+        ]
+    }
+
+
+
+      // Set headers
+      let currentCol = 1;
+      columnGroups.forEach(group => {
+        const startCol = currentCol;
+        const endCol = currentCol + group.span - 1;
+        const startCell = getCell(0, startCol);
+        startCell.value = group.label;
+        startCell.style = getHeaderStyle();
+        startCell.alignment = { horizontal: 'center', vertical: 'middle' };
+        startCell.border = getHeaderBorder();
+
+        if (group.span > 1) {
+          worksheet.mergeCells(startRow, startCol, startRow, endCol);
+          for (let i = 0; i < group.span; i++) {
+            const subCell = getCell(1, startCol + i);
+            subCell.value = group.subHeaders[i];
+            subCell.style = getHeaderStyle();
+            subCell.alignment = { horizontal: 'center', vertical: 'middle' };
+            subCell.border = getHeaderBorder();
+          }
+        } else {
+          worksheet.mergeCells(startRow, startCol, startRow + 1, startCol);
+        }
+
+        currentCol = endCol + 1;
+      });
+
+      // Fix column widths
+      const columnWidths = [
+      15, 15, 15, 15, 15, 15, 15,15, 15, 15, 15, 15
+      ];
+      worksheet.columns = columnWidths.map((width) => ({ width }));
+
+      // Add data rows (starting from row after headers)
+      const dataStartRow = startRow + 2;
+
+      data.forEach((rowData, index) => {
+        const row = worksheet.getRow(dataStartRow + index);
+        row.values = [
+          rowData.market_name.toUpperCase() || '',
+          rowData.team_name.toUpperCase() || '',
+          rowData.month || '',
+          rowData.year || '',
+          rowData.target || 0,
+          rowData.shipok || 0,
+           rowData.shipok_percent  || 0,
+           rowData.shipok_score ||  rowData.shipok - rowData.target,
+          rowData.target_without_trucks || 0,
+          rowData.shipok_without_trucks || 0,   
+            rowData.shipok_percent_no_truck  || 0,
+           rowData.shipok_score_without_trucks ||   rowData.shipok_without_trucks - rowData.target_without_trucks,        
+
+          // rowData.memo_text || '',
+        ];
+
+        row.eachCell((cell, colNumber) => {
+          cell.border = getDataBorder();
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
+          
+
+        });
+      });
+};
+
+
+
+
 const createTeamPerformanceExcelTable = (
   worksheet,
   targetShipokData,
@@ -1062,12 +1241,6 @@ const feedbackData = (agendId, dbName, givenMonth,givenYear, agentFeedback, mana
   const currentMonthIndex = currentDate.getMonth(); // 0-based index
 
   const results = [];
-
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
 
   const processMonth = (month, index) => {
    
@@ -1314,39 +1487,6 @@ exports.salesAgentMonthlyPerformanceExportToExcel = async (req,res, next) => {
    createMetricsSummaryExcelTable(metricsSummary, worksheet, secondTableStartRow, 'Metrics Summary', 'month')
 
    
-
-  //  createTargetExcelTable(agent_target, worksheet, secondTableStartRow, 'Sales Agent Target/ShipOk')
-
-
-  //  const thirdTableStartRow = worksheet.lastRow.number + 3;
-  
-  
-   //create new deposit table
-// createNewDepositAbenseTardinesAndMemoTable(agent_new_deposit, worksheet, thirdTableStartRow, 'Sales Agent New Deposit')
-
-
-
-// const forthTableStartRow = worksheet.lastRow.number + 3;
-// const monthFeedbackData = feedbackData(performance[0].id, performance[0].db_name,givenMonth,givenYear, agentFeedback, managerFeedback, lmsFeedback, feedbackByQa, fullyear )
-
-// createAgentFeedbackExcelTable(monthFeedbackData, worksheet, forthTableStartRow,  `Agent Feedback Information for the month of ${performance[0].month} ${performance[0].year}`, agent_type)
-
-
-
-// const fifthTableRow = worksheet.lastRow.number + 3 
-
-// createNewDepositAbenseTardinesAndMemoTable(agent_absences, worksheet, fifthTableRow, 'Sales Agent Absences')
-
-// const sixTableRow = worksheet.lastRow.number + 3 
-
-// createNewDepositAbenseTardinesAndMemoTable(agent_tardiness, worksheet, sixTableRow, 'Sales Agent Tardiness')
-
-// const siventthTableRow = worksheet.lastRow.number + 3 
-
-// createNewDepositAbenseTardinesAndMemoTable(agent_memos, worksheet,  siventthTableRow, 'Sales Agent Memo')
-
-
-
    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   
@@ -1956,26 +2096,165 @@ exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
   const agendId = req.agentId 
   const year_summary = req.year_summary
   const fullyear = req.fullyear
-  const data = req.dashboard.data
-  const month = data[0].month 
-  const year = data[0].year
+  const filterBy = req.filterBy
+ 
+  let data = []
+  
+  if(req.dashboard?.data){
+    data.push(req.dashboard.data)  // I push dashboard.data inside data array to  make the logic same  on the custom search 
+   
+    
+  
+  }else if(req.data){
+    data = [...req.data]
+    
+  }
 
-  const dataWithShipokPercent = data.map(agent => {
-       const percentage =((agent.shipok / agent.target) * 100).toFixed(2)
-      const roundOff = Math.round(percentage)
-      return {
-        shipok_percent: roundOff, ...agent
-      }
-  })
-
-
+ 
+ 
 
   const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
-  let  tableTitle = `AGENT MONTHLY TARGET`
+
+  //  const lastUsedRow = worksheet.lastRow.number;
+
+  switch(filterBy){
+     case "team":
+       
+         
+          data.forEach((d,index) => {
+              const month = d[0].month 
+              const year = d[0].year
+              const teamShipokPercent = d.map(team => {
+               
+                const percentage =((Number(team.shipok) / Number(team.target)) * 100).toFixed(2)
+                const roundOff = Math.round(percentage)
+                return {
+                  shipok_percent: roundOff, ...team
+                }
+
+              })
+
+              const worksheet = workbook.addWorksheet(`team-${month}-${year}-target`)
+              let  tableTitle = `TEAM MONTHLY TARGET`
+            
+
+              createAgentMonthyTargetForTeamExcelTable(teamShipokPercent, worksheet, 1, tableTitle, 'target') 
+
+              let   teamMembersWithPercent = []
+
+              data[index].forEach((team) => {
+                   const members = team.teammembers.map(member => {
+                      const percentage =((Number(member.shipok) / Number(member.target)) * 100).toFixed(2)
+                      const roundOff = Math.round(percentage)
+                       return {
+                         shipok_percent: roundOff, ...member
+                     }
+                   })
+                    teamMembersWithPercent.push(members)
+                
+              })
+
+          
+
+              for( const  teamMemberWithPercent of teamMembersWithPercent){
+                const lastUsedRow = worksheet.lastRow.number + 3;
+                const team_title = `${teamMemberWithPercent[0].team_name} MEMBERS`.toUpperCase()
+                createAgentMonthyTargetExcelTable(teamMemberWithPercent, worksheet, lastUsedRow, team_title , 'target')
+              }
+                   
+
+           })     
+       break 
+     case "overall":
+ 
+          data.forEach((d,index) => {
+              const month = d[0].month 
+              const year = d[0].year
+              const overallShipokPercent = d.map(overall => {
+               
+                const percentage =((Number(overall.shipok) / Number(overall.target)) * 100).toFixed(2)
+                const roundOff = Math.round(percentage)
+                const percentageNoTruck =((Number(overall.shipok_without_trucks) / Number(overall.target_without_trucks)) * 100).toFixed(2)
+                const roundOffNoTruck = Math.round(percentageNoTruck)
+                return {
+                  shipok_percent: roundOff, shipok_percent_no_truck: roundOffNoTruck, ...overall
+                }
+
+              })
+
+              const worksheet = workbook.addWorksheet(`overall-${month}-${year}-target`)
+              let  tableTitle = `OVERALL MONTHLY TARGET`
+            
+
+              // createAgentMonthyTargetForTeamExcelTable(teamShipokPercent, worksheet, 1, tableTitle, 'target') 
+              createAgentMonthyTargetForOverallExcelTable(overallShipokPercent, worksheet,1, tableTitle, 'target' )
+
+              let   teamMembersWithPercent = []
+
+              data[index].forEach((team) => {
+                   const members = team.teammembers.map(member => {
+                      const percentage =((Number(member.shipok) / Number(member.target)) * 100).toFixed(2)
+                      const roundOff = Math.round(percentage)
+                       return {
+                         shipok_percent: roundOff, ...member
+                     }
+                   })
+                    teamMembersWithPercent.push(members)
+                
+              })
+
+        
+              for( const  teamMemberWithPercent of teamMembersWithPercent){
+                const lastUsedRow = worksheet.lastRow.number + 3;
+                // const team_title = `${teamMemberWithPercent[0].team_name}`.toUpperCase()
+                // createAgentMonthyTargetExcelTable(teamMemberWithPercent, worksheet, lastUsedRow, team_title , 'target')
+                createAgentMonthyTargetForTeamExcelTable(teamMemberWithPercent, worksheet, lastUsedRow, "TEAM BREAKDOWN", 'target') 
+              }
+                   
+
+           })        
+       
+       break
+     default:    // for filterBy 'individual', 'agent', 'lms', 'market' or if filterBy is false or not set
+          data.forEach(d => {
+          const month = d[0].month 
+          const year = d[0].year
+          const dataWithShipokPercent = d.map(agent => {
+          const percentage =((Number(agent.shipok) / Number(agent.target)) * 100).toFixed(2)
+          const roundOff = Math.round(percentage)
+          return {
+            shipok_percent: roundOff, ...agent
+          }
+        })
 
 
-  createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
+      
+          const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
+          let  tableTitle = `AGENT MONTHLY TARGET`
+
+
+          createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
+
+      })
+
+  }
+
+
+  // const dataWithShipokPercent = data.map(agent => {
+  //      const percentage =((agent.shipok / agent.target) * 100).toFixed(2)
+  //     const roundOff = Math.round(percentage)
+  //     return {
+  //       shipok_percent: roundOff, ...agent
+  //     }
+  // })
+
+
+  // const workbook = new ExcelJS.Workbook();
+  // const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
+  // let  tableTitle = `AGENT MONTHLY TARGET`
+
+
+  // createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
 
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
@@ -1986,8 +2265,8 @@ exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
 
   await workbook.xlsx.write(res); 
 
-
   
+
   
 }
 

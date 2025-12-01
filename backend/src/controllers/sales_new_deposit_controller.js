@@ -2,6 +2,8 @@ const { reset } = require('nodemon');
 const pool  =  require('../config/db')
 const { validationResult } = require('express-validator')
 
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
+
 exports.addNewDeposit = async (req, res, next ) => {
    
     const errors = validationResult(req)
@@ -11,7 +13,6 @@ exports.addNewDeposit = async (req, res, next ) => {
     }
    
 
-   
 
     const agentId = req.params.agent_id
     const newDeposit =  req.body.new_deposit
@@ -77,11 +78,7 @@ exports.fetchAgentNewDeposit = async (req, res, next) => {
     const export_to_excel = req.export_to_excel
     
     const currentDate = new Date()
-             // Get the month name
-    const monthNames = [
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-            ];
+
     if (!req.query.month ||  req.query.month ==="") {
         
 
@@ -105,23 +102,6 @@ exports.fetchAgentNewDeposit = async (req, res, next) => {
         agentId = req.query.agent_id
     }
 
-         // Map month names to numbers
-    const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
-
-  
 
    // Convert "March" -> "03"
     const monthNumber = monthMap[givenMonth];

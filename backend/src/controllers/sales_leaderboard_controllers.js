@@ -4,6 +4,8 @@ const  pool = require('../config/db')
 
 const { validationResult } = require('express-validator')
 
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
+
 let leaderboardMasterQuery = 
 
 `
@@ -200,24 +202,7 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
 
   // Ensure month is always 2-digit (e.g., "03")
 
-      // Map month names to numbers
-    const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
-
   
-
  // Convert "March" -> "03"
     const monthNumber = monthMap[givenMonth];
     if (!monthNumber) {
@@ -362,8 +347,6 @@ exports.getAgentsMetrics = async ( agent_id, givenMonth,givenYear, withTrucks, l
                   shipok: totalShipOk
                 }
             })
-
-    
 
             const resultUm =  um.map(manager =>{
 
@@ -846,12 +829,6 @@ exports.fetchAgentLeaderBoard = async (req, res, next) => {
       return res.status(400).json({ errors: errors.array() });
     }
     
- 
-            // Get the month name
-    const monthNames = [
-              "January", "February", "March", "April", "May", "June",
-              "July", "August", "September", "October", "November", "December"
-    ];
 
     let givenMonth
     let givenYear 

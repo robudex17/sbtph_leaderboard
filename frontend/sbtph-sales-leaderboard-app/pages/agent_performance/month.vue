@@ -276,9 +276,8 @@
   import { useLeaderBoardStore } from '../stores/sales_leaderboard';
   import { onMounted, reactive,ref, watch } from 'vue';
 
-  
-
- import API from '~/utils/api'
+  import API from '~/utils/api'
+   import { months, getStarClass } from '@/utils/constants'
 
   
   definePageMeta({
@@ -356,9 +355,6 @@
   })
 
 
-
-
- 
   // Method to fetch leaderboard data
   const leaderBoardData = async( all,query) => {
     await leaderBoardStore.fetchLeaderboard(false,query);
@@ -401,21 +397,7 @@
     
   });
     
-  // Star rating calculation
-  const getStarClass = (rating, index) => {
-    const fullStar = 'text-yellow-500';
-    const halfStar = 'text-yellow-300';
-    const emptyStar = 'text-gray-300';
-  
-    const decimalPart = rating - Math.floor(rating);
-    if (index <= Math.floor(rating)) {
-      return fullStar;
-    } else if (index - 1 < decimalPart) {
-      return halfStar;
-    } else {
-      return emptyStar;
-    }
-  };
+
   </script>
   
   <style scoped>

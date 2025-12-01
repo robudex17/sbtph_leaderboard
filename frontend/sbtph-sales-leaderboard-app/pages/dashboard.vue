@@ -341,152 +341,130 @@
 
 
 <script setup>
-definePageMeta({
-  middleware: 'auth'
-})
+    definePageMeta({
+      middleware: 'auth'
+    })
 
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+    import { ref, computed, onMounted, watch } from 'vue'
+    import { useRouter, useRoute } from 'vue-router'
 
-const authStore = useAuthStore()
-authStore.fetchTokenFromLocalStore()
+    import { months, getWholeNumberPercentage } from '@/utils/constants'
 
-const router = useRouter()
-const route = useRoute()
-const currentUser = authStore.state.user
+    const authStore = useAuthStore()
+    authStore.fetchTokenFromLocalStore()
 
-
-
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-]
-
-const month = ref(months[new Date().getMonth()])
-const year = ref(new Date().getFullYear())
-
-  const itemsPerPage = 10;
-  const currentPage = ref(1);
+    const router = useRouter()
+    const route = useRoute()
+    const currentUser = authStore.state.user
 
 
- 
+    const month = ref(months[new Date().getMonth()])
+    const year = ref(new Date().getFullYear())
 
-const dashboardoption = ref("")
+    const itemsPerPage = 10;
+    const currentPage = ref(1);
 
-
-if(!route.query.dashboardoption && currentUser.agent_type != 2){
-
-  dashboardoption.value = 'individual'
-  route.query.dashboardoption = 'individual'
-}else{
-  dashboardoption.value = route.query.dashboardoption
-}
-
-if(!route.query.dashboardoption && currentUser.agent_type == 2){
-  dashboardoption.value = 'team'
-  route.query.dashboardoption = 'team'
-}else{
-  dashboardoption.value = route.query.dashboardoption
-}
+    const dashboardoption = ref("")
 
 
+    if(!route.query.dashboardoption && currentUser.agent_type != 2){
 
-// Stores
-const dashBoardStore = useDashBoardStore()
-const data = computed(() => dashBoardStore.state.dashboard.data)
-
-
-  const totalPages = computed(() =>
-    Math.ceil(data.value.length / itemsPerPage)
-  )
-  
-  const paginatedAgents = computed(() => {
-    const start = (currentPage.value - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    return data.value?.slice(start, end);
-  });
-
-
-// Only one open at a time
-const activeMarketId = ref(null)         // for team view
-const activeOverallBreakdown = ref(false) // for 'overall' view only
-
-const fetchDashboardData = async (query) => {
-  activeMarketId.value = null
-  activeOverallBreakdown.value = false
-  await dashBoardStore.fetchDashboard(route.query)
-}
-
-  //get image url from the .env file
-  const config = useRuntimeConfig()
-
-  const updateImageLink = (imageLink) => {
-        return `${config.public.imageBaseUrl}${imageLink}`
-  }
-
-
-onMounted( async() => {
-
- await fetchDashboardData(route.query)
-
-})
-
-// watch(() => route.query.dashboardoption, async (newOption) => {
-//   dashboardoption.value = newOption
-//   activeMarketId.value = null
-//   activeOverallBreakdown.value = false
-//   await fetchDashboardData({dashboardoption: newOption})
-// })
-
-watch(route, async(oldRoute, newRoute) => {
-   
-
-    if(!newRoute.query.dashboardoption && currentUser.agent_type != 2){
-       dashboardoption.value = 'individual'
-       newRoute.query.dashboardoption = 'individual'
+      dashboardoption.value = 'individual'
+      route.query.dashboardoption = 'individual'
     }else{
-      dashboardoption.value = newRoute.query.dashboardoption
+      dashboardoption.value = route.query.dashboardoption
     }
 
-    if(!newRoute.query.dashboardoption && currentUser.agent_type == 2){
-      newRoute.query.dashboardoption = 'team'
+    if(!route.query.dashboardoption && currentUser.agent_type == 2){
       dashboardoption.value = 'team'
+      route.query.dashboardoption = 'team'
     }else{
-      dashboardoption.value = newRoute.query.dashboardoption
+      dashboardoption.value = route.query.dashboardoption
     }
 
-    activeMarketId.value = null
-    activeOverallBreakdown.value = false
-   await fetchDashboardData(newRoute.query) 
-  
-})
 
-// Toggle logic
-const toggleTable = (id) => {
-  activeMarketId.value = (activeMarketId.value === id) ? null : id
-}
 
-const toggleOverallTable = () => {
-  activeOverallBreakdown.value = !activeOverallBreakdown.value
-}
+    // Stores
+    const dashBoardStore = useDashBoardStore()
+    const data = computed(() => dashBoardStore.state.dashboard.data)
 
-const getWholeNumberPercentage = (target,shipok) => {
-  //  {{ target_shipok.total_target > 0 ? Math.round(((Number(target_shipok.total_ship_ok) / Number(target_shipok.total_target)) * 100 )) + '%' : '0%' }} 
-   if (Number(target) !=0 && Number(shipok) != 0){
-     const percentage =((shipok / target) * 100).toFixed(2)
-     const roundOff = Math.round(percentage)
-     return roundOff + '%'
-   }
-   return '0%'
-}
 
-const rowClass = computed(() => {
-  return (item, index) => {
-    return index % 2 === 0
-      ? "bg-white text-green-800 font-bold"
-      : "bg-green-100 text-green-800 font-bold"
-  }
-})
+      const totalPages = computed(() =>
+        Math.ceil(data.value.length / itemsPerPage)
+      )
+      
+      const paginatedAgents = computed(() => {
+        const start = (currentPage.value - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return data.value?.slice(start, end);
+      });
+
+
+    // Only one open at a time
+    const activeMarketId = ref(null)         // for team view
+    const activeOverallBreakdown = ref(false) // for 'overall' view only
+
+    const fetchDashboardData = async (query) => {
+      activeMarketId.value = null
+      activeOverallBreakdown.value = false
+      await dashBoardStore.fetchDashboard(route.query)
+    }
+
+      //get image url from the .env file
+      const config = useRuntimeConfig()
+
+      const updateImageLink = (imageLink) => {
+            return `${config.public.imageBaseUrl}${imageLink}`
+      }
+
+
+    onMounted( async() => {
+
+    await fetchDashboardData(route.query)
+
+    })
+
+
+    watch(route, async(oldRoute, newRoute) => {
+      
+
+        if(!newRoute.query.dashboardoption && currentUser.agent_type != 2){
+          dashboardoption.value = 'individual'
+          newRoute.query.dashboardoption = 'individual'
+        }else{
+          dashboardoption.value = newRoute.query.dashboardoption
+        }
+
+        if(!newRoute.query.dashboardoption && currentUser.agent_type == 2){
+          newRoute.query.dashboardoption = 'team'
+          dashboardoption.value = 'team'
+        }else{
+          dashboardoption.value = newRoute.query.dashboardoption
+        }
+
+        activeMarketId.value = null
+        activeOverallBreakdown.value = false
+      await fetchDashboardData(newRoute.query) 
+      
+    })
+
+    // Toggle logic
+    const toggleTable = (id) => {
+      activeMarketId.value = (activeMarketId.value === id) ? null : id
+    }
+
+    const toggleOverallTable = () => {
+      activeOverallBreakdown.value = !activeOverallBreakdown.value
+    }
+
+
+    const rowClass = computed(() => {
+      return (item, index) => {
+        return index % 2 === 0
+          ? "bg-white text-green-800 font-bold"
+          : "bg-green-100 text-green-800 font-bold"
+      }
+    })
 </script>
 
 

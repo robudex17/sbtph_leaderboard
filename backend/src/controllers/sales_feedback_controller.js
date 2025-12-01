@@ -1,6 +1,8 @@
 const pool = require('../config/db')
 const { validationResult } = require('express-validator')
 
+const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_functions')
+
 // First Four controllers are for admin feedback
 exports.addNewFeedback = async (req, res, next) => {
     // const errors = validationResult(req)
@@ -96,11 +98,6 @@ exports.addNewFeedback = async (req, res, next) => {
  
     if (!req.query.month ||  req.query.month ==="") {
         
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -419,18 +416,10 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
     let fullyear = req.query.fullyear
     
 
-  
-    
-
     const export_to_excel = req.export_to_excel
     const currentDate = new Date()
 
-              // Get the month name
-    const monthNames = [
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-            ];
- 
+
     if (!req.query.month ||  req.query.month ==="") {
         
   
@@ -483,23 +472,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
     let query_feedback_month
     let query_feedback_year
 
-           // Map month names to numbers
-    const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
 
-  
 
  // Convert "March" -> "03"
     const monthNumber = monthMap[givenMonth];
@@ -1216,11 +1189,6 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
    
     if (!req.query.month ||  req.query.month ==="") {
         
-            // Get the month name
-        const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ];
         givenMonth = monthNames[currentDate.getMonth()]; // getMonth() returns 0-based index
     }else {
         givenMonth = req.query.month
@@ -1280,14 +1248,6 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
     const  path = req.path
 
-   
-
-                // Get the month name
-    const monthNames = [
-              "January", "February", "March", "April", "May", "June",
-              "July", "August", "September", "October", "November", "December"
-    ];
-
     const currentDate = new Date()
     let month 
     let year
@@ -1304,22 +1264,7 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
         year = req.query.year
     }
 
-    const monthMap = {
-      January: "01",
-      February: "02",
-      March: "03",
-      April: "04",
-      May: "05",
-      June: "06",
-      July: "07",
-      August: "08",
-      September: "09",
-      October: "10",
-      November: "11",
-      December: "12"
-    };
 
-  
 
  // Convert "March" -> "03"
     const monthNumber = monthMap[month];
@@ -1492,7 +1437,6 @@ exports.enableDisableDeleteAgentFeedback = async (req, res, next) => {
 
         `     
     }
-
 
         const [result] = await pool.execute(
    
