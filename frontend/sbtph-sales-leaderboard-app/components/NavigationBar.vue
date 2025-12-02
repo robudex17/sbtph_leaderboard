@@ -698,7 +698,7 @@
     watch(route, (newRoute, oldRoute)=> {
          urlPath.value = newRoute.fullPath
   
-          
+        
         if (Object.keys(newRoute.query).length == 0  ) {
           //  alert(JSON.stringify(newRoute.query))
             selectedMonth.value = ""

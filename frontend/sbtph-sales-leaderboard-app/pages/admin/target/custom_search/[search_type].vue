@@ -8,7 +8,7 @@
     <div v-else>
       <div v-if=" data.length > 0">
         <p class="text-gray-800 font-bold text-3xl mb-2 text-center">
-          Agent Target 
+          {{ filterBy.toUpperCase() }} TARGET
         </p>
               
         <!-- Export Button OUTSIDE table -->
@@ -258,8 +258,7 @@
     import API from '~/utils/api'
 
     import { months, getWholeNumberPercentage } from '@/utils/constants'
-    import Overall from '~/pages/analytics/overall.vue'
-
+   
     const authStore = useAuthStore()
     authStore.fetchTokenFromLocalStore()
 
@@ -309,10 +308,15 @@
     }
 
     const exportFileName = computed(() => {
-      const [ start_year, start_month] = route.query.start_date.split("-")
-      const [ end_year,  end_month ] = route.query.end_date.split("-")
+
+      if(route.query.start_date && route.query.end_date){
+            const [ start_year, start_month] = route.query.start_date.split("-")
+            const [ end_year,  end_month ] = route.query.end_date.split("-")
         
         return `${months[Number(start_month) -1]}${start_year}-${months[Number(end_month)-1]}${end_year}-target.xlsx`
+      }
+      
+        return `NoFilename-target.xlsx`
        
 
     })
@@ -343,14 +347,19 @@
 
     // ✅ Initial fetch
     onMounted(() => {
-      fetchCustomSearchData(searchType, route.query)
+      // fetchCustomSearchData(searchType, route.query)
+       customSeachStore.state.customSearch = []
+      
     })
+
+
 
     // ✅ Watch route change only when query changes
     watch(
       () => route.fullPath,
       (newRoute, oldRoute) => {
         if (newRoute !== oldRoute) {
+          
           fetchCustomSearchData(searchType, route.query)
            query.value = route.query
            filterBy.value = route.query.filterBy 

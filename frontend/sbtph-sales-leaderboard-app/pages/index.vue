@@ -609,7 +609,7 @@
 <script setup>
 import { useLeaderBoardStore } from '../stores/sales_leaderboard';
 import { onMounted, reactive,ref, watch, computed  } from 'vue';
-import { months, getStarClass } from '@/utils/constants'
+import { months, setRatingNameColor,getStarClass } from '@/utils/constants'
 
 import API from '~/utils/api'
 
@@ -651,7 +651,7 @@ const route = useRoute()
 
 const router = useRouter()
 const query = ref({})
-const { setRatingNameColor } = useRatingColor()
+// const { setRatingNameColor } = useRatingColor()
 const month = ref("")
 const year = ref("")
 
@@ -751,6 +751,9 @@ const  toggleView = () => {
   }
   isCardView.value = !isCardView.value
 }
+
+
+
 
 //watch for the route change
 

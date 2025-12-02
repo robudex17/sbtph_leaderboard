@@ -1141,7 +1141,6 @@ const createAgentMonthyTargetForOverallExcelTable = (data, worksheet, startRow =
 
 
 
-
 const createTeamPerformanceExcelTable = (
   worksheet,
   targetShipokData,
@@ -2118,9 +2117,7 @@ exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
   //  const lastUsedRow = worksheet.lastRow.number;
 
   switch(filterBy){
-     case "team":
-       
-         
+     case "team":     
           data.forEach((d,index) => {
               const month = d[0].month 
               const year = d[0].year
@@ -2226,11 +2223,9 @@ exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
             shipok_percent: roundOff, ...agent
           }
         })
-
-
-      
+  
           const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
-          let  tableTitle = `AGENT MONTHLY TARGET`
+          let  tableTitle = `${filterBy} MONTHLY TARGET`.toUpperCase()
 
 
           createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
@@ -2239,22 +2234,6 @@ exports.fetchSalesAgentsTargetExportToExcel = async(req, res, next) => {
 
   }
 
-
-  // const dataWithShipokPercent = data.map(agent => {
-  //      const percentage =((agent.shipok / agent.target) * 100).toFixed(2)
-  //     const roundOff = Math.round(percentage)
-  //     return {
-  //       shipok_percent: roundOff, ...agent
-  //     }
-  // })
-
-
-  // const workbook = new ExcelJS.Workbook();
-  // const worksheet = workbook.addWorksheet(`agent-${month}-${year}-target`)
-  // let  tableTitle = `AGENT MONTHLY TARGET`
-
-
-  // createAgentMonthyTargetExcelTable(dataWithShipokPercent, worksheet, 1, tableTitle, 'target')
 
 
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
