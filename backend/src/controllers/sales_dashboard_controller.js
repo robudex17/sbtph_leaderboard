@@ -429,15 +429,15 @@ exports.fetchAgentDashboard = async (req,res,next) => {
                 return '0%'
    }
 
-     let individualTargets
-     let individualTargetsYearMap
+    let individualTargets
+    let individualTargetsYearMap
     let year_summary =  req.query.year_summary == 'true'   ? true: false
     let fullyear =  req.query.fullyear == 'true'  ? true : false
     let agent_id = req.query.agent_id ? req.req.agent_id : ""
     
 
 
-      if (dashboarOption == 'individual'){
+    if (dashboarOption == 'individual'){
    
          if((loginUser.role =='admin' && loginUser.login_type == 'standarduser') || (loginUser.role =='poweruser' && loginUser.login_type == 'standarduser') || (loginUser.role == 'manager' && loginUser.agent_type == 2 ) ){
 

@@ -9,7 +9,6 @@ exports.generateAccessToken = (user) => {
     )
 }
 
-
 // exports.generateRefreshToken = (user) => {
 //     return jwt.sign(
 //         { username: user.username, role: user.role, login_id: user.login_id, 

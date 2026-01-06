@@ -21,8 +21,6 @@ exports.recordNewAbsent = async (req, res, next) => {
     const evaluation  = req.body.evaluation 
     const totalRecords = Number(req.body.total_records)
 
-   
-
     
     try {
 

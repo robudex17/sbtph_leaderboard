@@ -196,9 +196,6 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
     for (const agent of sales_agents) {
       const managerId = agent.manager_id; // ✅ avoid extra query
 
-
-      
-
       if (agent.agent_type === 0) {
         agent.feedback_by_um = null;
         agent.feedback_by_agents = null;
@@ -373,9 +370,6 @@ exports.getEvaluationSalesData = async ( givenMonth,givenYear) => {
           ORDER BY fba.year ASC, LPAD(fba.month, 2, '0') ASC;
 
         `
-
-
-
         const query_by_um = `
 
 
@@ -646,7 +640,7 @@ exports.fetchSalesEvaluationData= async (req, res, next) => {
 
       const result =   await this.getEvaluationSalesData(givenMonth, givenYear)
 
-      console.log(result)
+      // console.log(result)
       res.status(200).json(result)
       
   

@@ -10,7 +10,7 @@
         Export to Excel
       </button>
     </div>
-  </template>
+</template>
   
   <script setup>
   const props = defineProps({
@@ -43,9 +43,6 @@
     type: Boolean
   }
 });
-
-
-
 
 
 

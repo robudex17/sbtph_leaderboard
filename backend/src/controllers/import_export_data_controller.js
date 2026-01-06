@@ -775,7 +775,6 @@ const  createSalesAgentActiveExportToExcel = (data, worksheet, startRow = 1, tit
 };
 
 
-
 const createAgentMonthyTargetExcelTable = (data, worksheet, startRow = 1, title, performanceType, fullyear, year_summary, yearlyFinalRatings, yearlyRatingsName) => {
   const getCell = (rowOffset, col) => worksheet.getCell(startRow + rowOffset, col);
   let agent_ratings_name = data[0].ratings_name
@@ -1138,7 +1137,6 @@ const createAgentMonthyTargetForOverallExcelTable = (data, worksheet, startRow =
         });
       });
 };
-
 
 
 const createTeamPerformanceExcelTable = (
@@ -2303,6 +2301,7 @@ async function targetShipokImport (tableStats,table, target, shipok, agent_id, m
           }     
 
 }
+
 async function absenceTardinessMemoNewDepositImport(tableStats,table, type, agent_id,  month, year, description) {
          
             const [check] = await pool.execute(
@@ -2415,7 +2414,6 @@ async function  feedbackDataImport(tableStats, tableAdmin, tableQa, feedbackByAd
     }
 
 }
-
 
 
 const itterationArray = ["FIRST", "SECOND", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH", "EIGHTH", "NINTH", "TENTH"];

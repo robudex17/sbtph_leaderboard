@@ -654,6 +654,9 @@
              agent.total_records = totalRecords
              agent.new_deposit = 10000
              agent.date =  `${agent.year}-${monthNumber.toString().padStart(2, '0')}-01`
+
+            //  alert(JSON.stringify(agent))
+
              await useManageSalesStore.addAgentDeposit(agent.agent_id, route.query, agent)
              fetchSalesAgentsEvaluation(route.query)
             break

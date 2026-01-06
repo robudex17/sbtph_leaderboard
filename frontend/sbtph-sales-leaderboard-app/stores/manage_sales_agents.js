@@ -484,6 +484,7 @@ export const useManageSalesAgentStore = defineStore('salesAgents', () => {
     const addAgentDeposit = async (agent_id, query, target) => {
         state.loading = true
         state.error = null
+
        
         try {
             const response = await fetch(`${API.agentDeposit}/${agent_id}`, {

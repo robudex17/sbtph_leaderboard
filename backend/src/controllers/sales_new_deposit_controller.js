@@ -6,11 +6,11 @@ const { monthMap, monthNames } = require('./helper_scripts/global_variables_and_
 
 exports.addNewDeposit = async (req, res, next ) => {
    
-    const errors = validationResult(req)
+    // const errors = validationResult(req)
 
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
+    // if (!errors.isEmpty()) {
+    //     return res.status(400).json({ errors: errors.array() });
+    // }
    
 
 
@@ -25,8 +25,8 @@ exports.addNewDeposit = async (req, res, next ) => {
     const evaluation  = req.body.evaluation 
     const totalRecords = Number(req.body.total_records)
   
-
-
+    
+    
    
     try {
         const query = "INSERT INTO new_deposit ( agent_id, month, year,new_deposit,description,date) VALUES (?,?,?,?,?,?)"
@@ -241,6 +241,9 @@ exports.updateAgentNewDeposit = async (req, res, next) => {
     const  depositMonth = req.body.month  || req.body.eval_month
     const depositYear = req.body.year || req.body.eval_year
     const depositDescription = req.body.description
+
+
+ 
   
 
     try {
