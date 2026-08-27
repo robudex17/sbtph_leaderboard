@@ -320,11 +320,7 @@ exports.fetchSalesAgents = async (req,res, next ) => {
             // const connection =  await pool.getConnection()
     
             const [rows, fields] = await pool.execute(
-<<<<<<< HEAD
              `
-=======
-                                  `
->>>>>>> 1cd9bb8ac344fd42b12788ba638fa8edd389daff
                 SELECT 
                     sa.id AS id,
                     sa.firstname,
