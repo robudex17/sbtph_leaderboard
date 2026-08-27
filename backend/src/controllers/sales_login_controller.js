@@ -244,7 +244,7 @@ exports.loginUser = async(req,res, next) => {
 
        user[0].login_type = 'salesagentuser'
 
-
+       user[0].is_allowed_admin = 0 // default value
 
 
        const accessToken = generateAccessToken(user[0])

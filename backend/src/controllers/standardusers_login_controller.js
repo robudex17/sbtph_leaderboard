@@ -136,6 +136,14 @@ exports.loginUser = async(req,res, next) => {
      
  
        user[0].login_type = "standarduser"
+
+      //check if the loginuser is in allow_admins table
+       const [allow_admins] = await pool.execute(
+        'SELECT employee_id  FROM `allowed_admins` WHERE employee_id = ?',
+        [loginId]
+       )
+
+       user[0].is_allowed_admin = allow_admins.length > 0 ? 1 : 0
        
        const accessToken = generateAccessToken(user[0])
     //    const refreshToken = generateRefreshToken(user[0])
