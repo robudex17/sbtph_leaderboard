@@ -4,7 +4,7 @@
     <h1 class="text-3xl font-extrabold text-gray-800 mb-6 text-center">Standard Users Information</h1>
 
     <!-- Add Agent Button -->
-    <button  :disabled="['user', 'manager'].includes(currentUser.role)"
+    <button  :disabled="['user', 'manager'].includes(currentUser.role) || currentUser.is_allowed_admin !== 1"
       class="mb-6 px-2 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
       @click="openAddAgentModal"
     >
@@ -89,7 +89,7 @@
             >
               Cancel
             </button>
-            <button
+            <button :disabled="currentUser.is_allowed_admin !== 1"
               type="submit"
               class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600"
             >
@@ -213,7 +213,7 @@
             >
               Cancel
             </button>
-            <button
+            <button :disabled="currentUser.is_allowed_admin !== 1"
               type="submit"
               class="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600"
             >
@@ -268,20 +268,20 @@
             </td>
             <td class="py-2 px-3 border text-center">
               <div class="flex justify-center space-x-2">
-                <button :disabled="currentUser.role !=='admin'"
+                <button :disabled="currentUser.role !=='admin' || currentUser.is_allowed_admin !== 1"
                   class="px-2 py-2 bg-green-500 text-white font-bold rounded hover:bg-green-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditStandardUserModal(user)"
                 >
                 <i class="fas fa-edit"></i>
                   Edit
                 </button>
-                <button :disabled="currentUser.role !=='admin'"
+                <button :disabled="currentUser.role !=='admin' || currentUser.is_allowed_admin !== 1"
                   class="px-2 py-2 bg-gray-500 text-white font-bold rounded hover:bg-gray-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                   @click="openEditStandUserLoginModal({login_id: user.id, role: user.role, status: user.login_status, username: user.username})"
                 >
                   Login
                 </button>
-                <button :disabled="currentUser.role !=='admin'"
+                <button :disabled="currentUser.role !=='admin' || currentUser.is_allowed_admin !== 1"
                   class="px-2 py-2 bg-red-500 text-white font-bold rounded hover:bg-red-600  disabled:bg-gray-400 disabled:cursor-not-allowed"
                    @click="deleteStandardUser(user.id)"
                 >

@@ -1,4 +1,4 @@
-const e = require('express')
+// const e = require('express')
 const pool = require('../config/db')
 const { validationResult} = require('express-validator')
 const fs = require('fs')

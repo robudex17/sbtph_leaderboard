@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const  pool = require('../config/db')
 
 exports.authenticateToken = async (req,res,next) => {
     const authHeader = req.headers['authorization']
@@ -27,3 +28,16 @@ exports.authorizeRoles = (...allowedRoles ) => {
         next()
     }
 }
+
+exports.allowedAdmins = async (req, res, next) => {
+    const employeeId = req.user.login_id
+    const [result] = await pool.execute(
+        'SELECT employee_id  FROM `allowed_admins` WHERE employee_id = ?',
+        [employeeId]
+    )
+
+    if (result.length === 0) {
+        return res.status(403).json({ message: 'Access Denied: You are not allowed to perform this action' })
+    }
+    next()
+}   
