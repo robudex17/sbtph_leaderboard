@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const pool = require('../config/db')
 
 exports.authenticateToken = async (req,res,next) => {
     const authHeader = req.headers['authorization']
